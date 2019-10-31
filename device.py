@@ -1,5 +1,5 @@
 from enum import Enum
-
+import json
 
 class DeviceType(Enum):
     GPU = 'gpu'
@@ -64,6 +64,31 @@ class DeviceGraph:
     def __init__(self):
         self.devices = []
 
-    def load_from_file(self, path):
+    @staticmethod
+    def load_from_file(path):
+        device_graph = DeviceGraph()
         with open(path) as f:
-            pass
+            graph = json.loads(f.read())
+
+            # First, we load all devices
+            for device in graph['devices']:
+                args = [device['model'], device['clock'], device['peak_gflops'], device['memory']]
+                kwargs = {}
+
+                for kw in ('mem_bandwidth', 'type', 'id'):
+                    if kw in device:
+                        kwargs[kw] = device[kw]
+
+                d = Device(*args, **kwargs)
+                device_graph.devices.append(DeviceNode(d))
+
+            # Then, we resolve neighbours
+            for i, device in enumerate(device_graph.devices):
+                json_device = graph['devices'][i]
+
+                for neighbour in json_device['neighbours']:
+                    json_comm_channel = graph['comm_types'][neighbour['comm_channel']]
+                    comm_channel = CommunicationChannel(json_comm_channel['type'], json_comm_channel['bandwidth'])
+
+                    device.add_neighbour(device_graph.devices[neighbour['device']], comm_channel)
+        return device_graph

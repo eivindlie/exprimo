@@ -1,5 +1,5 @@
 {
-  "network_types": {
+  "comm_types": {
     "pcie3x16": {
       "type": "pcie3",
       "bandwidth": 256
@@ -20,13 +20,14 @@
       "peak_gflops": 289,
       "memory": 32,
       "mem_bandwidth": 68,
+      "type": "cpu",
       "neighbours": [
         {
-          "communication_channel": "pcie3x16",
+          "comm_channel": "pcie3x16",
           "device": 1
         },
         {
-          "communication_channel": "pcie3x16",
+          "comm_channel": "pcie3x16",
           "device": 2
         }
       ]
@@ -37,14 +38,14 @@
       "peak_gflops": 6144,
       "memory": 12,
       "mem_bandwidth": 336.5,
-      "type": "GPU",
+      "type": "gpu",
       "neighbours": [
         {
-          "communication_channel": "pcie3x16",
+          "comm_channel": "pcie3x16",
           "device": 0
         },
         {
-          "communication_channel": "sli",
+          "comm_channel": "sli",
           "device": 2
         }
       ]
@@ -55,14 +56,14 @@
       "peak_gflops": 6144,
       "memory": 12,
       "mem_bandwidth": 336.5,
-      "type": "GPU",
+      "type": "gpu",
       "neighbours": [
         {
-          "communication_channel": "pcie3x16",
+          "comm_channel": "pcie3x16",
           "device": 0
         },
         {
-          "communication_channel": "sli",
+          "comm_channel": "sli",
           "device": 1
         }
       ]
