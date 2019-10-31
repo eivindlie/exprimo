@@ -1,0 +1,3 @@
+[submodule "paleo"]
+	path = paleo
+	url = git@github.com:Lagostra/paleo.git
