@@ -1,0 +1,71 @@
+{
+  "network_types": {
+    "pcie3x16": {
+      "type": "pcie3",
+      "bandwidth": 256
+    },
+    "ethernet": {
+      "type": "ethernet",
+      "bandwidth": 1
+    },
+    "sli": {
+      "type": "sli",
+      "bandwidth": 26
+    }
+  },
+  "devices": [
+    {
+      "model": "Intel Core i7 5930K",
+      "clock": 210000,
+      "peak_gflops": 289,
+      "memory": 32,
+      "mem_bandwidth": 68,
+      "neighbours": [
+        {
+          "communication_channel": "pcie3x16",
+          "device": 1
+        },
+        {
+          "communication_channel": "pcie3x16",
+          "device": 2
+        }
+      ]
+    },
+    {
+      "model": "NVIDIA Titan X",
+      "clock": 1000,
+      "peak_gflops": 6144,
+      "memory": 12,
+      "mem_bandwidth": 336.5,
+      "type": "GPU",
+      "neighbours": [
+        {
+          "communication_channel": "pcie3x16",
+          "device": 0
+        },
+        {
+          "communication_channel": "sli",
+          "device": 2
+        }
+      ]
+    },
+    {
+      "model": "NVIDIA Titan X",
+      "clock": 1000,
+      "peak_gflops": 6144,
+      "memory": 12,
+      "mem_bandwidth": 336.5,
+      "type": "GPU",
+      "neighbours": [
+        {
+          "communication_channel": "pcie3x16",
+          "device": 0
+        },
+        {
+          "communication_channel": "sli",
+          "device": 1
+        }
+      ]
+    }
+  ]
+}
