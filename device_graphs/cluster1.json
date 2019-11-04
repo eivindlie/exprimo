@@ -2,7 +2,7 @@
   "comm_channels": [
     {
       "type": "pcie3",
-      "bandwidth": 256
+      "bandwidth": 128
     },
     {
       "type": "ethernet",

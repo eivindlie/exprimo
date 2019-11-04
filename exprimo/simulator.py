@@ -23,7 +23,7 @@ class Simulator:
         else:
             self.computation_graph = computation_graph
 
-    def simulate(self, print_event_trace=True, include_backward=True, return_event_trace=False):
+    def simulate(self, print_event_trace=True, include_backward=True, return_event_trace=False, batch_size=None):
         op_queues = [deque() for device in self.device_graph.devices]
         transfer_queues = [deque() for comm_channel in self.device_graph.comm_channels]
         events = []
@@ -38,7 +38,7 @@ class Simulator:
 
         def run_op(op, backward, start_time):
             device = self.device_graph.devices[op['device']].device
-            run_time = FlopsProfiler.profile(op, device, backward)
+            run_time = FlopsProfiler.profile(op, device, backward, batch_size)
             end_time = start_time + run_time
             events.append(Event('op_done', op['device'], start_time,
                                 end_time=end_time, operation=(op, backward)))
@@ -46,7 +46,7 @@ class Simulator:
         def run_transfer(op, backward, comm_channel_id, target, start_time):
             parent_device = self.device_graph.devices[op['device']].device
             comm_channel = self.device_graph.comm_channels[comm_channel_id]
-            transfer_time = TransferProfiler.profile(op, comm_channel, parent_device, backward)
+            transfer_time = TransferProfiler.profile(op, comm_channel, parent_device, backward, batch_size)
             end_time = start_time + transfer_time
             events.append(Event('transfer_done', comm_channel_id, start_time,
                                 operation=((op, backward), op['device'], target),
