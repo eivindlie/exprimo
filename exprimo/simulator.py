@@ -7,6 +7,7 @@ from collections import deque
 from device import DeviceGraph
 from graph import ComputationGraph
 from profilers.flops_profiler import FlopsProfiler
+from profilers.transfer_profiler import TransferProfiler
 
 
 class Simulator:
@@ -36,18 +37,18 @@ class Simulator:
                     events.append(Event('wakeup', layer['device'], 0, subtype='op'))
 
         def run_op(op, backward, start_time):
-            # TODO Carry out simulation of operation
             device = self.device_graph.devices[op['device']].device
             run_time = FlopsProfiler.profile(op, device, backward)
             end_time = start_time + run_time
             events.append(Event('op_done', op['device'], start_time,
                                 end_time=end_time, operation=(op, backward)))
 
-        def run_transfer(op, backward, comm_channel, target, start_time):
-            # TODO Carry out transfer calculation
-            transfer_time = 50
+        def run_transfer(op, backward, comm_channel_id, target, start_time):
+            parent_device = self.device_graph.devices[op['device']].device
+            comm_channel = self.device_graph.comm_channels[comm_channel_id]
+            transfer_time = TransferProfiler.profile(op, comm_channel, parent_device, backward)
             end_time = start_time + transfer_time
-            events.append(Event('transfer_done', comm_channel, start_time,
+            events.append(Event('transfer_done', comm_channel_id, start_time,
                                 operation=((op, backward), op['device'], target),
                                 end_time=end_time))
 
@@ -73,7 +74,12 @@ class Simulator:
                     child_device = self.device_graph.devices[child['device']]
                     comm_channel = op_device.neighbours[child_device]
 
-                    transfer_queues[comm_channel.id].append(((op, backward), op_device, child_device))
+                    if backward:
+                        # If we are doing the backward pass, we are transferring the gradients, which are
+                        # equal in size to the previous layer. We therefore set the op as child instead of op.
+                        transfer_queues[comm_channel.id].append(((child, backward), op_device, child_device))
+                    else:
+                        transfer_queues[comm_channel.id].append(((op, backward), op_device, child_device))
                     if len(transfer_queues[comm_channel.id]) == 1:
                         events.append(Event('wakeup', comm_channel.id, event.end_time, subtype='transfer'))
                 else:

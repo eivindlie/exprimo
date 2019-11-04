@@ -2,9 +2,9 @@ from paleo.profilers.flops_profiler import FlopsProfiler as PaleoFlopsProfiler
 from paleo.profilers.base import ProfilerOptions
 
 
-class FlopsProfiler:
+class TransferProfiler:
     @staticmethod
-    def profile(layer_spec, device, backward=False, batch_size=None):
+    def profile(layer_spec, comm_channel, parent_device, backward=False, batch_size=None):
         layer = layer_spec.operation
 
         if batch_size:
@@ -16,7 +16,7 @@ class FlopsProfiler:
         profiler_options.use_cudnn_heuristics = False
         profiler_options.include_bias_and_activation = False
 
-        profiler = PaleoFlopsProfiler(profiler_options, device)
-        time = profiler.profile(layer, cross_device_bandwidth=0)
+        profiler = PaleoFlopsProfiler(profiler_options, parent_device)
+        time = profiler.estimate_remote_fetch(layer, 0, [1], comm_channel.bandwidth / 8)
 
-        return time.comp_time + time.comm_time
+        return time.comm_time
