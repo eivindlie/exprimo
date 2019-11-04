@@ -4,8 +4,11 @@ from paleo.profilers.base import ProfilerOptions, TimeMeasure
 
 class FlopsProfiler:
     @staticmethod
-    def profile(layer_spec, device, backward=False):
+    def profile(layer_spec, device, backward=False, batch_size=None):
         layer = layer_spec.operation
+
+        if batch_size:
+            layer.batch_size = batch_size
 
         profiler_options = ProfilerOptions()
         direction = 'backward' if backward else 'forward'
