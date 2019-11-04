@@ -6,6 +6,7 @@ from collections import deque
 
 from device import DeviceGraph
 from graph import ComputationGraph
+from profilers.flops_profiler import FlopsProfiler
 
 
 class Simulator:
@@ -36,7 +37,8 @@ class Simulator:
 
         def run_op(op, backward, start_time):
             # TODO Carry out simulation of operation
-            run_time = 50
+            device = self.device_graph.devices[op['device']].device
+            run_time = FlopsProfiler.profile(op, device, backward)
             end_time = start_time + run_time
             events.append(Event('op_done', op['device'], start_time,
                                 end_time=end_time, operation=(op, backward)))

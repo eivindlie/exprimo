@@ -36,6 +36,10 @@ class Device:
         self.type = type
         self.hardware_id = hardware_id
 
+    @property
+    def is_gpu(self):
+        return self.type == DeviceType.GPU
+
 
 class CommunicationChannel:
 
