@@ -39,7 +39,7 @@ class Device:
 
 class CommunicationChannel:
 
-    def __init__(self, type, bandwidth):
+    def __init__(self, type, bandwidth, cid):
         """
         Creates a new communication channel.
         :param type:    The type of the channel; available types are given in the CommunicationType enum.
@@ -48,13 +48,15 @@ class CommunicationChannel:
         """
         self.type = type
         self.bandwidth = bandwidth
+        self.id = cid
 
 
 class DeviceNode:
 
-    def __init__(self, device):
+    def __init__(self, device, device_id):
         self.device = device
         self.neighbours = {}
+        self.id = device_id
 
     def add_neighbour(self, device_node, comm_channel):
         # We save neighbours as a mapping to comm_channel, so that it is easy to find bandwidth
@@ -75,7 +77,7 @@ class DeviceGraph:
             graph = json.loads(f.read())
 
             # First, we load all devices
-            for device in graph['devices']:
+            for i, device in enumerate(graph['devices']):
                 args = [device['model'], device['clock'], device['peak_gflops'], device['memory']]
                 kwargs = {}
 
@@ -84,12 +86,13 @@ class DeviceGraph:
                         kwargs[kw] = device[kw]
 
                 d = Device(*args, **kwargs)
-                device_graph.devices.append(DeviceNode(d))
+                device_graph.devices.append(DeviceNode(d, i))
             device_graph.all_devices.extend(device_graph.devices)
 
             # Then, we load all communication channels
-            for comm_channel in graph['comm_channels']:
-                device_graph.comm_channels.append(CommunicationChannel(comm_channel['type'], comm_channel['bandwidth']))
+            for i, comm_channel in enumerate(graph['comm_channels']):
+                device_graph.comm_channels.append(CommunicationChannel(comm_channel['type'],
+                                                                       comm_channel['bandwidth'], i))
             device_graph.all_devices.extend(device_graph.comm_channels)
 
             # Finally, we resolve neighbours

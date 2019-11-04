@@ -19,6 +19,8 @@ class LayerSpec:
         self.parents = []
         self.inbounds = []
         self.outbounds = []
+        self.forward_done = False
+        self.backward_done = False
 
     def attach_op(self, operation):
         self.operation = operation
