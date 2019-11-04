@@ -1,6 +1,7 @@
 from enum import Enum
 import json
 
+
 class DeviceType(Enum):
     GPU = 'gpu'
     CPU = 'cpu'
@@ -15,7 +16,7 @@ class CommunicationType(Enum):
 
 class Device:
 
-    def __init__(self, model, clock, peak_gflops, memory, mem_bandwidth=68, type=DeviceType.CPU, id=None):
+    def __init__(self, model, clock, peak_gflops, memory, mem_bandwidth=68, type=DeviceType.CPU, hardware_id=None):
         """
         Creates a new device.
         :param model: Model string for the device. E.g. 'V100' or 'Titan X'.
@@ -24,7 +25,7 @@ class Device:
         :param memory: Memory available to the device, in GB.
         :param mem_bandwidth: The bandwidth available to the device when reading from device memory, in GB/s.
         :param type: Device type; available types are given in the DeviceType enum. (CPU or GPU)
-        :param id: The hardware ID of the device if available on the local computer.
+        :param hardware_id: The hardware ID of the device if available on the local computer.
         """
 
         self.model = model
@@ -33,7 +34,7 @@ class Device:
         self.memory = memory
         self.mem_bandwidth = mem_bandwidth
         self.type = type
-        self.id = id
+        self.hardware_id = hardware_id
 
 
 class CommunicationChannel:
@@ -56,13 +57,16 @@ class DeviceNode:
         self.neighbours = {}
 
     def add_neighbour(self, device_node, comm_channel):
-        self.neighbours[comm_channel] = device_node
+        # We save neighbours as a mapping to comm_channel, so that it is easy to find bandwidth
+        self.neighbours[device_node] = comm_channel
 
 
 class DeviceGraph:
 
     def __init__(self):
         self.devices = []
+        self.comm_channels = []
+        self.all_devices = []
 
     @staticmethod
     def load_from_file(path):
@@ -81,14 +85,20 @@ class DeviceGraph:
 
                 d = Device(*args, **kwargs)
                 device_graph.devices.append(DeviceNode(d))
+            device_graph.all_devices.extend(device_graph.devices)
 
-            # Then, we resolve neighbours
+            # Then, we load all communication channels
+            for comm_channel in graph['comm_channels']:
+                device_graph.comm_channels.append(CommunicationChannel(comm_channel['type'], comm_channel['bandwidth']))
+            device_graph.all_devices.extend(device_graph.comm_channels)
+
+            # Finally, we resolve neighbours
             for i, device in enumerate(device_graph.devices):
                 json_device = graph['devices'][i]
 
                 for neighbour in json_device['neighbours']:
-                    json_comm_channel = graph['comm_types'][neighbour['comm_channel']]
-                    comm_channel = CommunicationChannel(json_comm_channel['type'], json_comm_channel['bandwidth'])
+                    comm_channel_idx = neighbour['comm_channel']
+                    comm_channel = device_graph.comm_channels[comm_channel_idx]
 
                     device.add_neighbour(device_graph.devices[neighbour['device']], comm_channel)
         return device_graph

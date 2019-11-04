@@ -1,18 +1,18 @@
 {
-  "comm_types": {
-    "pcie3x16": {
+  "comm_channels": [
+    {
       "type": "pcie3",
       "bandwidth": 256
     },
-    "ethernet": {
+    {
       "type": "ethernet",
       "bandwidth": 1
     },
-    "sli": {
+    {
       "type": "sli",
       "bandwidth": 26
     }
-  },
+  ],
   "devices": [
     {
       "model": "Intel Core i7 5930K",
@@ -23,11 +23,11 @@
       "type": "cpu",
       "neighbours": [
         {
-          "comm_channel": "pcie3x16",
+          "comm_channel": 0,
           "device": 1
         },
         {
-          "comm_channel": "pcie3x16",
+          "comm_channel": 0,
           "device": 2
         }
       ]
@@ -41,11 +41,11 @@
       "type": "gpu",
       "neighbours": [
         {
-          "comm_channel": "pcie3x16",
+          "comm_channel": 0,
           "device": 0
         },
         {
-          "comm_channel": "sli",
+          "comm_channel": 2,
           "device": 2
         }
       ]
@@ -59,11 +59,11 @@
       "type": "gpu",
       "neighbours": [
         {
-          "comm_channel": "pcie3x16",
+          "comm_channel": 0,
           "device": 0
         },
         {
-          "comm_channel": "sli",
+          "comm_channel": 2,
           "device": 1
         }
       ]
