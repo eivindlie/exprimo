@@ -12,7 +12,7 @@ from paleo.graph import GraphWalker
 
 class LayerSpec:
 
-    def __init__(self, name, params, device=0):
+    def __init__(self, name, params):
         self.name = name
         self.params = dict(params)
         self.operation = None
@@ -247,6 +247,11 @@ class ComputationGraph:
 
                 names_to_specs[parent_name].outbounds.append(layer_spec)
                 layer_spec.inbounds.append(names_to_specs[parent_name])
+
+        # Set default devices for any layer with unspecified device
+        for layer_name, layer_spec in names_to_specs.items():
+            if 'device' not in layer_spec.params:
+                layer_spec.params['device'] = 0
 
         graph_walker = GraphWalker(names_to_specs)
         self.nested_list = graph_walker.start(names_to_specs['data'])
