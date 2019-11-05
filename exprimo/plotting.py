@@ -1,8 +1,9 @@
 import matplotlib.pyplot as plt
 
 
-def plot_event_trace(events):
+def plot_event_trace(events, show_transfer_lines=True):
     op_done_events = [e for e in events if e.type == 'op_done']
+    transfer_done_events = [e for e in events if e.type == 'transfer_done']
     devices = sorted(list({e.device for e in op_done_events}))
     run_time = max(events, key=lambda e: e.end_time).end_time
 
@@ -19,5 +20,12 @@ def plot_event_trace(events):
     for event in op_done_events:
         device_index = devices.index(event.device)
         gnt.broken_barh([(event.start_time, event.end_time - event.start_time)], (5 + 2 + 10 * device_index, 6))
+
+    if show_transfer_lines:
+        for event in transfer_done_events:
+            from_device_index = devices.index(event.from_device)
+            to_device_index = devices.index(event.to_device)
+            gnt.plot([event.start_time, event.end_time], [10 + 10 * from_device_index, 10 + 10 * to_device_index],
+                     color='red')
 
     plt.show()
