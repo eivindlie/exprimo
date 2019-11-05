@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 
 
-def plot_event_trace(events, show_transfer_lines=True):
+def plot_event_trace(events, show_transfer_lines=True, cmap='Accent'):
     op_done_events = [e for e in events if e.type == 'op_done']
     transfer_done_events = [e for e in events if e.type == 'transfer_done']
     batches = max(events, key=lambda e: e.batch).batch + 1
@@ -19,9 +19,9 @@ def plot_event_trace(events, show_transfer_lines=True):
 
     gnt.grid(True)
 
-    cmap = matplotlib.cm.get_cmap('Accent', 2*batches)
+    cmap_func = matplotlib.cm.get_cmap(cmap, 2*batches)
     for event in op_done_events:
-        color = cmap((2*event.batch + int(event.backward)) / 2*batches)
+        color = cmap_func((2*event.batch + int(event.backward)) / 2*batches)
         device_index = devices.index(event.device)
         gnt.broken_barh([(event.start_time, event.end_time - event.start_time)], (5 + 2 + 10 * device_index, 6),
                         color=color)
