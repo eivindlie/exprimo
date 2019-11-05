@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import matplotlib
+from matplotlib.colors import Normalize
 
 
 def plot_event_trace(events, show_transfer_lines=True, cmap='Accent'):
@@ -20,8 +21,9 @@ def plot_event_trace(events, show_transfer_lines=True, cmap='Accent'):
     gnt.grid(True)
 
     cmap_func = matplotlib.cm.get_cmap(cmap, 2*batches)
+    cmap_norm = Normalize(vmin=0, vmax=2*batches)
     for event in op_done_events:
-        color = cmap_func((2*event.batch + int(event.backward)) / 2*batches)
+        color = cmap_func(cmap_norm(2*event.batch + int(event.backward)))
         device_index = devices.index(event.device)
         gnt.broken_barh([(event.start_time, event.end_time - event.start_time)], (5 + 2 + 10 * device_index, 6),
                         color=color)
