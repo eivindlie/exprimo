@@ -3,199 +3,502 @@
     "layers": {
         "data": {
             "type": "Input",
-            "tensor": [1, 224, 224, 3],
+            "tensor": [
+                1,
+                224,
+                224,
+                3
+            ],
             "parents": [],
             "device": 1
         },
         "conv1": {
             "type": "Convolution",
-            "parents": ["data"],
-            "filter": [7, 7, -1, 64],
-            "strides": [1, 2, 2, 1],
-            "padding": "SAME"
+            "parents": [
+                "data"
+            ],
+            "filter": [
+                7,
+                7,
+                -1,
+                64
+            ],
+            "strides": [
+                1,
+                2,
+                2,
+                1
+            ],
+            "padding": "SAME",
+            "device": 1
         },
         "pool1": {
             "type": "Pooling",
-            "parents": ["conv1"],
-            "ksize": [1, 3, 3, 1],
-            "strides": [1, 2, 2, 1],
-            "padding": "VALID"
+            "parents": [
+                "conv1"
+            ],
+            "ksize": [
+                1,
+                3,
+                3,
+                1
+            ],
+            "strides": [
+                1,
+                2,
+                2,
+                1
+            ],
+            "padding": "VALID",
+            "device": 1
         },
         "res2a_branch1": {
             "type": "Convolution",
-            "parents": ["pool1"],
-            "filter": [1, 1, -1, 256],
-            "strides": [1, 1, 1, 1],
-            "padding": "VALID"
+            "parents": [
+                "pool1"
+            ],
+            "filter": [
+                1,
+                1,
+                -1,
+                256
+            ],
+            "strides": [
+                1,
+                1,
+                1,
+                1
+            ],
+            "padding": "VALID",
+            "device": 1
         },
         "res2a_branch2a": {
             "type": "Convolution",
-            "parents": ["pool1"],
-            "filter": [1, 1, -1, 64],
-            "strides": [1, 1, 1, 1],
-            "padding": "VALID"
+            "parents": [
+                "pool1"
+            ],
+            "filter": [
+                1,
+                1,
+                -1,
+                64
+            ],
+            "strides": [
+                1,
+                1,
+                1,
+                1
+            ],
+            "padding": "VALID",
+            "device": 1
         },
         "res2a_branch2b": {
             "type": "Convolution",
-            "parents": ["res2a_branch2a"],
-            "filter": [3, 3, -1, 64],
-            "strides": [1, 1, 1, 1],
-            "padding": "SAME"
+            "parents": [
+                "res2a_branch2a"
+            ],
+            "filter": [
+                3,
+                3,
+                -1,
+                64
+            ],
+            "strides": [
+                1,
+                1,
+                1,
+                1
+            ],
+            "padding": "SAME",
+            "device": 1
         },
         "res2a_branch2c": {
             "type": "Convolution",
-            "parents": ["res2a_branch2b"],
-            "filter": [1, 1, -1, 256],
-            "strides": [1, 1, 1, 1],
-            "padding": "VALID"
+            "parents": [
+                "res2a_branch2b"
+            ],
+            "filter": [
+                1,
+                1,
+                -1,
+                256
+            ],
+            "strides": [
+                1,
+                1,
+                1,
+                1
+            ],
+            "padding": "VALID",
+            "device": 1
         },
         "res2a": {
             "type": "Elementwise",
             "parents": [
-                "res2a_branch1", "res2a_branch2c"
-            ]
+                "res2a_branch1",
+                "res2a_branch2c"
+            ],
+            "device": 1
         },
         "res2b_branch2a": {
             "type": "Convolution",
-            "parents": ["res2a"],
-            "filter": [1, 1, -1, 64],
-            "strides": [1, 1, 1, 1],
-            "padding": "VALID"
+            "parents": [
+                "res2a"
+            ],
+            "filter": [
+                1,
+                1,
+                -1,
+                64
+            ],
+            "strides": [
+                1,
+                1,
+                1,
+                1
+            ],
+            "padding": "VALID",
+            "device": 1
         },
         "res2b_branch2b": {
             "type": "Convolution",
-            "parents": ["res2b_branch2a"],
-            "filter": [3, 3, -1, 64],
-            "strides": [1, 1, 1, 1],
-            "padding": "SAME"
+            "parents": [
+                "res2b_branch2a"
+            ],
+            "filter": [
+                3,
+                3,
+                -1,
+                64
+            ],
+            "strides": [
+                1,
+                1,
+                1,
+                1
+            ],
+            "padding": "SAME",
+            "device": 1
         },
         "res2b_branch2c": {
             "type": "Convolution",
-            "parents": ["res2b_branch2b"],
-            "filter": [1, 1, -1, 256],
-            "strides": [1, 1, 1, 1],
-            "padding": "VALID"
+            "parents": [
+                "res2b_branch2b"
+            ],
+            "filter": [
+                1,
+                1,
+                -1,
+                256
+            ],
+            "strides": [
+                1,
+                1,
+                1,
+                1
+            ],
+            "padding": "VALID",
+            "device": 1
         },
         "res2b": {
             "type": "Elementwise",
             "parents": [
-                "res2a", "res2b_branch2c"
-            ]
+                "res2a",
+                "res2b_branch2c"
+            ],
+            "device": 1
         },
         "res2c_branch2a": {
             "type": "Convolution",
-            "parents": ["res2b"],
-            "filter": [1, 1, -1, 64],
-            "strides": [1, 1, 1, 1],
-            "padding": "VALID"
+            "parents": [
+                "res2b"
+            ],
+            "filter": [
+                1,
+                1,
+                -1,
+                64
+            ],
+            "strides": [
+                1,
+                1,
+                1,
+                1
+            ],
+            "padding": "VALID",
+            "device": 1
         },
         "res2c_branch2b": {
             "type": "Convolution",
-            "parents": ["res2c_branch2a"],
-            "filter": [3, 3, -1, 64],
-            "strides": [1, 1, 1, 1],
-            "padding": "SAME"
+            "parents": [
+                "res2c_branch2a"
+            ],
+            "filter": [
+                3,
+                3,
+                -1,
+                64
+            ],
+            "strides": [
+                1,
+                1,
+                1,
+                1
+            ],
+            "padding": "SAME",
+            "device": 1
         },
         "res2c_branch2c": {
             "type": "Convolution",
-            "parents": ["res2c_branch2b"],
-            "filter": [1, 1, -1, 256],
-            "strides": [1, 1, 1, 1],
-            "padding": "VALID"
+            "parents": [
+                "res2c_branch2b"
+            ],
+            "filter": [
+                1,
+                1,
+                -1,
+                256
+            ],
+            "strides": [
+                1,
+                1,
+                1,
+                1
+            ],
+            "padding": "VALID",
+            "device": 1
         },
         "res2c": {
             "type": "Elementwise",
             "parents": [
-                "res2b", "res2c_branch2c"
-            ]
+                "res2b",
+                "res2c_branch2c"
+            ],
+            "device": 1
         },
         "res3a_branch1": {
             "type": "Convolution",
-            "parents": ["res2c"],
-            "filter": [1, 1, -1, 512],
-            "strides": [1, 2, 2, 1],
-            "padding": "VALID"
+            "parents": [
+                "res2c"
+            ],
+            "filter": [
+                1,
+                1,
+                -1,
+                512
+            ],
+            "strides": [
+                1,
+                2,
+                2,
+                1
+            ],
+            "padding": "VALID",
+            "device": 1
         },
         "res3a_branch2a": {
             "type": "Convolution",
-            "parents": ["res2c"],
-            "filter": [1, 1, -1, 128],
-            "strides": [1, 2, 2, 1],
-            "padding": "VALID"
+            "parents": [
+                "res2c"
+            ],
+            "filter": [
+                1,
+                1,
+                -1,
+                128
+            ],
+            "strides": [
+                1,
+                2,
+                2,
+                1
+            ],
+            "padding": "VALID",
+            "device": 1
         },
         "res3a_branch2b": {
             "type": "Convolution",
-            "parents": ["res3a_branch2a"],
-            "filter": [3, 3, -1, 128],
-            "strides": [1, 1, 1, 1],
-            "padding": "SAME"
+            "parents": [
+                "res3a_branch2a"
+            ],
+            "filter": [
+                3,
+                3,
+                -1,
+                128
+            ],
+            "strides": [
+                1,
+                1,
+                1,
+                1
+            ],
+            "padding": "SAME",
+            "device": 1
         },
         "res3a_branch2c": {
             "type": "Convolution",
-            "parents": ["res3a_branch2b"],
-            "filter": [1, 1, -1, 512],
-            "strides": [1, 1, 1, 1],
-            "padding": "VALID"
+            "parents": [
+                "res3a_branch2b"
+            ],
+            "filter": [
+                1,
+                1,
+                -1,
+                512
+            ],
+            "strides": [
+                1,
+                1,
+                1,
+                1
+            ],
+            "padding": "VALID",
+            "device": 1
         },
         "res3a": {
             "type": "Elementwise",
             "parents": [
-                "res3a_branch1", "res3a_branch2c"
-            ]
+                "res3a_branch1",
+                "res3a_branch2c"
+            ],
+            "device": 1
         },
         "res3b_branch2a": {
             "type": "Convolution",
-            "parents": ["res3a"],
-            "filter": [1, 1, -1, 128],
-            "strides": [1, 1, 1, 1],
-            "padding": "VALID"
+            "parents": [
+                "res3a"
+            ],
+            "filter": [
+                1,
+                1,
+                -1,
+                128
+            ],
+            "strides": [
+                1,
+                1,
+                1,
+                1
+            ],
+            "padding": "VALID",
+            "device": 1
         },
         "res3b_branch2b": {
             "type": "Convolution",
-            "parents": ["res3b_branch2a"],
-            "filter": [3, 3, -1, 128],
-            "strides": [1, 1, 1, 1],
-            "padding": "SAME"
+            "parents": [
+                "res3b_branch2a"
+            ],
+            "filter": [
+                3,
+                3,
+                -1,
+                128
+            ],
+            "strides": [
+                1,
+                1,
+                1,
+                1
+            ],
+            "padding": "SAME",
+            "device": 1
         },
         "res3b_branch2c": {
             "type": "Convolution",
-            "parents": ["res3b_branch2b"],
-            "filter": [1, 1, -1, 512],
-            "strides": [1, 1, 1, 1],
-            "padding": "VALID"
+            "parents": [
+                "res3b_branch2b"
+            ],
+            "filter": [
+                1,
+                1,
+                -1,
+                512
+            ],
+            "strides": [
+                1,
+                1,
+                1,
+                1
+            ],
+            "padding": "VALID",
+            "device": 1
         },
         "res3b": {
             "type": "Elementwise",
             "parents": [
-                "res3a", "res3b_branch2c"
-            ]
+                "res3a",
+                "res3b_branch2c"
+            ],
+            "device": 1
         },
         "res3c_branch2a": {
             "type": "Convolution",
-            "parents": ["res3b"],
-            "filter": [1, 1, -1, 128],
-            "strides": [1, 1, 1, 1],
-            "padding": "VALID"
+            "parents": [
+                "res3b"
+            ],
+            "filter": [
+                1,
+                1,
+                -1,
+                128
+            ],
+            "strides": [
+                1,
+                1,
+                1,
+                1
+            ],
+            "padding": "VALID",
+            "device": 1
         },
         "res3c_branch2b": {
             "type": "Convolution",
-            "parents": ["res3c_branch2a"],
-            "filter": [3, 3, -1, 128],
-            "strides": [1, 1, 1, 1],
-            "padding": "SAME"
+            "parents": [
+                "res3c_branch2a"
+            ],
+            "filter": [
+                3,
+                3,
+                -1,
+                128
+            ],
+            "strides": [
+                1,
+                1,
+                1,
+                1
+            ],
+            "padding": "SAME",
+            "device": 1
         },
         "res3c_branch2c": {
             "type": "Convolution",
-            "parents": ["res3c_branch2b"],
-            "filter": [1, 1, -1, 512],
-            "strides": [1, 1, 1, 1],
-            "padding": "VALID"
+            "parents": [
+                "res3c_branch2b"
+            ],
+            "filter": [
+                1,
+                1,
+                -1,
+                512
+            ],
+            "strides": [
+                1,
+                1,
+                1,
+                1
+            ],
+            "padding": "VALID",
+            "device": 1
         },
         "res3c": {
             "type": "Elementwise",
             "parents": [
-                "res3b", "res3c_branch2c"
-            ]
+                "res3b",
+                "res3c_branch2c"
+            ],
+            "device": 1
         },
         "res3d_branch2a": {
             "type": "Convolution",
@@ -203,12 +506,19 @@
                 "res3c"
             ],
             "filter": [
-                1, 1, -1, 128
+                1,
+                1,
+                -1,
+                128
             ],
             "strides": [
-                1, 1, 1, 1
+                1,
+                1,
+                1,
+                1
             ],
-            "padding": "VALID"
+            "padding": "VALID",
+            "device": 1
         },
         "res3d_branch2b": {
             "type": "Convolution",
@@ -216,12 +526,19 @@
                 "res3d_branch2a"
             ],
             "filter": [
-                3, 3, -1, 128
+                3,
+                3,
+                -1,
+                128
             ],
             "strides": [
-                1, 1, 1, 1
+                1,
+                1,
+                1,
+                1
             ],
-            "padding": "SAME"
+            "padding": "SAME",
+            "device": 1
         },
         "res3d_branch2c": {
             "type": "Convolution",
@@ -229,18 +546,27 @@
                 "res3d_branch2b"
             ],
             "filter": [
-                1, 1, -1, 512
+                1,
+                1,
+                -1,
+                512
             ],
             "strides": [
-                1, 1, 1, 1
+                1,
+                1,
+                1,
+                1
             ],
-            "padding": "VALID"
+            "padding": "VALID",
+            "device": 1
         },
         "res3d": {
             "type": "Elementwise",
             "parents": [
-                "res3c", "res3d_branch2c"
-            ]
+                "res3c",
+                "res3d_branch2c"
+            ],
+            "device": 1
         },
         "res4a_branch1": {
             "type": "Convolution",
@@ -248,12 +574,19 @@
                 "res3d"
             ],
             "filter": [
-                1, 1, -1, 1024
+                1,
+                1,
+                -1,
+                1024
             ],
             "strides": [
-                1, 2, 2, 1
+                1,
+                2,
+                2,
+                1
             ],
-            "padding": "VALID"
+            "padding": "VALID",
+            "device": 1
         },
         "res4a_branch2a": {
             "type": "Convolution",
@@ -261,12 +594,19 @@
                 "res3d"
             ],
             "filter": [
-                1, 1, -1, 256
+                1,
+                1,
+                -1,
+                256
             ],
             "strides": [
-                1, 2, 2, 1
+                1,
+                2,
+                2,
+                1
             ],
-            "padding": "VALID"
+            "padding": "VALID",
+            "device": 1
         },
         "res4a_branch2b": {
             "type": "Convolution",
@@ -274,12 +614,19 @@
                 "res4a_branch2a"
             ],
             "filter": [
-                3, 3, -1, 256
+                3,
+                3,
+                -1,
+                256
             ],
             "strides": [
-                1, 1, 1, 1
+                1,
+                1,
+                1,
+                1
             ],
-            "padding": "SAME"
+            "padding": "SAME",
+            "device": 1
         },
         "res4a_branch2c": {
             "type": "Convolution",
@@ -287,18 +634,27 @@
                 "res4a_branch2b"
             ],
             "filter": [
-                1, 1, -1, 1024
+                1,
+                1,
+                -1,
+                1024
             ],
             "strides": [
-                1, 1, 1, 1
+                1,
+                1,
+                1,
+                1
             ],
-            "padding": "VALID"
+            "padding": "VALID",
+            "device": 1
         },
         "res4a": {
             "type": "Elementwise",
             "parents": [
-                "res4a_branch1", "res4a_branch2c"
-            ]
+                "res4a_branch1",
+                "res4a_branch2c"
+            ],
+            "device": 1
         },
         "res4b_branch2a": {
             "type": "Convolution",
@@ -306,12 +662,19 @@
                 "res4a"
             ],
             "filter": [
-                1, 1, -1, 256
+                1,
+                1,
+                -1,
+                256
             ],
             "strides": [
-                1, 1, 1, 1
+                1,
+                1,
+                1,
+                1
             ],
-            "padding": "VALID"
+            "padding": "VALID",
+            "device": 1
         },
         "res4b_branch2b": {
             "type": "Convolution",
@@ -319,12 +682,19 @@
                 "res4b_branch2a"
             ],
             "filter": [
-                3, 3, -1, 256
+                3,
+                3,
+                -1,
+                256
             ],
             "strides": [
-                1, 1, 1, 1
+                1,
+                1,
+                1,
+                1
             ],
-            "padding": "SAME"
+            "padding": "SAME",
+            "device": 1
         },
         "res4b_branch2c": {
             "type": "Convolution",
@@ -332,18 +702,27 @@
                 "res4b_branch2b"
             ],
             "filter": [
-                1, 1, -1, 1024
+                1,
+                1,
+                -1,
+                1024
             ],
             "strides": [
-                1, 1, 1, 1
+                1,
+                1,
+                1,
+                1
             ],
-            "padding": "VALID"
+            "padding": "VALID",
+            "device": 1
         },
         "res4b": {
             "type": "Elementwise",
             "parents": [
-                "res4a", "res4b_branch2c"
-            ]
+                "res4a",
+                "res4b_branch2c"
+            ],
+            "device": 1
         },
         "res4c_branch2a": {
             "type": "Convolution",
@@ -351,12 +730,19 @@
                 "res4b"
             ],
             "filter": [
-                1, 1, -1, 256
+                1,
+                1,
+                -1,
+                256
             ],
             "strides": [
-                1, 1, 1, 1
+                1,
+                1,
+                1,
+                1
             ],
-            "padding": "VALID"
+            "padding": "VALID",
+            "device": 1
         },
         "res4c_branch2b": {
             "type": "Convolution",
@@ -364,12 +750,19 @@
                 "res4c_branch2a"
             ],
             "filter": [
-                3, 3, -1, 256
+                3,
+                3,
+                -1,
+                256
             ],
             "strides": [
-                1, 1, 1, 1
+                1,
+                1,
+                1,
+                1
             ],
-            "padding": "SAME"
+            "padding": "SAME",
+            "device": 1
         },
         "res4c_branch2c": {
             "type": "Convolution",
@@ -377,18 +770,27 @@
                 "res4c_branch2b"
             ],
             "filter": [
-                1, 1, -1, 1024
+                1,
+                1,
+                -1,
+                1024
             ],
             "strides": [
-                1, 1, 1, 1
+                1,
+                1,
+                1,
+                1
             ],
-            "padding": "VALID"
+            "padding": "VALID",
+            "device": 1
         },
         "res4c": {
             "type": "Elementwise",
             "parents": [
-                "res4b", "res4c_branch2c"
-            ]
+                "res4b",
+                "res4c_branch2c"
+            ],
+            "device": 1
         },
         "res4d_branch2a": {
             "type": "Convolution",
@@ -396,12 +798,19 @@
                 "res4c"
             ],
             "filter": [
-                1, 1, -1, 256
+                1,
+                1,
+                -1,
+                256
             ],
             "strides": [
-                1, 1, 1, 1
+                1,
+                1,
+                1,
+                1
             ],
-            "padding": "VALID"
+            "padding": "VALID",
+            "device": 1
         },
         "res4d_branch2b": {
             "type": "Convolution",
@@ -409,12 +818,19 @@
                 "res4d_branch2a"
             ],
             "filter": [
-                3, 3, -1, 256
+                3,
+                3,
+                -1,
+                256
             ],
             "strides": [
-                1, 1, 1, 1
+                1,
+                1,
+                1,
+                1
             ],
-            "padding": "SAME"
+            "padding": "SAME",
+            "device": 1
         },
         "res4d_branch2c": {
             "type": "Convolution",
@@ -422,18 +838,27 @@
                 "res4d_branch2b"
             ],
             "filter": [
-                1, 1, -1, 1024
+                1,
+                1,
+                -1,
+                1024
             ],
             "strides": [
-                1, 1, 1, 1
+                1,
+                1,
+                1,
+                1
             ],
-            "padding": "VALID"
+            "padding": "VALID",
+            "device": 1
         },
         "res4d": {
             "type": "Elementwise",
             "parents": [
-                "res4c", "res4d_branch2c"
-            ]
+                "res4c",
+                "res4d_branch2c"
+            ],
+            "device": 1
         },
         "res4e_branch2a": {
             "type": "Convolution",
@@ -441,12 +866,19 @@
                 "res4d"
             ],
             "filter": [
-                1, 1, -1, 256
+                1,
+                1,
+                -1,
+                256
             ],
             "strides": [
-                1, 1, 1, 1
+                1,
+                1,
+                1,
+                1
             ],
-            "padding": "VALID"
+            "padding": "VALID",
+            "device": 1
         },
         "res4e_branch2b": {
             "type": "Convolution",
@@ -454,12 +886,19 @@
                 "res4e_branch2a"
             ],
             "filter": [
-                3, 3, -1, 256
+                3,
+                3,
+                -1,
+                256
             ],
             "strides": [
-                1, 1, 1, 1
+                1,
+                1,
+                1,
+                1
             ],
-            "padding": "SAME"
+            "padding": "SAME",
+            "device": 1
         },
         "res4e_branch2c": {
             "type": "Convolution",
@@ -467,18 +906,27 @@
                 "res4e_branch2b"
             ],
             "filter": [
-                1, 1, -1, 1024
+                1,
+                1,
+                -1,
+                1024
             ],
             "strides": [
-                1, 1, 1, 1
+                1,
+                1,
+                1,
+                1
             ],
-            "padding": "VALID"
+            "padding": "VALID",
+            "device": 1
         },
         "res4e": {
             "type": "Elementwise",
             "parents": [
-                "res4d", "res4e_branch2c"
-            ]
+                "res4d",
+                "res4e_branch2c"
+            ],
+            "device": 1
         },
         "res4f_branch2a": {
             "type": "Convolution",
@@ -486,12 +934,19 @@
                 "res4e"
             ],
             "filter": [
-                1, 1, -1, 256
+                1,
+                1,
+                -1,
+                256
             ],
             "strides": [
-                1, 1, 1, 1
+                1,
+                1,
+                1,
+                1
             ],
-            "padding": "VALID"
+            "padding": "VALID",
+            "device": 1
         },
         "res4f_branch2b": {
             "type": "Convolution",
@@ -499,12 +954,19 @@
                 "res4f_branch2a"
             ],
             "filter": [
-                3, 3, -1, 256
+                3,
+                3,
+                -1,
+                256
             ],
             "strides": [
-                1, 1, 1, 1
+                1,
+                1,
+                1,
+                1
             ],
-            "padding": "SAME"
+            "padding": "SAME",
+            "device": 1
         },
         "res4f_branch2c": {
             "type": "Convolution",
@@ -512,18 +974,27 @@
                 "res4f_branch2b"
             ],
             "filter": [
-                1, 1, -1, 1024
+                1,
+                1,
+                -1,
+                1024
             ],
             "strides": [
-                1, 1, 1, 1
+                1,
+                1,
+                1,
+                1
             ],
-            "padding": "VALID"
+            "padding": "VALID",
+            "device": 1
         },
         "res4f": {
             "type": "Elementwise",
             "parents": [
-                "res4e", "res4f_branch2c"
-            ]
+                "res4e",
+                "res4f_branch2c"
+            ],
+            "device": 1
         },
         "res5a_branch1": {
             "type": "Convolution",
@@ -531,12 +1002,19 @@
                 "res4f"
             ],
             "filter": [
-                1, 1, -1, 2048
+                1,
+                1,
+                -1,
+                2048
             ],
             "strides": [
-                1, 2, 2, 1
+                1,
+                2,
+                2,
+                1
             ],
-            "padding": "VALID"
+            "padding": "VALID",
+            "device": 1
         },
         "res5a_branch2a": {
             "type": "Convolution",
@@ -544,12 +1022,19 @@
                 "res4f"
             ],
             "filter": [
-                1, 1, -1, 512
+                1,
+                1,
+                -1,
+                512
             ],
             "strides": [
-                1, 2, 2, 1
+                1,
+                2,
+                2,
+                1
             ],
-            "padding": "VALID"
+            "padding": "VALID",
+            "device": 1
         },
         "res5a_branch2b": {
             "type": "Convolution",
@@ -557,12 +1042,19 @@
                 "res5a_branch2a"
             ],
             "filter": [
-                3, 3, -1, 512
+                3,
+                3,
+                -1,
+                512
             ],
             "strides": [
-                1, 1, 1, 1
+                1,
+                1,
+                1,
+                1
             ],
-            "padding": "SAME"
+            "padding": "SAME",
+            "device": 1
         },
         "res5a_branch2c": {
             "type": "Convolution",
@@ -570,18 +1062,27 @@
                 "res5a_branch2b"
             ],
             "filter": [
-                1, 1, -1, 2048
+                1,
+                1,
+                -1,
+                2048
             ],
             "strides": [
-                1, 1, 1, 1
+                1,
+                1,
+                1,
+                1
             ],
-            "padding": "VALID"
+            "padding": "VALID",
+            "device": 1
         },
         "res5a": {
             "type": "Elementwise",
             "parents": [
-                "res5a_branch1", "res5a_branch2c"
-            ]
+                "res5a_branch1",
+                "res5a_branch2c"
+            ],
+            "device": 1
         },
         "res5b_branch2a": {
             "type": "Convolution",
@@ -589,12 +1090,19 @@
                 "res5a"
             ],
             "filter": [
-                1, 1, -1, 512
+                1,
+                1,
+                -1,
+                512
             ],
             "strides": [
-                1, 1, 1, 1
+                1,
+                1,
+                1,
+                1
             ],
-            "padding": "VALID"
+            "padding": "VALID",
+            "device": 1
         },
         "res5b_branch2b": {
             "type": "Convolution",
@@ -602,12 +1110,19 @@
                 "res5b_branch2a"
             ],
             "filter": [
-                3, 3, -1, 512
+                3,
+                3,
+                -1,
+                512
             ],
             "strides": [
-                1, 1, 1, 1
+                1,
+                1,
+                1,
+                1
             ],
-            "padding": "SAME"
+            "padding": "SAME",
+            "device": 1
         },
         "res5b_branch2c": {
             "type": "Convolution",
@@ -615,18 +1130,27 @@
                 "res5b_branch2b"
             ],
             "filter": [
-                1, 1, -1, 2048
+                1,
+                1,
+                -1,
+                2048
             ],
             "strides": [
-                1, 1, 1, 1
+                1,
+                1,
+                1,
+                1
             ],
-            "padding": "VALID"
+            "padding": "VALID",
+            "device": 1
         },
         "res5b": {
             "type": "Elementwise",
             "parents": [
-                "res5a", "res5b_branch2c"
-            ]
+                "res5a",
+                "res5b_branch2c"
+            ],
+            "device": 1
         },
         "res5c_branch2a": {
             "type": "Convolution",
@@ -634,12 +1158,19 @@
                 "res5b"
             ],
             "filter": [
-                1, 1, -1, 512
+                1,
+                1,
+                -1,
+                512
             ],
             "strides": [
-                1, 1, 1, 1
+                1,
+                1,
+                1,
+                1
             ],
-            "padding": "VALID"
+            "padding": "VALID",
+            "device": 1
         },
         "res5c_branch2b": {
             "type": "Convolution",
@@ -647,12 +1178,19 @@
                 "res5c_branch2a"
             ],
             "filter": [
-                3, 3, -1, 512
+                3,
+                3,
+                -1,
+                512
             ],
             "strides": [
-                1, 1, 1, 1
+                1,
+                1,
+                1,
+                1
             ],
-            "padding": "SAME"
+            "padding": "SAME",
+            "device": 1
         },
         "res5c_branch2c": {
             "type": "Convolution",
@@ -660,18 +1198,27 @@
                 "res5c_branch2b"
             ],
             "filter": [
-                1, 1, -1, 2048
+                1,
+                1,
+                -1,
+                2048
             ],
             "strides": [
-                1, 1, 1, 1
+                1,
+                1,
+                1,
+                1
             ],
-            "padding": "VALID"
+            "padding": "VALID",
+            "device": 1
         },
         "res5c": {
             "type": "Elementwise",
             "parents": [
-                "res5b", "res5c_branch2c"
-            ]
+                "res5b",
+                "res5c_branch2c"
+            ],
+            "device": 1
         },
         "pool5": {
             "type": "Pooling",
@@ -679,25 +1226,34 @@
                 "res5c"
             ],
             "ksize": [
-                1, 7, 7, 1
+                1,
+                7,
+                7,
+                1
             ],
             "strides": [
-                1, 1, 1, 1
+                1,
+                1,
+                1,
+                1
             ],
-            "padding": "VALID"
+            "padding": "VALID",
+            "device": 1
         },
         "fc1000": {
             "type": "InnerProduct",
             "parents": [
                 "pool5"
             ],
-            "num_outputs": 1000
+            "num_outputs": 1000,
+            "device": 1
         },
         "prob": {
             "type": "Softmax",
             "parents": [
                 "fc1000"
-            ]
+            ],
+            "device": 1
         }
     }
 }
