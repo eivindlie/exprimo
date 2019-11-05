@@ -52,7 +52,7 @@ class LinearSearchOptimizer:
         best_score = -1
         best_net = None
         for comb in tqdm(product(range(len(device_graph.devices)), repeat=len(groups)),
-                         total=len(device_graph.devices) ** len(groups)):
+                         total=len(device_graph.devices) ** len(groups), unit='placements'):
             net = json.loads(net_string)
             for i, device in enumerate(comb):
                 for layer in groups[i]:
@@ -62,7 +62,7 @@ class LinearSearchOptimizer:
             graph.load_from_string(json.dumps(net))
             simulator = Simulator(graph, device_graph)
 
-            score = simulator.simulate(print_event_trace=False, batch_size=128)
+            score = simulator.simulate(print_event_trace=False, batch_size=128, batches=2)
 
             if score < best_score or best_net is None:
                 best_net = net
