@@ -161,9 +161,9 @@ class Simulator:
 
 class Event:
 
-    def __init__(self, type, device, start_time, end_time=None, operation=None, subtype=None, batch=0,
+    def __init__(self, event_type, device, start_time, end_time=None, operation=None, subtype=None, batch=0,
                  from_device=None, to_device=None):
-        self.type = type
+        self.type = event_type
         self.device = device
         self.start_time = start_time
         self.end_time = end_time
