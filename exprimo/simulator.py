@@ -2,6 +2,7 @@
 Execution simulator based on the technique described in Placeto (Addanki et al., 2019, https://arxiv.org/abs/1906.08879)
 """
 
+import heapq
 from collections import deque, defaultdict
 
 from device import DeviceGraph
@@ -31,6 +32,7 @@ class Simulator:
         device_free = [True for i in range(len(self.device_graph.devices))]
         forward_done = [defaultdict(lambda: False) for b in range(batches)]
         backward_done = [defaultdict(lambda: False) for b in range(batches)]
+        event_queue = MinHeap(key=lambda ev: ev.end_time)
         events = []
 
         for b in range(batches):
@@ -39,13 +41,13 @@ class Simulator:
                     op_queues[layer['device']].append((layer, False, b))
                     if device_free[layer['device']]:
                         device_free[layer['device']] = False
-                        events.append(Event('wakeup', layer['device'], 0, subtype='op', batch=b))
+                        event_queue.push(Event('wakeup', layer['device'], 0, subtype='op', batch=b))
 
         def run_op(op, backward, start_time, batch=0):
             device = self.device_graph.devices[op['device']].device
             run_time = FlopsProfiler.profile(op, device, backward, batch_size)
             end_time = start_time + run_time
-            events.append(Event('op_done', op['device'], start_time,
+            event_queue.push(Event('op_done', op['device'], start_time,
                                 end_time=end_time, operation=(op, backward, batch), batch=batch))
 
         def run_transfer(op, backward, comm_channel_id, target_op, start_time, batch=0):
@@ -58,7 +60,7 @@ class Simulator:
 
             transfer_time = TransferProfiler.profile(transferred_op, comm_channel, parent_device, backward, batch_size)
             end_time = start_time + transfer_time
-            events.append(Event('transfer_done', comm_channel_id, start_time,
+            event_queue.push(Event('transfer_done', comm_channel_id, start_time,
                                 operation=((op, backward, batch), target_op),
                                 end_time=end_time, batch=batch,
                                 from_device=op['device'], to_device=target_op['device']))
@@ -89,7 +91,7 @@ class Simulator:
                     transfer_queues[comm_channel.id].append(((op, backward, batch), child))
                     if comm_free[comm_channel.id]:
                         comm_free[comm_channel.id] = False
-                        events.append(Event('wakeup', comm_channel.id, event.end_time, subtype='transfer',
+                        event_queue.push(Event('wakeup', comm_channel.id, event.end_time, subtype='transfer',
                                             batch=batch))
                 else:
                     if can_run(child, backward, batch):
@@ -114,7 +116,7 @@ class Simulator:
                     op_queues[child['device']].append((child, backward, batch))
                     if device_free[child['device']]:
                         device_free[child['device']] = False
-                        events.append(Event('wakeup', child['device'], event.end_time, subtype='op', batch=batch))
+                        event_queue.push(Event('wakeup', child['device'], event.end_time, subtype='op', batch=batch))
 
             if len(transfer_queues[event.device]):
                 (op2, backward2, batch2), target_op = transfer_queues[event.device].popleft()
@@ -123,7 +125,6 @@ class Simulator:
                 comm_free[event.device] = True
 
         def wakeup(event):
-            event.end_time = event.start_time
             if event.subtype == 'transfer':
                 (op, backward, batch), target_op = transfer_queues[event.device].popleft()
                 run_transfer(op, backward, event.device, target_op, event.start_time, batch=batch)
@@ -137,18 +138,11 @@ class Simulator:
             'wakeup': wakeup
         }
 
-        e = 0
-        while True:
-            if e >= len(events):
-                break
-
-            event = events[e]
+        while not event_queue.empty():
+            event = event_queue.pop()
+            events.append(event)
             event.handled = True
             event_map[event.type](event)
-
-            e += 1
-
-        events.sort(key=lambda ev: ev.end_time)
 
         if print_event_trace:
             for event in events:
@@ -159,6 +153,25 @@ class Simulator:
         return events[-1].end_time
 
 
+class MinHeap:
+    def __init__(self, initial=None, key=lambda x: x):
+        self.key = key
+        if initial:
+            self._data = [(key(item), item) for item in initial]
+            heapq.heapify(self._data)
+        else:
+            self._data = []
+
+    def push(self, item):
+        heapq.heappush(self._data, (self.key(item), item))
+
+    def pop(self):
+        return heapq.heappop(self._data)[1]
+
+    def empty(self):
+        return len(self._data) == 0
+
+
 class Event:
 
     def __init__(self, event_type, device, start_time, end_time=None, operation=None, subtype=None, batch=0,
@@ -166,7 +179,10 @@ class Event:
         self.type = event_type
         self.device = device
         self.start_time = start_time
-        self.end_time = end_time
+        if event_type == 'wakeup':
+            self.end_time = start_time
+        else:
+            self.end_time = end_time
         self.operation = operation
         self.subtype = subtype
         self.batch = batch
