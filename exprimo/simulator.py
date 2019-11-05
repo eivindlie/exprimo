@@ -60,7 +60,8 @@ class Simulator:
             end_time = start_time + transfer_time
             events.append(Event('transfer_done', comm_channel_id, start_time,
                                 operation=((op, backward, batch), target_op),
-                                end_time=end_time, batch=batch))
+                                end_time=end_time, batch=batch,
+                                from_device=op['device'], to_device=target_op['device']))
 
         def can_run(op, backward, batch):
             parents = op.outbounds if backward else op.inbounds
@@ -160,7 +161,8 @@ class Simulator:
 
 class Event:
 
-    def __init__(self, type, device, start_time, end_time=None, operation=None, subtype=None, batch=0):
+    def __init__(self, type, device, start_time, end_time=None, operation=None, subtype=None, batch=0,
+                 from_device=None, to_device=None):
         self.type = type
         self.device = device
         self.start_time = start_time
@@ -168,25 +170,34 @@ class Event:
         self.operation = operation
         self.subtype = subtype
         self.batch = batch
+        self.from_device = from_device
+        self.to_device = to_device
 
         self.handled = False
 
-    def __str__(self):
+    @property
+    def backward(self):
         if self.operation:
             if self.type == 'op_done' or self.subtype == 'op':
-                op_name = self.operation[0].name
-                backward = self.operation[1]
+                return self.operation[1]
             else:
-                op_name = self.operation[0][0].name
-                backward = self.operation[0][1]
-        else:
-            op_name = None
-            backward = None
+                return self.operation[0][1]
+        return None
 
+    @property
+    def op_name(self):
+        if self.operation:
+            if self.type == 'op_done' or self.subtype == 'op':
+                return self.operation[0].name
+            else:
+                return self.operation[0][0].name
+        return None
+
+    def __str__(self):
         return f'[{self.type.capitalize()}{f"/{self.subtype}" if self.subtype else ""}] ' \
                f'Device: {self.device}   ' \
                f'Batch: {self.batch}   ' \
                f'Start time: {self.start_time}   ' \
                f'{f"End time: {self.end_time}   " if self.end_time else ""}' \
-               f'{f"Operation: {op_name}   " if op_name else ""}' \
-               f'{f"Backward: {backward}   " if backward is not None else ""}'
+               f'{f"Operation: {self.op_name}   " if self.op_name else ""}' \
+               f'{f"Backward: {self.backward}   " if self.backward is not None else ""}'
