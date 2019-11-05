@@ -48,13 +48,18 @@ class Simulator:
             events.append(Event('op_done', op['device'], start_time,
                                 end_time=end_time, operation=(op, backward, batch), batch=batch))
 
-        def run_transfer(op, backward, comm_channel_id, target, start_time, batch=0):
+        def run_transfer(op, backward, comm_channel_id, target_op, start_time, batch=0):
             parent_device = self.device_graph.devices[op['device']].device
             comm_channel = self.device_graph.comm_channels[comm_channel_id]
-            transfer_time = TransferProfiler.profile(op, comm_channel, parent_device, backward, batch_size)
+
+            # If we are running the backward step, we are transferring gradients, which are the same size as the
+            # output of the target op
+            transferred_op = target_op if backward else op
+
+            transfer_time = TransferProfiler.profile(transferred_op, comm_channel, parent_device, backward, batch_size)
             end_time = start_time + transfer_time
             events.append(Event('transfer_done', comm_channel_id, start_time,
-                                operation=((op, backward, batch), op['device'], target),
+                                operation=((op, backward, batch), target_op),
                                 end_time=end_time, batch=batch))
 
         def can_run(op, backward, batch):
@@ -80,12 +85,7 @@ class Simulator:
                     child_device = self.device_graph.devices[child['device']]
                     comm_channel = op_device.neighbours[child_device]
 
-                    if backward:
-                        # If we are doing the backward pass, we are transferring the gradients, which are
-                        # equal in size to the previous layer. We therefore set the op as child instead of op.
-                        transfer_queues[comm_channel.id].append(((child, backward, batch), op_device, child_device))
-                    else:
-                        transfer_queues[comm_channel.id].append(((op, backward, batch), op_device, child_device))
+                    transfer_queues[comm_channel.id].append(((op, backward, batch), child))
                     if comm_free[comm_channel.id]:
                         comm_free[comm_channel.id] = False
                         events.append(Event('wakeup', comm_channel.id, event.end_time, subtype='transfer',
@@ -105,7 +105,7 @@ class Simulator:
                 device_free[event.device] = True
 
         def transfer_done(event):
-            (op, backward, batch), start_device, end_device = event.operation
+            (op, backward, batch), target_op = event.operation
             children = op.inbounds if backward else op.outbounds
 
             for child in children:
@@ -116,16 +116,16 @@ class Simulator:
                         events.append(Event('wakeup', child['device'], event.end_time, subtype='op', batch=batch))
 
             if len(transfer_queues[event.device]):
-                (op2, backward2, batch2), start_device2, end_device2 = transfer_queues[event.device].popleft()
-                run_transfer(op2, backward2, event.device, end_device2, event.end_time, batch=batch2)
+                (op2, backward2, batch2), target_op = transfer_queues[event.device].popleft()
+                run_transfer(op2, backward2, event.device, target_op, event.end_time, batch=batch2)
             else:
                 comm_free[event.device] = True
 
         def wakeup(event):
             event.end_time = event.start_time
             if event.subtype == 'transfer':
-                (op, backward, batch), start_device, end_device = transfer_queues[event.device].popleft()
-                run_transfer(op, backward, event.device, end_device, event.start_time, batch=batch)
+                (op, backward, batch), target_op = transfer_queues[event.device].popleft()
+                run_transfer(op, backward, event.device, target_op, event.start_time, batch=batch)
             else:
                 (op, backward, batch) = op_queues[event.device].popleft()
                 run_op(op, backward, event.start_time, batch=batch)
