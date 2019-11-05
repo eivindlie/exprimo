@@ -12,6 +12,9 @@ def plot_event_trace(events, show_transfer_lines=True, cmap='Accent'):
 
     fig, gnt = plt.subplots()
 
+    gnt.set_ylabel('Device')
+    gnt.set_xlabel('Time (ms)')
+
     gnt.set_ylim(0, 10 + 10 * len(devices))
     gnt.set_xlim(0, run_time)
 
