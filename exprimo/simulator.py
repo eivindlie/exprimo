@@ -50,20 +50,22 @@ class Simulator:
             event_queue.push(Event('op_done', op['device'], start_time,
                                 end_time=end_time, operation=(op, backward, batch), batch=batch))
 
-        def run_transfer(op, backward, comm_channel_id, target_op, start_time, batch=0):
+        def run_transfer(op, backward, comm_channel_id, target_ops, start_time, batch=0):
             parent_device = self.device_graph.devices[op['device']].device
             comm_channel = self.device_graph.comm_channels[comm_channel_id]
 
             # If we are running the backward step, we are transferring gradients, which are the same size as the
             # output of the target op
-            transferred_op = target_op if backward else op
+            transferred_ops = target_ops if backward else [op]
 
-            transfer_time = TransferProfiler.profile(transferred_op, comm_channel, parent_device, backward, batch_size)
+            transfer_time = 0
+            for transferred_op in transferred_ops:
+                transfer_time += TransferProfiler.profile(transferred_op, comm_channel, parent_device, backward, batch_size)
             end_time = start_time + transfer_time
             event_queue.push(Event('transfer_done', comm_channel_id, start_time,
-                                operation=((op, backward, batch), target_op),
+                                operation=((op, backward, batch), target_ops),
                                 end_time=end_time, batch=batch,
-                                from_device=op['device'], to_device=target_op['device']))
+                                from_device=op['device'], to_device=target_ops[0]['device']))
 
         def can_run(op, backward, batch):
             parents = op.outbounds if backward else op.inbounds
@@ -82,13 +84,20 @@ class Simulator:
                 forward_done[batch][op] = True
                 children = op.outbounds
 
+            transfers = []
             for child in children:
                 if child['device'] != op['device']:
                     op_device = self.device_graph.devices[op['device']]
                     child_device = self.device_graph.devices[child['device']]
                     comm_channel = op_device.neighbours[child_device]
 
-                    transfer_queues[comm_channel.id].append(((op, backward, batch), child))
+                    # See if a transfer to this device is scheduled already
+                    transfer = next((t for t in transfers if t[1][0]['device'] == child['device']), None)
+                    if transfer:
+                        transfer[1].append(child)
+                    else:
+                        # Transfer format: (transferred_op, target_ops)
+                        transfers.append(((op, backward, batch), [child]))
                     if comm_free[comm_channel.id]:
                         comm_free[comm_channel.id] = False
                         event_queue.push(Event('wakeup', comm_channel.id, event.end_time, subtype='transfer',
@@ -97,6 +106,14 @@ class Simulator:
                     if can_run(child, backward, batch):
                         op_queues[child['device']].append((child, backward, batch))
                         # Don't need to check if device is free, as it is the current device
+
+            for transfer in transfers:
+                child = transfer[1][0]
+                op_device = self.device_graph.devices[op['device']]
+                child_device = self.device_graph.devices[child['device']]
+                comm_channel = op_device.neighbours[child_device]
+
+                transfer_queues[comm_channel.id].append(transfer)
 
             if not backward and not len(children) and include_backward:
                 op_queues[op['device']].append((op, True, batch))
@@ -108,7 +125,7 @@ class Simulator:
                 device_free[event.device] = True
 
         def transfer_done(event):
-            (op, backward, batch), target_op = event.operation
+            (op, backward, batch), target_ops = event.operation
             children = op.inbounds if backward else op.outbounds
 
             for child in children:
@@ -119,15 +136,15 @@ class Simulator:
                         event_queue.push(Event('wakeup', child['device'], event.end_time, subtype='op', batch=batch))
 
             if len(transfer_queues[event.device]):
-                (op2, backward2, batch2), target_op = transfer_queues[event.device].popleft()
-                run_transfer(op2, backward2, event.device, target_op, event.end_time, batch=batch2)
+                (op2, backward2, batch2), target_ops2 = transfer_queues[event.device].popleft()
+                run_transfer(op2, backward2, event.device, target_ops2, event.end_time, batch=batch2)
             else:
                 comm_free[event.device] = True
 
         def wakeup(event):
             if event.subtype == 'transfer':
-                (op, backward, batch), target_op = transfer_queues[event.device].popleft()
-                run_transfer(op, backward, event.device, target_op, event.start_time, batch=batch)
+                (op, backward, batch), target_ops = transfer_queues[event.device].popleft()
+                run_transfer(op, backward, event.device, target_ops, event.start_time, batch=batch)
             else:
                 (op, backward, batch) = op_queues[event.device].popleft()
                 run_op(op, backward, event.start_time, batch=batch)
@@ -215,6 +232,8 @@ class Event:
                f'Start time: {self.start_time}   ' \
                f'{f"End time: {self.end_time}   " if self.end_time else ""}' \
                f'{f"Operation: {self.op_name}   " if self.op_name else ""}' \
+               f'{f"From device: {self.from_device}   " if self.from_device else ""}' \
+               f'{f"To device: {self.to_device}   " if self.to_device else ""}' \
                f'{f"Backward: {self.backward}   " if self.backward is not None else ""}'
 
     def __gt__(self, other):
