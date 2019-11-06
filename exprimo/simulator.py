@@ -32,7 +32,7 @@ class Simulator:
         device_free = [True for i in range(len(self.device_graph.devices))]
         forward_done = [defaultdict(lambda: False) for b in range(batches)]
         backward_done = [defaultdict(lambda: False) for b in range(batches)]
-        event_queue = MinHeap(key=lambda ev: ev.end_time)
+        event_queue = MinHeap()
         events = []
 
         for b in range(batches):
@@ -154,19 +154,18 @@ class Simulator:
 
 
 class MinHeap:
-    def __init__(self, initial=None, key=lambda x: x):
-        self.key = key
+    def __init__(self, initial=None):
         if initial:
-            self._data = [(key(item), item) for item in initial]
+            self._data = initial[:]
             heapq.heapify(self._data)
         else:
             self._data = []
 
     def push(self, item):
-        heapq.heappush(self._data, (self.key(item), item))
+        heapq.heappush(self._data, item)
 
     def pop(self):
-        return heapq.heappop(self._data)[1]
+        return heapq.heappop(self._data)
 
     def empty(self):
         return len(self._data) == 0
@@ -217,3 +216,6 @@ class Event:
                f'{f"End time: {self.end_time}   " if self.end_time else ""}' \
                f'{f"Operation: {self.op_name}   " if self.op_name else ""}' \
                f'{f"Backward: {self.backward}   " if self.backward is not None else ""}'
+
+    def __gt__(self, other):
+        self.end_time > other.end_time
