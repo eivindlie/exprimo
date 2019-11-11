@@ -26,7 +26,7 @@ class Simulator:
         else:
             self.computation_graph = computation_graph
 
-    def simulate(self, batch_size=None, batches=1,
+    def simulate(self, batch_size=None, batches=1, check_memory_usage=True,
                  print_event_trace=True, include_backward=True, return_event_trace=False, print_memory_usage=True):
         op_queues = [deque() for device in self.device_graph.devices]
         transfer_queues = [deque() for comm_channel in self.device_graph.comm_channels]
@@ -186,6 +186,13 @@ class Simulator:
             print()
             print('Peak memory usage:'.rjust(18), end='')
             print(''.join(mem_strings))
+
+        if check_memory_usage:
+            for i, device in enumerate(self.device_graph.devices):
+                if peak_memory_usage[i] > device.device.memory * 10**9:
+                    if return_event_trace:
+                        return -1, events
+                    return -1
 
         if return_event_trace:
             return events[-1].end_time, events
