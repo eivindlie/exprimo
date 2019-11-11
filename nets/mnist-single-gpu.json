@@ -1,0 +1,131 @@
+{
+    "name": "Keras MNIST CNN",
+    "layers": {
+        "data": {
+            "parents": [],
+            "type": "Input",
+            "tensor": [
+                128,
+                28,
+                28,
+                1
+            ],
+            "device": 1
+        },
+        "conv2d": {
+            "type": "Convolution",
+            "filter": [
+                5,
+                5,
+                1,
+                32
+            ],
+            "padding": "SAME",
+            "strides": [
+                1,
+                1,
+                1,
+                1
+            ],
+            "parents": [
+                "data"
+            ],
+            "device": 1
+        },
+        "max_pooling2d": {
+            "type": "Pooling",
+            "padding": "SAME",
+            "ksize": [
+                1,
+                2,
+                2,
+                1
+            ],
+            "strides": [
+                1,
+                2,
+                2,
+                1
+            ],
+            "parents": [
+                "conv2d"
+            ],
+            "device": 1
+        },
+        "conv2d_1": {
+            "type": "Convolution",
+            "filter": [
+                5,
+                5,
+                32,
+                64
+            ],
+            "padding": "SAME",
+            "strides": [
+                1,
+                1,
+                1,
+                1
+            ],
+            "parents": [
+                "max_pooling2d"
+            ],
+            "device": 1
+        },
+        "max_pooling2d_1": {
+            "type": "Pooling",
+            "padding": "SAME",
+            "ksize": [
+                1,
+                2,
+                2,
+                1
+            ],
+            "strides": [
+                1,
+                2,
+                2,
+                1
+            ],
+            "parents": [
+                "conv2d_1"
+            ],
+            "device": 1
+        },
+        "flatten": {
+            "type": "Input",
+            "tensor": [
+                128,
+                3136
+            ],
+            "parents": [
+                "max_pooling2d_1"
+            ],
+            "device": 1
+        },
+        "dense": {
+            "type": "InnerProduct",
+            "num_outputs": 1024,
+            "parents": [
+                "flatten"
+            ],
+            "device": 1
+        },
+        "dropout": {
+            "type": "Dropout",
+            "dropout_keep_prob": 0.6,
+            "parents": [
+                "dense"
+            ],
+            "device": 1
+        },
+        "dense_1": {
+            "type": "InnerProduct",
+            "num_outputs": 10,
+            "parents": [
+                "dropout"
+            ],
+            "device": 1
+        }
+    }
+}
