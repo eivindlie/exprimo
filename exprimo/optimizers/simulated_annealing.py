@@ -22,7 +22,7 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
     def optimize(self, net_string, device_graph):
         n_devices = len(device_graph.devices)
         net = json.loads(net_string)
-        
+
         groups = self.create_colocation_groups(net['layers'].keys())
 
         placement = [0] * len(groups)
