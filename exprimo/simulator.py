@@ -32,8 +32,7 @@ class Simulator:
         transfer_queues = [deque() for comm_channel in self.device_graph.comm_channels]
         comm_free = [True for i in range(len(self.device_graph.comm_channels))]
         device_free = [True for i in range(len(self.device_graph.devices))]
-        forward_done = [defaultdict(lambda: False) for b in range(batches)]
-        backward_done = [defaultdict(lambda: False) for b in range(batches)]
+        available_tensors = [[] for i in range(len(self.device_graph.devices))]
         event_queue = MinHeap()
         events = []
 
@@ -74,19 +73,17 @@ class Simulator:
             # TODO Need to somehow check that all tensors are available on the device?
             parents = op.outbounds if backward else op.inbounds
             for parent in parents:
-                if (backward and not backward_done[batch][parent]) or \
-                        (not backward and not forward_done[batch][parent]):
+                if (backward and (parent.name, op.name, batch) not in available_tensors[op['device']]) or \
+                        (not backward and (parent.name, batch) not in available_tensors[op['device']]):
                     return False
             return True
 
         def op_done(event):
             op, backward, batch = event.operation
-            if backward:
-                backward_done[batch][op] = True
-                children = op.inbounds
-            else:
-                forward_done[batch][op] = True
-                children = op.outbounds
+            children = op.inbounds if backward else op.outbounds
+
+            if not backward:
+                available_tensors[op['device']].append((op.name, event.batch))
             
             transfers = []
             for child in children:
@@ -103,6 +100,8 @@ class Simulator:
                         # Transfer format: (transferred_op, target_ops)
                         transfers.append(((op, backward, batch), [child]))
                 else:
+                    available_tensors[op['device']].append((op.name, child.name, event.batch))
+
                     if can_run(child, backward, batch):
                         op_queues[child['device']].append((child, backward, batch))
                         # Don't need to check if device is free, as it is the current device
@@ -132,7 +131,12 @@ class Simulator:
             (op, backward, batch), target_ops = event.operation
             children = op.inbounds if backward else op.outbounds
 
+            if not backward:
+                available_tensors[target_ops[0]['device']].append((op.name, event.batch))
+
             for child in children:
+                if backward:
+                    available_tensors[child['device']].append((op.name, child.name, event.batch))
                 if can_run(child, backward, batch):
                     op_queues[child['device']].append((child, backward, batch))
                     if device_free[child['device']]:
