@@ -42,7 +42,7 @@ class HillClimbingOptimizer(BaseOptimizer):
 
             for n in generate_neighbours(placement):
                 new_score = evaluate_placement(apply_placement(net_string, n, groups), device_graph)
-                if new_score < score:
+                if (new_score < score or score == -1) and new_score != -1:
                     placement = n
                     score = new_score
                     break
@@ -52,11 +52,41 @@ class HillClimbingOptimizer(BaseOptimizer):
         return placement
 
 
+class RandomHillClimbingOptimizer(BaseOptimizer):
+
+    def __init__(self, colocation_heuristic=None, patience=100):
+        super().__init__(colocation_heuristic)
+        self.patience = patience
+
+    def optimize(self, net_string, device_graph):
+        n_devices = len(device_graph.devices)
+        net = json.loads(net_string)
+        groups = self.create_colocation_groups(net['layers'].keys())
+
+        placement = [0] * len(groups) # generate_random_placement(len(groups), n_devices)
+        score = evaluate_placement(apply_placement(net_string, placement, groups), device_graph)
+
+        tests = 0
+        while tests < self.patience:
+            new_placement = placement[:]
+            new_placement[randint(0, len(new_placement) - 1)] = randint(0, n_devices - 1)
+            new_score = evaluate_placement(apply_placement(net_string, new_placement, groups), device_graph)
+
+            if (new_score < score or score == -1) and new_score != -1:
+                tests = 0
+                score = new_score
+                placement = new_placement
+            else:
+                tests += 1
+        return placement
+
+
 if __name__ == '__main__':
-    optimizer = HillClimbingOptimizer(verbose=True)
-    device_graph = DeviceGraph.load_from_file('../device_graphs/cluster1.json')
+    optimizer = RandomHillClimbingOptimizer(patience=100)
+    device_graph = DeviceGraph.load_from_file('../device_graphs/cluster2-reduced-memory.json')
     with open('../nets/mnist.json') as f:
         net_string = f.read()
 
     best_net = optimizer.optimize(net_string, device_graph)
+    print(f'Best discovered configuration: {best_net}')
     pass
