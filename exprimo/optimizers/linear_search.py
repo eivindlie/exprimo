@@ -4,22 +4,16 @@ from tqdm import tqdm
 
 from device import DeviceGraph
 from graph import ComputationGraph
+from optimizers.base import BaseOptimizer
 from simulator import Simulator
 
-from optimizers.utils import prefix_heuristic, create_colocation_groups
+from optimizers.utils import prefix_heuristic
 
-
-
-
-
-class LinearSearchOptimizer:
+class LinearSearchOptimizer(BaseOptimizer):
     """
     A naive optimizer that carries out a brute-force search for the best placement. Will take significant time
     to run if the search space is too large.
     """
-
-    def __init__(self, colocation_heuristic=None):
-        self.colocation_heuristic = colocation_heuristic
 
     def optimize(self, net_string, device_graph):
         """
@@ -30,7 +24,7 @@ class LinearSearchOptimizer:
         """
 
         net = json.loads(net_string)
-        groups = create_colocation_groups(net['layers'].keys(), self.colocation_heuristic)
+        groups = self.create_colocation_groups(net['layers'].keys())
 
         best_score = -1
         best_net = None
