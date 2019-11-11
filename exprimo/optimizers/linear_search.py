@@ -7,7 +7,8 @@ from graph import ComputationGraph
 from optimizers.base import BaseOptimizer
 from simulator import Simulator
 
-from optimizers.utils import prefix_heuristic
+from optimizers.utils import prefix_heuristic, apply_placement, , evaluate_placement
+
 
 class LinearSearchOptimizer(BaseOptimizer):
     """
@@ -30,16 +31,10 @@ class LinearSearchOptimizer(BaseOptimizer):
         best_net = None
         for comb in tqdm(product(range(len(device_graph.devices)), repeat=len(groups)),
                          total=len(device_graph.devices) ** len(groups), unit='placements'):
-            net = json.loads(net_string)
-            for i, device in enumerate(comb):
-                for layer in groups[i]:
-                    net['layers'][layer]['device'] = device
 
-            graph = ComputationGraph()
-            graph.load_from_string(json.dumps(net))
-            simulator = Simulator(graph, device_graph)
+            net = apply_placement(net_string, comb, groups)
 
-            score = simulator.simulate(print_event_trace=False, batch_size=128, batches=2)
+            score = evaluate_placement(net, device_graph, batch_size=128, batches=1)
 
             if score < best_score or best_net is None:
                 best_net = net
