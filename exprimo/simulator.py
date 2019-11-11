@@ -219,6 +219,17 @@ class Simulator:
         # and backpropagation)
         saved_tensors = [[] for i in range(len(devices))]
 
+        def unreference_tensor(saved_op, device, batch, backward):
+            saved_tensor = next((i for i in saved_tensors[device]
+                                 if i[:3] == [saved_op, batch, backward]), None)
+
+            saved_tensor[3] -= 1
+            if saved_tensor[3] == 0:
+                saved_op_shape = (saved_tensor[0][1] if backward
+                                  else saved_tensor[0]).operation.outputs
+                saved_tensors[device].remove(saved_tensor)
+                memory_usage[device] -= calculate_tensor_size(saved_op_shape)
+
         for i, event in enumerate(events):
             if event.type == 'op_done':
                 op = event.operation[0]
@@ -243,6 +254,7 @@ class Simulator:
                                          if i[:3] == [saved_op, event.batch, event.backward]), None)
                     assert saved_tensor, 'All required tensors must be available before operation execution!'
 
+                    # TODO Need to handle both inputs and gradients!
                     # If we are doing the backward pass, this is the last time we need the inputs.
                     if event.backward:
                         saved_tensor[3] -= 1
@@ -254,17 +266,14 @@ class Simulator:
 
             elif event.type == 'transfer_done':
                 transferred_op, target_ops = event.operation[0][0], event.operation[1]
-                saved_op = (transferred_op, target_ops[0]) if event.backward else transferred_op
 
-                saved_tensor = next((i for i in saved_tensors[transferred_op['device']]
-                                     if i[:3] == [saved_op, event.batch, event.backward]), None)
-
-                saved_tensor[3] -= 1
-                if saved_tensor[3] == 0:
-                    saved_op_shape = (saved_tensor[0][1] if event.backward
-                                      else saved_tensor[0]).operation.outputs
-                    saved_tensors[transferred_op['device']].remove(saved_tensor)
-                    memory_usage[transferred_op['device']] -= calculate_tensor_size(saved_op_shape)
+                if event.backward:
+                    for child in target_ops:
+                        saved_op = (transferred_op, child)
+                        unreference_tensor(saved_op, transferred_op['device'], event.batch, event.backward)
+                else:
+                    saved_op = transferred_op
+                    unreference_tensor(saved_op, transferred_op['device'], event.batch, event.backward)
 
                 for child in target_ops:
                     saved_tensor = next((i for i in saved_tensors[child['device']]
