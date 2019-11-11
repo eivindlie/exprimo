@@ -26,8 +26,8 @@ class Simulator:
         else:
             self.computation_graph = computation_graph
 
-    def simulate(self, print_event_trace=True, include_backward=True, return_event_trace=False, batch_size=None,
-                 batches=1):
+    def simulate(self, batch_size=None, batches=1,
+                 print_event_trace=True, include_backward=True, return_event_trace=False, print_memory_usage=True):
         op_queues = [deque() for device in self.device_graph.devices]
         transfer_queues = [deque() for comm_channel in self.device_graph.comm_channels]
         comm_free = [True for i in range(len(self.device_graph.comm_channels))]
@@ -169,6 +169,24 @@ class Simulator:
             for event in events:
                 print(event)
 
+        peak_memory_usage = self.calculate_peak_memory_usage(events)
+
+        if print_memory_usage:
+            print('\n')
+            mem_strings = []
+            print('Device:'.rjust(18), end='')
+            for i, device in enumerate(self.device_graph.devices):
+                mem_string = f'{round(peak_memory_usage[i] / 2**20, 2)} MiB'
+                col_width = max(len(mem_string), len(device.name)) + 5
+                mem_string = mem_string.rjust(col_width)
+                mem_strings.append(mem_string)
+
+                print(device.name.rjust(col_width), end='')
+
+            print()
+            print('Peak memory usage:'.rjust(18), end='')
+            print(''.join(mem_strings))
+
         if return_event_trace:
             return events[-1].end_time, events
         return events[-1].end_time
@@ -224,7 +242,30 @@ class Simulator:
                             memory_usage[op['device']] -= calculate_tensor_size(saved_op_shape)
 
             elif event.type == 'transfer_done':
-                pass
+                transferred_op, target_ops = event.operation[0][0], event.operation[1]
+                saved_op = (transferred_op, target_ops[0]) if event.backward else transferred_op
+
+                saved_tensor = next((i for i in saved_tensors[transferred_op['device']]
+                                     if i[:3] == [saved_op, event.batch, event.backward]), None)
+
+                saved_tensor[3] -= 1
+                if saved_tensor[3] == 0:
+                    saved_op_shape = (saved_tensor[0][1] if event.backward
+                                      else saved_tensor[0]).operation.outputs
+                    saved_tensors[transferred_op['device']].remove(saved_tensor)
+                    memory_usage[transferred_op['device']] -= calculate_tensor_size(saved_op_shape)
+
+                for child in target_ops:
+                    saved_tensor = next((i for i in saved_tensors[child['device']]
+                                         if i[:3] == [saved_op, event.batch, event.backward]), None)
+
+                    if saved_tensor:
+                        saved_tensor[3] += 1
+                    else:
+                        saved_tensors[child['device']].append([saved_op, event.batch, event.backward, 1])
+                        saved_op_shape = (saved_op[1] if event.backward else saved_op).operation.outputs
+                        tensor_size = calculate_tensor_size(saved_op_shape)
+                        memory_usage[child['device']] += tensor_size
 
             # Check if any devices now use more memory than previous recorded peak
             peak_memory_usage = np.maximum(peak_memory_usage, memory_usage)
