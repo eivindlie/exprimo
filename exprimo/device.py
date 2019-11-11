@@ -66,6 +66,12 @@ class DeviceNode:
         # We save neighbours as a mapping to comm_channel, so that it is easy to find bandwidth
         self.neighbours[device_node] = comm_channel
 
+    @property
+    def name(self):
+        if self.device.hardware_id:
+            return self.device.hardware_id
+        return 'device' + str(self.id)
+
 
 class DeviceGraph:
 
