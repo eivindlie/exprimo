@@ -100,7 +100,8 @@ class Simulator:
                         # Transfer format: (transferred_op, target_ops)
                         transfers.append(((op, backward, batch), [child]))
                 else:
-                    available_tensors[op['device']].append((op.name, child.name, event.batch))
+                    if backward:
+                        available_tensors[op['device']].append((op.name, child.name, event.batch))
 
                     if can_run(child, backward, batch):
                         op_queues[child['device']].append((child, backward, batch))
@@ -129,12 +130,11 @@ class Simulator:
 
         def transfer_done(event):
             (op, backward, batch), target_ops = event.operation
-            children = op.inbounds if backward else op.outbounds
 
             if not backward:
                 available_tensors[target_ops[0]['device']].append((op.name, event.batch))
 
-            for child in children:
+            for child in target_ops:
                 if backward:
                     available_tensors[child['device']].append((op.name, child.name, event.batch))
                 if can_run(child, backward, batch):
