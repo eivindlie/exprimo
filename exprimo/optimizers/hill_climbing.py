@@ -63,7 +63,7 @@ class RandomHillClimbingOptimizer(BaseOptimizer):
         net = json.loads(net_string)
         groups = self.create_colocation_groups(net['layers'].keys())
 
-        placement = [0] * len(groups) # generate_random_placement(len(groups), n_devices)
+        placement = [0] * len(groups)  # generate_random_placement(len(groups), n_devices)
         score = evaluate_placement(apply_placement(net_string, placement, groups), device_graph)
 
         tests = 0
@@ -78,7 +78,7 @@ class RandomHillClimbingOptimizer(BaseOptimizer):
                 placement = new_placement
             else:
                 tests += 1
-        return placement
+        return apply_placement(net_string, placement, groups)
 
 
 if __name__ == '__main__':
