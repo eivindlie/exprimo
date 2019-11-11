@@ -87,7 +87,7 @@ class Simulator:
             else:
                 forward_done[batch][op] = True
                 children = op.outbounds
-
+            
             transfers = []
             for child in children:
                 if child['device'] != op['device']:
@@ -102,10 +102,6 @@ class Simulator:
                     else:
                         # Transfer format: (transferred_op, target_ops)
                         transfers.append(((op, backward, batch), [child]))
-                    if comm_free[comm_channel.id]:
-                        comm_free[comm_channel.id] = False
-                        event_queue.push(Event('wakeup', comm_channel.id, event.end_time, subtype='transfer',
-                                               batch=batch))
                 else:
                     if can_run(child, backward, batch):
                         op_queues[child['device']].append((child, backward, batch))
@@ -118,6 +114,10 @@ class Simulator:
                 comm_channel = op_device.neighbours[child_device]
 
                 transfer_queues[comm_channel.id].append(transfer)
+                if comm_free[comm_channel.id]:
+                    comm_free[comm_channel.id] = False
+                    event_queue.push(Event('wakeup', comm_channel.id, event.end_time, subtype='transfer',
+                                           batch=batch))
 
             if not backward and not len(children) and include_backward:
                 op_queues[op['device']].append((op, True, batch))
@@ -215,7 +215,7 @@ class Simulator:
         # and backpropagation)
         saved_tensors = [[] for i in range(len(devices))]
 
-        for event in events:
+        for i, event in enumerate(events):
             if event.type == 'op_done':
                 op = event.operation[0]
                 children = op.inbounds if event.backward else op.outbounds
