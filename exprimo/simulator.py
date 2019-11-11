@@ -5,10 +5,12 @@ Execution simulator based on the technique described in Placeto (Addanki et al.,
 import heapq
 from collections import deque, defaultdict
 
+import numpy as np
+
 from device import DeviceGraph
 from graph import ComputationGraph
-from profilers.flops_profiler import FlopsProfiler
-from profilers.transfer_profiler import TransferProfiler
+from exprimo.profilers import FlopsProfiler
+from exprimo.profilers import TransferProfiler
 
 
 class Simulator:
@@ -170,6 +172,64 @@ class Simulator:
         if return_event_trace:
             return events[-1].end_time, events
         return events[-1].end_time
+
+    def calculate_peak_memory_usage(self, events):
+        def calculate_tensor_size(shape, dtype='float32'):
+            return np.prod(shape) * np.dtype(dtype).itemsize
+
+        devices = self.device_graph.devices
+
+        memory_usage = np.zeros(len(devices))
+
+        for op in self.computation_graph.topological_order:
+            memory_usage[op['device']] += op.operation.weights_in_bytes
+
+        peak_memory_usage = np.copy(memory_usage)
+
+        # We keep a record of what tensors are being saved on which devices (used for both consecutive layers
+        # and backpropagation)
+        saved_tensors = [[] for i in range(len(devices))]
+
+        for event in events:
+            if event.type == 'op_done':
+                op = event.operation[0]
+                children = op.inbounds if event.backward else op.outbounds
+                parents = op.outbounds if event.backward else op.inbounds
+
+                for child in children:
+                    saved_op = (op, child) if event.backward else op
+                    saved_tensor = next((i for i in saved_tensors[op['device']]
+                                         if i[:3] == [saved_op, event.batch, event.backward]), None)
+                    if saved_tensor:
+                        saved_tensor[3] += 1
+                    else:
+                        saved_tensors[op['device']].append([saved_op, event.batch, event.backward, 1])
+                        saved_op_shape = (saved_op[1] if event.backward else saved_op).operation.outputs
+                        tensor_size = calculate_tensor_size(saved_op_shape)
+                        memory_usage[op['device']] += tensor_size
+
+                for parent in parents:
+                    saved_op = (parent, op) if event.backward else parent
+                    saved_tensor = next((i for i in saved_tensors[op['device']]
+                                         if i[:3] == [saved_op, event.batch, event.backward]), None)
+                    assert saved_tensor, 'All required tensors must be available before operation execution!'
+
+                    # If we are doing the backward pass, this is the last time we need the inputs.
+                    if event.backward:
+                        saved_tensor[3] -= 1
+                        if saved_tensor[3] == 0:
+                            saved_op_shape = (saved_tensor[0][1] if event.backward
+                                              else saved_tensor[0]).operation.outputs
+                            saved_tensors[op['device']].remove(saved_tensor)
+                            memory_usage[op['device']] -= calculate_tensor_size(saved_op_shape)
+
+            elif event.type == 'transfer_done':
+                pass
+
+            # Check if any devices now use more memory than previous recorded peak
+            peak_memory_usage = np.maximum(peak_memory_usage, memory_usage)
+
+        return tuple(peak_memory_usage)
 
 
 class MinHeap:
