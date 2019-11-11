@@ -14,13 +14,11 @@ def prefix_heuristic(prefix_length=None, delimiter=None):
     return should_colocate
 
 
-def generate_random_placement(net_string, n_devices):
-    net = json.loads(net_string)
-
-    for layer_name, layer in net['layers'].items():
-        layer['device'] = randint(0, n_devices - 1)
-
-    return net
+def generate_random_placement(n_groups, n_devices):
+    placement = []
+    for i in range(n_groups):
+        placement.append(randint(0, n_devices - 1))
+    return placement
 
 
 def evaluate_placement(net, device_graph, batch_size=128, batches=1):
@@ -29,7 +27,8 @@ def evaluate_placement(net, device_graph, batch_size=128, batches=1):
     graph.load_from_string(net_string)
     simulator = Simulator(graph, device_graph)
 
-    return simulator.simulate(print_event_trace=False, batch_size=batch_size, batches=batches)
+    return simulator.simulate(print_event_trace=False, print_memory_usage=False,
+                              batch_size=batch_size, batches=batches)
 
 
 def apply_placement(net_string, placement, groups):

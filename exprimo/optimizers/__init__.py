@@ -1,1 +1,3 @@
+
+from exprimo.optimizers.hill_climbing import HillClimbingOptimizer
 from exprimo.optimizers.linear_search import LinearSearchOptimizer

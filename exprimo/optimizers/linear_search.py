@@ -2,12 +2,10 @@ import json
 from itertools import product
 from tqdm import tqdm
 
-from device import DeviceGraph
-from graph import ComputationGraph
-from optimizers.base import BaseOptimizer
-from simulator import Simulator
+from exprimo.device import DeviceGraph
+from exprimo.optimizers.base import BaseOptimizer
 
-from optimizers.utils import prefix_heuristic, apply_placement, , evaluate_placement
+from exprimo.optimizers.utils import prefix_heuristic, apply_placement, evaluate_placement
 
 
 class LinearSearchOptimizer(BaseOptimizer):
