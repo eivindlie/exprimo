@@ -79,14 +79,3 @@ class RandomHillClimbingOptimizer(BaseOptimizer):
             else:
                 tests += 1
         return apply_placement(net_string, placement, groups)
-
-
-if __name__ == '__main__':
-    optimizer = RandomHillClimbingOptimizer(patience=100)
-    device_graph = DeviceGraph.load_from_file('../device_graphs/cluster2-reduced-memory.json')
-    with open('../nets/mnist.json') as f:
-        net_string = f.read()
-
-    best_net = optimizer.optimize(net_string, device_graph)
-    print(f'Best discovered configuration: {best_net}')
-    pass

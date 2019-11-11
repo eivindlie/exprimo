@@ -39,13 +39,3 @@ class LinearSearchOptimizer(BaseOptimizer):
                 best_score = score
 
         return best_net
-
-
-if __name__ == '__main__':
-    optimizer = LinearSearchOptimizer(prefix_heuristic(prefix_length=4))
-    device_graph = DeviceGraph.load_from_file('../device_graphs/cluster1.json')
-    with open('../nets/resnet50.json') as f:
-        net_string = f.read()
-
-    best_net = optimizer.optimize(net_string, device_graph)
-    pass

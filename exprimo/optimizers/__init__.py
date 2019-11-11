@@ -1,4 +1,4 @@
 
-from exprimo.optimizers.hill_climbing import HillClimbingOptimizer
+from exprimo.optimizers.hill_climbing import HillClimbingOptimizer, RandomHillClimbingOptimizer
 from exprimo.optimizers.linear_search import LinearSearchOptimizer
 from exprimo.optimizers.simulated_annealing import SimulatedAnnealingOptimizer

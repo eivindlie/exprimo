@@ -22,6 +22,7 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
     def optimize(self, net_string, device_graph):
         n_devices = len(device_graph.devices)
         net = json.loads(net_string)
+        
         groups = self.create_colocation_groups(net['layers'].keys())
 
         placement = [0] * len(groups)
@@ -44,13 +45,3 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
         if callable(self.temp_schedule):
             return self.temp_schedule(i)
         return self.temp_schedule
-
-
-if __name__ == '__main__':
-    optimizer = SimulatedAnnealingOptimizer(temp_schedule=50, steps=1000)
-    device_graph = DeviceGraph.load_from_file('../device_graphs/cluster2-reduced-memory.json')
-    with open('../nets/mnist.json') as f:
-        net_string = f.read()
-
-    best_net = optimizer.optimize(net_string, device_graph)
-    print(f'Best discovered configuration: {[layer["device"] for layer in best_net["layers"].values()]}')
