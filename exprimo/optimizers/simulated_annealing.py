@@ -1,6 +1,7 @@
 import json
 from random import randint
 import numpy as np
+from tqdm import tqdm
 
 from exprimo import DeviceGraph
 from exprimo.optimizers.base import BaseOptimizer
@@ -13,10 +14,10 @@ def exponential_multiplicate_decay(initial_value, decay):
 
 class SimulatedAnnealingOptimizer(BaseOptimizer):
 
-    def __init__(self, colocation_heuristic=None, temp_schedule=exponential_multiplicate_decay(10, 0.95), patience=25):
+    def __init__(self, colocation_heuristic=None, temp_schedule=exponential_multiplicate_decay(40, 0.95), steps=500):
         super().__init__(colocation_heuristic)
         self.temp_schedule = temp_schedule
-        self.patience = patience
+        self.steps = steps
 
     def optimize(self, net_string, device_graph):
         n_devices = len(device_graph.devices)
@@ -26,9 +27,7 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
         placement = [0] * len(groups)
         score = evaluate_placement(apply_placement(net_string, placement, groups), device_graph)
 
-        i = 0
-        tests = 0
-        while tests < self.patience:
+        for i in tqdm(range(self.steps)):
             new_placement = placement[:]
             new_placement[randint(0, len(new_placement) - 1)] = randint(0, n_devices - 1)
             new_score = evaluate_placement(apply_placement(net_string, new_placement, groups), device_graph)
@@ -38,9 +37,6 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
                         or randint(0, 1) < 1 - np.exp((new_score - score)/self.temp(i)):
                     score = new_score
                     placement = new_placement
-                    tests = 0
-            i += 1
-            tests += 1
 
         return apply_placement(net_string, placement, groups)
 
@@ -51,10 +47,10 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
 
 
 if __name__ == '__main__':
-    optimizer = SimulatedAnnealingOptimizer()
+    optimizer = SimulatedAnnealingOptimizer(temp_schedule=50, steps=1000)
     device_graph = DeviceGraph.load_from_file('../device_graphs/cluster2-reduced-memory.json')
     with open('../nets/mnist.json') as f:
         net_string = f.read()
 
     best_net = optimizer.optimize(net_string, device_graph)
-    print(f'Best discovered configuration: {best_net}')
+    print(f'Best discovered configuration: {[layer["device"] for layer in best_net["layers"].values()]}')
