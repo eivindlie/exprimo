@@ -48,7 +48,7 @@ class Simulator:
             run_time = FlopsProfiler.profile(op, device, backward, batch_size)
             end_time = start_time + run_time
             event_queue.push(Event('op_done', op['device'], start_time,
-                                end_time=end_time, operation=(op, backward, batch), batch=batch))
+                                   end_time=end_time, operation=(op, backward, batch), batch=batch))
 
         def run_transfer(op, backward, comm_channel_id, target_ops, start_time, batch=0):
             parent_device = self.device_graph.devices[op['device']].device
@@ -60,12 +60,13 @@ class Simulator:
 
             transfer_time = 0
             for transferred_op in transferred_ops:
-                transfer_time += TransferProfiler.profile(transferred_op, comm_channel, parent_device, backward, batch_size)
+                transfer_time += TransferProfiler.profile(transferred_op, comm_channel, parent_device,
+                                                          backward, batch_size)
             end_time = start_time + transfer_time
             event_queue.push(Event('transfer_done', comm_channel_id, start_time,
-                                operation=((op, backward, batch), target_ops),
-                                end_time=end_time, batch=batch,
-                                from_device=op['device'], to_device=target_ops[0]['device']))
+                                   operation=((op, backward, batch), target_ops),
+                                   end_time=end_time, batch=batch,
+                                   from_device=op['device'], to_device=target_ops[0]['device']))
 
         def can_run(op, backward, batch):
             # TODO Need to somehow check that all tensors are available on the device?
@@ -102,7 +103,7 @@ class Simulator:
                     if comm_free[comm_channel.id]:
                         comm_free[comm_channel.id] = False
                         event_queue.push(Event('wakeup', comm_channel.id, event.end_time, subtype='transfer',
-                                            batch=batch))
+                                               batch=batch))
                 else:
                     if can_run(child, backward, batch):
                         op_queues[child['device']].append((child, backward, batch))
