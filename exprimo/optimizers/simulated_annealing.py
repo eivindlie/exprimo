@@ -26,7 +26,7 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
 
         groups = self.create_colocation_groups(net['layers'].keys())
 
-        placement = [0] * len(groups)
+        placement = [randint(0, n_devices - 1) for n in range(len(groups))]  # [0] * len(groups)
         score = evaluate_placement(apply_placement(net_string, placement, groups), device_graph,
                                    batches=self.batches, pipeline_batches=self.pipeline_batches)
 
