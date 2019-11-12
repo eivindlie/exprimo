@@ -234,7 +234,7 @@ class Simulator:
                     memory_overuse += peak_memory_usage[i] - device.device.memory * 10**9
             if memory_penalization_factor:
                 score += memory_overuse * memory_penalization_factor
-            else:
+            elif memory_overuse > 0:
                 score = -1
 
         if return_event_trace:
