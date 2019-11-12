@@ -27,6 +27,7 @@ class Simulator:
             self.computation_graph = computation_graph
 
     def simulate(self, batch_size=None, batches=1, check_memory_usage=True, pipeline_batches=1,
+                 memory_penalization_factor=None,
                  print_event_trace=True, include_backward=True, return_event_trace=False, print_memory_usage=True):
         op_queues = [deque() for device in self.device_graph.devices]
         transfer_queues = [deque() for comm_channel in self.device_graph.comm_channels]
@@ -225,16 +226,21 @@ class Simulator:
             print('Peak memory usage:'.rjust(18), end='')
             print(''.join(mem_strings))
 
+        score = events[-1].end_time
+
         if check_memory_usage:
+            memory_overuse = 0
             for i, device in enumerate(self.device_graph.devices):
                 if peak_memory_usage[i] > device.device.memory * 10**9:
-                    if return_event_trace:
-                        return -1, events
-                    return -1
+                    memory_overuse += peak_memory_usage[i] - device.device.memory * 10**9
+            if memory_penalization_factor:
+                score += memory_overuse * memory_penalization_factor
+            else:
+                score = -1
 
         if return_event_trace:
-            return events[-1].end_time, events
-        return events[-1].end_time
+            return score, events
+        return score
 
     def calculate_peak_memory_usage(self, events):
         def calculate_tensor_size(shape, dtype='float32'):
