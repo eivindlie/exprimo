@@ -26,7 +26,7 @@ class Simulator:
         else:
             self.computation_graph = computation_graph
 
-    def simulate(self, batch_size=None, batches=1, check_memory_usage=True,
+    def simulate(self, batch_size=None, batches=1, check_memory_usage=True, pipeline_batches=1,
                  print_event_trace=True, include_backward=True, return_event_trace=False, print_memory_usage=True):
         op_queues = [deque() for device in self.device_graph.devices]
         transfer_queues = [deque() for comm_channel in self.device_graph.comm_channels]
@@ -36,13 +36,45 @@ class Simulator:
         event_queue = MinHeap()
         events = []
 
-        for b in range(batches):
+        last_scheduled_batch = -1
+
+        def consider_scheduling_batch(start_time):
+            """
+            Schedules a new batch for the network if the current number of batches is less than pipeline_batches,
+            there are more available batches from the total number to be executed, and all devices that will handle
+            input layers of the new batch are free.
+            :return: Returns True if a new batch was scheduled, False otherwise.
+            """
+            nonlocal last_scheduled_batch
+            if last_scheduled_batch >= batches:
+                return False
+
+            running_batches = set(e.batch for e in event_queue)
+
+            if len(running_batches) >= pipeline_batches:
+                return False
+
+            input_layers = [[] for i in range(len(self.device_graph.devices))]
+
+            # TODO Look into more effective ways of handling this?
+            # Can for example make a permanent list of all input layers, so that we do not need to re-create it each
+            # time...
             for layer in self.computation_graph.topological_order:
                 if not len(layer.inbounds):
-                    op_queues[layer['device']].append((layer, False, b))
-                    if device_free[layer['device']]:
-                        device_free[layer['device']] = False
-                        event_queue.push(Event('wakeup', layer['device'], 0, subtype='op', batch=b))
+                    if not device_free[layer['device']]:
+                        return False
+                    input_layers[layer['device']].append(layer)
+
+            last_scheduled_batch += 1
+            for device, layers in enumerate(input_layers):
+                for layer in layers:
+                    op_queues[device].append((layer, False, last_scheduled_batch))
+                    if device_free[device]:
+                        device_free[device] = False
+                        event_queue.push(Event('wakeup', device, start_time, subtype='op', batch=last_scheduled_batch))
+            return True
+
+        consider_scheduling_batch(0)
 
         def run_op(op, backward, start_time, batch=0):
             device = self.device_graph.devices[op['device']].device
@@ -168,6 +200,8 @@ class Simulator:
             events.append(event)
             event.handled = True
             event_map[event.type](event)
+
+            consider_scheduling_batch(event.end_time)
 
         if print_event_trace:
             for event in events:
@@ -309,6 +343,9 @@ class MinHeap:
 
     def empty(self):
         return len(self._data) == 0
+
+    def __iter__(self):
+        return self._data.__iter__()
 
 
 class Event:
