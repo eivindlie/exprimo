@@ -397,4 +397,7 @@ class Event:
                f'{f"Backward: {self.backward}   " if self.backward is not None else ""}'
 
     def __gt__(self, other):
-        self.end_time > other.end_time
+        return self.end_time > other.end_time
+
+    def __lt__(self, other):
+        return self.end_time < other.end_time
