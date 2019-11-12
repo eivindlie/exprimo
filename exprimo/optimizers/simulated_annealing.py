@@ -8,13 +8,13 @@ from exprimo.optimizers.base import BaseOptimizer
 from exprimo.optimizers.utils import evaluate_placement, apply_placement
 
 
-def exponential_multiplicate_decay(initial_value, decay):
+def exponential_multiplicative_decay(initial_value, decay):
     return lambda t: initial_value * decay**t
 
 
 class SimulatedAnnealingOptimizer(BaseOptimizer):
 
-    def __init__(self, *args, temp_schedule=exponential_multiplicate_decay(40, 0.95), steps=500,
+    def __init__(self, *args, temp_schedule=exponential_multiplicative_decay(40, 0.95), steps=500,
                  **kwargs):
         super().__init__(*args, **kwargs)
         self.temp_schedule = temp_schedule
