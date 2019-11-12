@@ -14,8 +14,9 @@ def exponential_multiplicate_decay(initial_value, decay):
 
 class SimulatedAnnealingOptimizer(BaseOptimizer):
 
-    def __init__(self, colocation_heuristic=None, temp_schedule=exponential_multiplicate_decay(40, 0.95), steps=500):
-        super().__init__(colocation_heuristic)
+    def __init__(self, *args, temp_schedule=exponential_multiplicate_decay(40, 0.95), steps=500,
+                 **kwargs):
+        super().__init__(*args, **kwargs)
         self.temp_schedule = temp_schedule
         self.steps = steps
 
@@ -26,7 +27,8 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
         groups = self.create_colocation_groups(net['layers'].keys())
 
         placement = [0] * len(groups)
-        score = evaluate_placement(apply_placement(net_string, placement, groups), device_graph)
+        score = evaluate_placement(apply_placement(net_string, placement, groups), device_graph,
+                                   batches=self.batches, pipeline_batches=self.pipeline_batches)
 
         for i in tqdm(range(self.steps)):
             new_placement = placement[:]
@@ -39,7 +41,7 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
                     score = new_score
                     placement = new_placement
 
-        return apply_placement(net_string, placement, groups)
+        return json.dumps(apply_placement(net_string, placement, groups))
 
     def temp(self, i):
         if callable(self.temp_schedule):
