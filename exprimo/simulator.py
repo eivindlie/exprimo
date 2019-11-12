@@ -310,6 +310,8 @@ class Simulator:
                     unreference_tensor(saved_op, transferred_op['device'], event.batch, event.backward)
 
                 for child in target_ops:
+                    if event.backward:
+                        saved_op = (transferred_op, child)
                     saved_tensor = next((i for i in saved_tensors[child['device']]
                                          if i[:3] == [saved_op, event.batch, event.backward]), None)
 
