@@ -46,7 +46,7 @@ class Simulator:
             :return: Returns True if a new batch was scheduled, False otherwise.
             """
             nonlocal last_scheduled_batch
-            if last_scheduled_batch >= batches:
+            if last_scheduled_batch + 1 >= batches:
                 return False
 
             running_batches = set(e.batch for e in event_queue)
