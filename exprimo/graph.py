@@ -154,7 +154,7 @@ class ComputationGraph:
                     layer = layers.Generic(layer_spec.name, inputs,
                                            layer_spec['type'])
             except Exception as e:
-                exit()
+                raise e
 
             if layer:
                 layer_spec.parents.extend([names_to_specs[p] for p in layer_spec['parents']])
