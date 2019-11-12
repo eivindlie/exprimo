@@ -10,7 +10,7 @@
                 28,
                 1
             ],
-            "device": 0
+            "device": 2
         },
         "conv2d": {
             "type": "Convolution",
@@ -70,7 +70,7 @@
             "parents": [
                 "max_pooling2d"
             ],
-            "device": 1
+            "device": 2
         },
         "max_pooling2d_1": {
             "type": "Pooling",
@@ -90,7 +90,7 @@
             "parents": [
                 "conv2d_1"
             ],
-            "device": 1
+            "device": 2
         },
         "flatten": {
             "type": "Input",
