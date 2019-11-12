@@ -273,12 +273,11 @@ class Simulator:
             if event.type == 'op_done':
                 op = event.operation[0]
                 children = op.inbounds if event.backward else op.outbounds
-                parents = op.outbounds if event.backward else op.inbounds
 
                 for child in children:
                     saved_op = (op, child) if event.backward else op
                     saved_tensor = next((i for i in saved_tensors[op['device']]
-                                         if i[:3] == [saved_op, event.batch, event.backward]), None)
+                                         if i[:2] == [saved_op, event.batch]), None)
                     if saved_tensor:
                         saved_tensor[3] += 1
                     else:
@@ -287,21 +286,33 @@ class Simulator:
                         tensor_size = calculate_tensor_size(saved_op_shape)
                         memory_usage[op['device']] += tensor_size
 
-                for parent in parents:
-                    saved_op = (parent, op) if event.backward else parent
-                    saved_tensor = next((i for i in saved_tensors[op['device']]
-                                         if i[:3] == [saved_op, event.batch, event.backward]), None)
-                    assert saved_tensor, 'All required tensors must be available before operation execution!'
-
-                    # TODO Need to handle both inputs and gradients!
-                    # If we are doing the backward pass, this is the last time we need the inputs.
-                    if event.backward:
+                if event.backward:
+                    # Check whether activations of previous layer can now be deleted
+                    for parent in op.inbounds:
+                        saved_tensor = next((i for i in saved_tensors[op['device']]
+                                             if i[:2] == [parent, event.batch]), None)
+                        assert saved_tensor, 'All required tensors must be available before operation execution!'
                         saved_tensor[3] -= 1
                         if saved_tensor[3] == 0:
-                            saved_op_shape = (saved_tensor[0][1] if event.backward
-                                              else saved_tensor[0]).operation.outputs
+                            saved_op_shape = saved_tensor[0].operation.outputs
                             saved_tensors[op['device']].remove(saved_tensor)
                             memory_usage[op['device']] -= calculate_tensor_size(saved_op_shape)
+
+                    for child in op.outbounds:
+                        saved_op = (child, op)
+                        saved_tensor = next((i for i in saved_tensors[op['device']]
+                                             if i[:2] == [saved_op, event.batch]), None)
+                        assert saved_tensor, 'All required tensors must be available before operation execution!'
+                        saved_tensor[3] -= 1
+                        if saved_tensor[3] == 0:
+                            saved_op_shape = saved_tensor[0][1].operation.outputs
+                            saved_tensors[op['device']].remove(saved_tensor)
+                            memory_usage[op['device']] -= calculate_tensor_size(saved_op_shape)
+                else:
+                    for parent in op.inbounds:
+                        saved_tensor = next((i for i in saved_tensors[op['device']]
+                                             if i[:3] == [parent, event.batch, event.backward]), None)
+                        assert saved_tensor, 'All required tensors must be available before operation execution!'
 
             elif event.type == 'transfer_done':
                 transferred_op, target_ops = event.operation[0][0], event.operation[1]
