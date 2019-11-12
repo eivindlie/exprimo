@@ -103,7 +103,6 @@ class Simulator:
                                    from_device=op['device'], to_device=target_ops[0]['device']))
 
         def can_run(op, backward, batch):
-            # TODO Need to somehow check that all tensors are available on the device?
             parents = op.outbounds if backward else op.inbounds
             for parent in parents:
                 if (backward and (parent.name, op.name, batch) not in available_tensors[op['device']]) or \
