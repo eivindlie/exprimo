@@ -35,6 +35,9 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
             new_placement[randint(0, len(new_placement) - 1)] = randint(0, n_devices - 1)
             new_score = evaluate_placement(apply_placement(net_string, new_placement, groups), device_graph)
 
+            if self.verbose and (i+1) % 50 == 0:
+                print(f'[{i+1}/{self.steps}] Best run time: {score:,.2f}ms \tBest placement: {placement}')
+
             if new_score != -1:
                 if new_score < score or score == -1\
                         or randint(0, 1) < 1 - np.exp((new_score - score)/self.temp(i)):
