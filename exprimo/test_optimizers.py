@@ -1,15 +1,17 @@
 import json
 
 from exprimo import DeviceGraph, Simulator, plot_event_trace, ComputationGraph
-from exprimo.optimizers import SimulatedAnnealingOptimizer, HillClimbingOptimizer, RandomHillClimbingOptimizer
+from exprimo.optimizers import SimulatedAnnealingOptimizer, HillClimbingOptimizer, RandomHillClimbingOptimizer, \
+    exponential_multiplicative_decay
 
 batches = 1
 pipeline_batches = 1
 
 # optimizer = RandomHillClimbingOptimizer(patience=100)
 # optimizer = LinearSearchOptimizer(prefix_heuristic(prefix_length=4))
-optimizer = SimulatedAnnealingOptimizer(temp_schedule=50, steps=3000, batches=batches,
-                                        pipeline_batches=pipeline_batches)
+optimizer = SimulatedAnnealingOptimizer(temp_schedule=exponential_multiplicative_decay(50, 0.98),
+                                        steps=30000, batches=batches,
+                                        pipeline_batches=pipeline_batches, verbose=True)
 device_graph = DeviceGraph.load_from_file('../device_graphs/cluster2-reduced-memory.json')
 with open('../nets/resnet50.json') as f:
     net_string = f.read()
