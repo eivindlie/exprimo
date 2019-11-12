@@ -274,7 +274,16 @@ class Simulator:
                 op = event.operation[0]
                 children = op.inbounds if event.backward else op.outbounds
 
+                transfers = []
                 for child in children:
+                    if child['device'] != op['device']:
+                        if child['device'] in transfers:
+                            # We only need one reference for each transfer, as the tensor is only transferred once
+                            # to each device
+                            continue
+                        else:
+                            transfers.append(child['device'])
+
                     saved_op = (op, child) if event.backward else op
                     saved_tensor = next((i for i in saved_tensors[op['device']]
                                          if i[:2] == [saved_op, event.batch]), None)
