@@ -102,9 +102,11 @@ class GAOptimizer(BaseOptimizer):
                 mutated_pop.append(mutated)
             return mutated_pop
 
-        def create_next_generation(current_gen, elite_size, mutation_rate):
-            nonlocal early_stopping_counter, best_score
-            pop_rank = create_ranking(current_gen)
+
+        pop = create_initial_population(self.population_size)
+
+        for g in tqdm(range(self.steps)):
+            pop_rank = create_ranking(pop)
 
             if pop_rank[0][1] > best_score:
                 best_score = pop_rank[0][1]
@@ -112,26 +114,20 @@ class GAOptimizer(BaseOptimizer):
             else:
                 early_stopping_counter += 1
 
-            selection_results = selection(pop_rank, elite_size)
-            mating_pool = get_mating_pool(current_gen, selection_results)
-            children = breed_population(mating_pool, elite_size)
-            next_gen = mutate_population(children, mutation_rate)
+            selection_results = selection(pop_rank, self.elite_size)
+            mating_pool = get_mating_pool(pop, selection_results)
+            children = breed_population(mating_pool, self.elite_size)
+            next_gen = mutate_population(children, self.mutation_rate)
 
-            return next_gen
-
-        pop = create_initial_population(self.population_size)
-
-        for g in tqdm(range(self.steps)):
-            pop = create_next_generation(pop, self.elite_size, self.mutation_rate)
+            pop = next_gen
 
             if self.early_stopping_threshold and early_stopping_counter > self.early_stopping_threshold:
                 print('Early stopping criterion achieved. Stopping training.')
                 break
 
-            if self.verbose and (g+1) % 50 == 0:
-                ranking = create_ranking(pop)
-                best_solution = pop[ranking[0][0]]
-                best_score = ranking[0][1]
+            if self.verbose and (g+1) % 10 == 0:
+                best_solution = pop[pop_rank[0][0]]
+                best_score = pop_rank[0][1]
                 print(f'[{g+1}/{self.steps}] Best time: {1 / best_score:.2f}ms \t Best solution: {best_solution}')
 
         ranking = create_ranking(pop)
