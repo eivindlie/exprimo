@@ -3,6 +3,7 @@ import json
 from exprimo import DeviceGraph, Simulator, plot_event_trace, ComputationGraph
 from exprimo.optimizers import SimulatedAnnealingOptimizer, HillClimbingOptimizer, RandomHillClimbingOptimizer, \
     GAOptimizer, exponential_multiplicative_decay
+from optimizers.utils import prefix_heuristic
 
 batches = 1
 pipeline_batches = 1
@@ -12,11 +13,12 @@ pipeline_batches = 1
 # optimizer = SimulatedAnnealingOptimizer(temp_schedule=exponential_multiplicative_decay(50, 0.98),
 #                                         steps=30000, batches=batches,
 #                                         pipeline_batches=pipeline_batches, verbose=True)
-optimizer = GAOptimizer(population_size=100, mutation_rate=0.01, elite_size=20, steps=500,
-                        early_stopping_threshold=50, verbose=True)
+optimizer = GAOptimizer(population_size=50, mutation_rate=0.05, elite_size=10, steps=500,
+                        early_stopping_threshold=None, verbose=True,
+                        colocation_heuristic=prefix_heuristic(prefix_length=5))
 
 device_graph = DeviceGraph.load_from_file('../device_graphs/cluster2-reduced-memory.json')
-with open('../nets/alex_v2.json') as f:
+with open('../nets/resnet50.json') as f:
     net_string = f.read()
 
 best_net = optimizer.optimize(net_string, device_graph)
