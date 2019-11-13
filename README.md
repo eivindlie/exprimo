@@ -5,6 +5,8 @@ combining it with the technique described in the paper about [Placeto](https://a
 to accomodate for more complex model parallelism configurations. Exprimo runs entirely without relying on access to training hardware,
 instead relying on FLOP calculations carried out by Paleo to simulate any network on any hardware.
 
+Also included are a number of optimization techniques for finding the best configuration for a given network to run on a given device graph.
+
 ## References
 * Addanki,  R.,  Venkatakrishnan,  S.  B.,  Gupta,  S.,  Mao,  H.,  and  Alizadeh,  M.
 (2019).  Placeto:  Learning generalizable device placement algorithms for distributed machine learning.
