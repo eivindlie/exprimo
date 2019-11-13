@@ -12,7 +12,8 @@ pipeline_batches = 1
 # optimizer = SimulatedAnnealingOptimizer(temp_schedule=exponential_multiplicative_decay(50, 0.98),
 #                                         steps=30000, batches=batches,
 #                                         pipeline_batches=pipeline_batches, verbose=True)
-optimizer = GAOptimizer(population_size=100, mutation_rate=0.01, elite_size=20, steps=500, verbose=True)
+optimizer = GAOptimizer(population_size=100, mutation_rate=0.01, elite_size=20, steps=500,
+                        early_stopping_threshold=50, verbose=True)
 
 device_graph = DeviceGraph.load_from_file('../device_graphs/cluster2-reduced-memory.json')
 with open('../nets/alex_v2.json') as f:

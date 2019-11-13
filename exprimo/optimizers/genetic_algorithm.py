@@ -12,12 +12,14 @@ from exprimo.optimizers.utils import generate_random_placement, evaluate_placeme
 
 class GAOptimizer(BaseOptimizer):
 
-    def __init__(self, population_size=100, mutation_rate=0.01, elite_size=20, steps=500, *args, **kwargs):
+    def __init__(self, population_size=100, mutation_rate=0.01, elite_size=20, steps=500,
+                 early_stopping_threshold=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.population_size = population_size
         self.mutation_rate = mutation_rate
         self.elite_size = elite_size
         self.steps = steps
+        self.early_stopping_threshold = early_stopping_threshold
 
     def optimize(self, net_string, device_graph):
         net = json.loads(net_string)
@@ -25,6 +27,9 @@ class GAOptimizer(BaseOptimizer):
 
         n_groups = len(groups)
         n_devices = len(device_graph.devices)
+
+        best_score = 0
+        early_stopping_counter = 0
 
         def create_initial_population(population_size):
             population = []
@@ -98,7 +103,15 @@ class GAOptimizer(BaseOptimizer):
             return mutated_pop
 
         def create_next_generation(current_gen, elite_size, mutation_rate):
+            nonlocal early_stopping_counter, best_score
             pop_rank = create_ranking(current_gen)
+
+            if pop_rank[0][1] > best_score:
+                best_score = pop_rank[0][1]
+                early_stopping_counter = 0
+            else:
+                early_stopping_counter += 1
+
             selection_results = selection(pop_rank, elite_size)
             mating_pool = get_mating_pool(current_gen, selection_results)
             children = breed_population(mating_pool, elite_size)
@@ -110,6 +123,10 @@ class GAOptimizer(BaseOptimizer):
 
         for g in tqdm(range(self.steps)):
             pop = create_next_generation(pop, self.elite_size, self.mutation_rate)
+
+            if self.early_stopping_threshold and early_stopping_counter > self.early_stopping_threshold:
+                print('Early stopping criterion achieved. Stopping training.')
+                break
 
             if self.verbose and (g+1) % 50 == 0:
                 ranking = create_ranking(pop)
