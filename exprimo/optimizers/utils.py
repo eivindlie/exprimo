@@ -14,6 +14,18 @@ def prefix_heuristic(prefix_length=None, delimiter=None):
     return should_colocate
 
 
+def create_colocation_groups(layer_names, colocation_heuristic):
+    groups = []
+    for layer in layer_names:
+        for group in groups:
+            if colocation_heuristic(layer, group[0]):
+                group.append(layer)
+                break
+        else:
+            groups.append([layer])
+    return groups
+
+
 def generate_random_placement(n_groups, n_devices):
     placement = []
     for i in range(n_groups):

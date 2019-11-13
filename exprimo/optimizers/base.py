@@ -1,5 +1,7 @@
 from abc import abstractmethod
 
+from optimizers.utils import create_colocation_groups
+
 
 class BaseOptimizer:
 
@@ -13,15 +15,7 @@ class BaseOptimizer:
         if not self.colocation_heuristic:
             return [[name] for name in layer_names]
 
-        groups = []
-        for layer in layer_names:
-            for group in groups:
-                if self.colocation_heuristic(layer, group[0]):
-                    group.append(layer)
-                    break
-            else:
-                groups.append([layer])
-        return groups
+        return create_colocation_groups(layer_names, self.colocation_heuristic)
 
     @abstractmethod
     def optimize(self, net_string, device_graph):
