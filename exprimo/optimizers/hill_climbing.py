@@ -2,8 +2,8 @@ import json
 from random import randint
 
 from exprimo import DeviceGraph
-from exprimo.optimizers.base import BaseOptimizer
-from exprimo.optimizers.utils import generate_random_placement, evaluate_placement, apply_placement
+from optimizers.base import BaseOptimizer
+from optimizers.utils import generate_random_placement, evaluate_placement, apply_placement
 
 
 class HillClimbingOptimizer(BaseOptimizer):

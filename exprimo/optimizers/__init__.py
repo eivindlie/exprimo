@@ -1,5 +1,5 @@
 
-from exprimo.optimizers.hill_climbing import HillClimbingOptimizer, RandomHillClimbingOptimizer
-from exprimo.optimizers.linear_search import LinearSearchOptimizer
-from exprimo.optimizers.simulated_annealing import SimulatedAnnealingOptimizer, exponential_multiplicative_decay
-from exprimo.optimizers.genetic_algorithm import GAOptimizer
+from .hill_climbing import HillClimbingOptimizer, RandomHillClimbingOptimizer
+from .linear_search import LinearSearchOptimizer
+from .simulated_annealing import SimulatedAnnealingOptimizer, exponential_multiplicative_decay
+from .genetic_algorithm import GAOptimizer
