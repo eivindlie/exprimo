@@ -277,9 +277,10 @@ class Simulator:
                 transfers = []
                 for child in children:
                     if child['device'] != op['device']:
-                        if child['device'] in transfers:
+                        if not event.backward and child['device'] in transfers:
                             # We only need one reference for each transfer, as the tensor is only transferred once
-                            # to each device
+                            # to each device. However, when doing backprop, each transfer is unique, since we are
+                            # transferring gradients.
                             continue
                         else:
                             transfers.append(child['device'])
