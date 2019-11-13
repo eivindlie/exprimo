@@ -1,10 +1,16 @@
+import numpy as np
+
 from paleo.profilers.flops_profiler import FlopsProfiler as PaleoFlopsProfiler
 from paleo.profilers.base import ProfilerOptions
 
 
+def calculate_tensor_size(shape, dtype='float32'):
+    return np.prod(shape) * np.dtype(dtype).itemsize
+
+
 class TransferProfiler:
     @staticmethod
-    def profile(layer_spec, comm_channel, parent_device, backward=False, batch_size=None):
+    def profile(layer_spec, comm_channel, parent_device, backward=False, batch_size=None, dtype='float32'):
         layer = layer_spec.operation
 
         if batch_size:
@@ -17,6 +23,9 @@ class TransferProfiler:
         profiler_options.include_bias_and_activation = False
 
         profiler = PaleoFlopsProfiler(profiler_options, parent_device)
-        time = profiler.estimate_remote_fetch(layer, 0, [1], comm_channel.bandwidth / 8)
 
-        return time.comm_time
+        num_bytes = calculate_tensor_size(layer.outputs, dtype)
+        time = profiler.estimate_comm_time(
+            num_bytes, comm_channel.bandwidth / 8, ppp=profiler.options.ppp_comm)
+
+        return time
