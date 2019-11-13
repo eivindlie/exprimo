@@ -136,4 +136,4 @@ class GAOptimizer(BaseOptimizer):
 
         ranking = create_ranking(pop)
         best_solution = pop[ranking[0][0]]
-        return best_solution
+        return json.dumps(apply_placement(net_string, best_solution, groups))
