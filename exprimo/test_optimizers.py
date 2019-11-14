@@ -14,11 +14,12 @@ pipeline_batches = 1
 #                                         steps=30000, batches=batches,
 #                                         pipeline_batches=pipeline_batches, verbose=True)
 optimizer = GAOptimizer(population_size=50, mutation_rate=0.05, elite_size=10, steps=500,
-                        early_stopping_threshold=None, verbose=True,
+                        early_stopping_threshold=None, verbose=False,
+                        use_caching=True,
                         colocation_heuristic=prefix_heuristic(prefix_length=5))
 
 device_graph = DeviceGraph.load_from_file('../device_graphs/cluster2-reduced-memory.json')
-with open('../nets/resnet50.json') as f:
+with open('../nets/alex_v2.json') as f:
     net_string = f.read()
 
 best_net = optimizer.optimize(net_string, device_graph)

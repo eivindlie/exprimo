@@ -13,13 +13,14 @@ from exprimo.optimizers.utils import generate_random_placement, evaluate_placeme
 class GAOptimizer(BaseOptimizer):
 
     def __init__(self, population_size=100, mutation_rate=0.01, elite_size=20, steps=500,
-                 early_stopping_threshold=None, *args, **kwargs):
+                 early_stopping_threshold=None, use_caching=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.population_size = population_size
         self.mutation_rate = mutation_rate
         self.elite_size = elite_size
         self.steps = steps
         self.early_stopping_threshold = early_stopping_threshold
+        self.use_caching = use_caching
 
     def optimize(self, net_string, device_graph):
         net = json.loads(net_string)
@@ -31,6 +32,9 @@ class GAOptimizer(BaseOptimizer):
         best_score = 0
         early_stopping_counter = 0
 
+        if self.use_caching:
+            fitness_cache = {}
+
         def create_initial_population(population_size):
             population = []
 
@@ -41,7 +45,16 @@ class GAOptimizer(BaseOptimizer):
             return population
 
         def calculate_fitness(placement):
+            if self.use_caching:
+                placement_t = tuple(placement)
+                if placement_t in fitness_cache:
+                    return fitness_cache[placement_t]
+
             run_time = evaluate_placement(apply_placement(net_string, placement, groups), device_graph)
+
+            if self.use_caching:
+                fitness_cache[tuple(placement)] = 1 / run_time
+
             return 1 / run_time
 
         def create_ranking(population):
