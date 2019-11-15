@@ -72,10 +72,10 @@ class RandomHillClimbingOptimizer(BaseOptimizer):
             new_placement[randint(0, len(new_placement) - 1)] = randint(0, n_devices - 1)
             new_score = evaluate_placement(apply_placement(net_string, new_placement, groups), device_graph)
 
-            if (new_score < score or score == -1) and new_score != -1:
+            if new_score < score:
                 tests = 0
                 score = new_score
                 placement = new_placement
             else:
                 tests += 1
-        return apply_placement(net_string, placement, groups)
+        return json.dumps(apply_placement(net_string, placement, groups))
