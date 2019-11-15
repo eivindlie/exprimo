@@ -1,5 +1,5 @@
 import json
-from random import randint
+from random import randint, random
 import numpy as np
 from tqdm import tqdm
 
@@ -36,11 +36,11 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
             new_score = evaluate_placement(apply_placement(net_string, new_placement, groups), device_graph)
 
             if self.verbose and (i+1) % 50 == 0:
-                print(f'[{i+1}/{self.steps}] Best run time: {score:,.2f}ms \tBest placement: {placement}')
+                print(f'[{i+1}/{self.steps}] Best run time: {score:,.2f}ms \tCurrent placement: {placement}')
 
             if new_score != -1:
                 if new_score < score or score == -1\
-                        or randint(0, 1) < 1 - np.exp((new_score - score)/self.temp(i)):
+                        or random() < 1 - np.exp((new_score - score)/self.temp(i)):
                     score = new_score
                     placement = new_placement
 
