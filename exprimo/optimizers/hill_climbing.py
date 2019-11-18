@@ -1,6 +1,8 @@
 import json
 from random import randint
 
+from tqdm import tqdm
+
 from exprimo import DeviceGraph
 from optimizers.base import BaseOptimizer
 from optimizers.utils import generate_random_placement, evaluate_placement, apply_placement
@@ -68,7 +70,7 @@ class RandomHillClimbingOptimizer(BaseOptimizer):
         placement = [0] * len(groups)  # generate_random_placement(len(groups), n_devices)
         score = evaluate_placement(apply_placement(net_string, placement, groups), device_graph)
 
-        for i in range(self.steps):
+        for i in tqdm(range(self.steps)):
             new_placement = placement[:]
             new_placement[randint(0, len(new_placement) - 1)] = randint(0, n_devices - 1)
             new_score = evaluate_placement(apply_placement(net_string, new_placement, groups), device_graph)
