@@ -50,7 +50,8 @@ class GAOptimizer(BaseOptimizer):
                 if placement_t in fitness_cache:
                     return fitness_cache[placement_t]
 
-            run_time = evaluate_placement(apply_placement(net_string, placement, groups), device_graph)
+            run_time = evaluate_placement(apply_placement(net_string, placement, groups), device_graph,
+                                          batches=self.batches, pipeline_batches=self.pipeline_batches)
 
             if self.use_caching:
                 fitness_cache[tuple(placement)] = 1 / run_time

@@ -32,7 +32,8 @@ class HillClimbingOptimizer(BaseOptimizer):
         groups = self.create_colocation_groups(net['layers'].keys())
 
         placement = generate_random_placement(len(groups), n_devices)
-        score = evaluate_placement(apply_placement(net_string, placement, groups), device_graph)
+        score = evaluate_placement(apply_placement(net_string, placement, groups), device_graph,
+                                   batches=self.batches, pipeline_batches=self.pipeline_batches)
 
         i = 0
         while True:
@@ -41,7 +42,8 @@ class HillClimbingOptimizer(BaseOptimizer):
                 print(f'Iteration {i}. Best running time: {score:.2f}ms')
 
             for n in generate_neighbours(placement):
-                new_score = evaluate_placement(apply_placement(net_string, n, groups), device_graph)
+                new_score = evaluate_placement(apply_placement(net_string, n, groups), device_graph,
+                                               batches=self.batches, pipeline_batches=self.pipeline_batches)
                 if (new_score < score or score == -1) and new_score != -1:
                     placement = n
                     score = new_score

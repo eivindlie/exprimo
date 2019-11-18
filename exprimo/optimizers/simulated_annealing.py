@@ -33,7 +33,8 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
         for i in tqdm(range(self.steps)):
             new_placement = placement[:]
             new_placement[randint(0, len(new_placement) - 1)] = randint(0, n_devices - 1)
-            new_score = evaluate_placement(apply_placement(net_string, new_placement, groups), device_graph)
+            new_score = evaluate_placement(apply_placement(net_string, new_placement, groups), device_graph,
+                                           batches=self.batches, pipeline_batches=self.pipeline_batches)
 
             if self.verbose and (i+1) % 50 == 0:
                 print(f'[{i+1}/{self.steps}] Best run time: {score:,.2f}ms \tCurrent placement: {placement}')
