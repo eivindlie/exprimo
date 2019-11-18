@@ -127,3 +127,7 @@ dmypy.json
 
 # Editor files
 .idea/
+
+
+# Experimental result
+experiment_results/
