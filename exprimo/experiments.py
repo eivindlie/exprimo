@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 from exprimo import DeviceGraph, ComputationGraph, Simulator
 from exprimo.optimizers import SimulatedAnnealingOptimizer, RandomHillClimbingOptimizer, GAOptimizer, \
@@ -43,16 +44,20 @@ experiments = [
 
 repeats = 10
 
+log('\n\n\n\n')
+log('=' * 120)
+log(f'{str(datetime.now()):^120}')
+log('=' * 120)
 for e, experiment in enumerate(experiments):
-    log(f'************  Experiment {e + 1}/{len(experiments)}  *************')
+    log(f'\n************  Experiment {e + 1}/{len(experiments)}  *************')
     batches = experiment['batches']
     pipeline_batches = experiment['pipeline_batches']
     evals = experiment['function_evaluations']
-    pop_size = 50
+    pop_size = 10
     hc_optimizer = RandomHillClimbingOptimizer(steps=evals, batches=batches, pipeline_batches=pipeline_batches)
     sa_optimizer = SimulatedAnnealingOptimizer(steps=evals, temp_schedule=exponential_multiplicative_decay(50, 0.98),
                                                batches=batches, pipeline_batches=pipeline_batches)
-    ga_optimizer = GAOptimizer(steps=evals/pop_size, elite_size=10, mutation_rate=0.05, use_caching=True,
+    ga_optimizer = GAOptimizer(steps=evals//pop_size, elite_size=10, mutation_rate=0.05, use_caching=True,
                                batches=batches, pipeline_batches=pipeline_batches)
     optimizers = [hc_optimizer, sa_optimizer, ga_optimizer]
 
@@ -94,11 +99,14 @@ for e, experiment in enumerate(experiments):
                                                     batches=batches, pipeline_batches=pipeline_batches)
 
                 times.append(execution_time)
-                print(f'{execution_time:.2}ms')
+                if execution_time == -1:
+                    print('No acceptable solution found')
+                else:
+                    print(f'{execution_time:.2f}ms')
                 with open(f'../experiment_results/nets/{e + 1}-{n + 1}-{o + 1}-{i + 1}.json', 'w') as f:
                     f.write(best_net)
 
-            log(f'{",".join(times)}')
+            log(f'{",".join(str(t) for t in times)}')
         log('\n')
 
     log('\n\n')
