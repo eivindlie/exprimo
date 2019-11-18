@@ -56,9 +56,9 @@ class HillClimbingOptimizer(BaseOptimizer):
 
 class RandomHillClimbingOptimizer(BaseOptimizer):
 
-    def __init__(self, colocation_heuristic=None, patience=100):
-        super().__init__(colocation_heuristic)
-        self.patience = patience
+    def __init__(self, *args, steps=5000, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.steps = steps
 
     def optimize(self, net_string, device_graph):
         n_devices = len(device_graph.devices)
@@ -68,16 +68,16 @@ class RandomHillClimbingOptimizer(BaseOptimizer):
         placement = [0] * len(groups)  # generate_random_placement(len(groups), n_devices)
         score = evaluate_placement(apply_placement(net_string, placement, groups), device_graph)
 
-        tests = 0
-        while tests < self.patience:
+        for i in range(self.steps):
             new_placement = placement[:]
             new_placement[randint(0, len(new_placement) - 1)] = randint(0, n_devices - 1)
             new_score = evaluate_placement(apply_placement(net_string, new_placement, groups), device_graph)
 
-            if new_score < score:
-                tests = 0
+            if (new_score < score or score == -1) and new_score != -1:
                 score = new_score
                 placement = new_placement
-            else:
-                tests += 1
+
+            if self.verbose and (i + 1) % 50 == 0:
+                print(f'[{i+1}/{self.steps}] Current time: {score:.2f}ms \t Current solution: {placement}')
+
         return json.dumps(apply_placement(net_string, placement, groups))
