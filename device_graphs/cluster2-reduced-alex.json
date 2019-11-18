@@ -1,0 +1,68 @@
+{
+  "comm_channels": [
+    {
+      "type": "pcie3",
+      "bandwidth": 128
+    },
+    {
+      "type": "ethernet",
+      "bandwidth": 1
+    }
+  ],
+  "devices": [
+    {
+      "model": "Intel Core i7 5930K",
+      "clock": 210000,
+      "peak_gflops": 289,
+      "memory": 8,
+      "mem_bandwidth": 68,
+      "type": "cpu",
+      "neighbours": [
+        {
+          "comm_channel": 0,
+          "device": 1
+        },
+        {
+          "comm_channel": 0,
+          "device": 2
+        }
+      ]
+    },
+    {
+      "model": "NVIDIA Titan X",
+      "clock": 1000,
+      "peak_gflops": 6144,
+      "memory": 0.5,
+      "mem_bandwidth": 336.5,
+      "type": "gpu",
+      "neighbours": [
+        {
+          "comm_channel": 0,
+          "device": 0
+        },
+        {
+          "comm_channel": 0,
+          "device": 2
+        }
+      ]
+    },
+    {
+      "model": "NVIDIA Titan X",
+      "clock": 1000,
+      "peak_gflops": 6144,
+      "memory": 0.5,
+      "mem_bandwidth": 336.5,
+      "type": "gpu",
+      "neighbours": [
+        {
+          "comm_channel": 0,
+          "device": 0
+        },
+        {
+          "comm_channel": 0,
+          "device": 1
+        }
+      ]
+    }
+  ]
+}
