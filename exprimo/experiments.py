@@ -53,12 +53,12 @@ for e, experiment in enumerate(experiments):
     batches = experiment['batches']
     pipeline_batches = experiment['pipeline_batches']
     evals = experiment['function_evaluations']
-    pop_size = 10
+    pop_size = 50
     hc_optimizer = RandomHillClimbingOptimizer(steps=evals, batches=batches, pipeline_batches=pipeline_batches)
     sa_optimizer = SimulatedAnnealingOptimizer(steps=evals, temp_schedule=exponential_multiplicative_decay(50, 0.98),
                                                batches=batches, pipeline_batches=pipeline_batches)
     ga_optimizer = GAOptimizer(steps=evals//pop_size, elite_size=10, mutation_rate=0.05, use_caching=True,
-                               batches=batches, pipeline_batches=pipeline_batches)
+                               batches=batches, pipeline_batches=pipeline_batches, population_size=pop_size)
     optimizers = [hc_optimizer, sa_optimizer, ga_optimizer]
 
     for n, net_path in enumerate(experiment['net_paths']):
