@@ -1,17 +1,22 @@
 import json
 from datetime import datetime
+from multiprocessing import Pool
 
 from exprimo import DeviceGraph, ComputationGraph, Simulator
 from exprimo.optimizers import SimulatedAnnealingOptimizer, RandomHillClimbingOptimizer, GAOptimizer, \
     exponential_multiplicative_decay
 from optimizers.utils import prefix_heuristic
 
+WORKERS = 4
 
-def log(string, end='\n'):
-    print(string, end=end)
 
-    with open('../experiment_results/log.txt', 'a') as f:
-        f.write(string + end)
+def get_logger(log_file):
+    def log(string, end='\n'):
+        print(string, end=end)
+
+        with open(log_file, 'a') as f:
+            f.write(string + end)
+    return log
 
 
 experiments = [
@@ -42,13 +47,16 @@ experiments = [
     },
 ]
 
-repeats = 10
 
-log('\n\n\n\n')
-log('=' * 120)
-log(f'{str(datetime.now()):^120}')
-log('=' * 120)
-for e, experiment in enumerate(experiments):
+def run_experiment(experiment_id, experiment, repeats=10):
+    log = get_logger(f'../experiment_results/experiment{experiment_id + 1}.log')
+    e = experiment_id
+
+    log('\n\n\n\n')
+    log('=' * 120)
+    log(f'{str(datetime.now()):^120}')
+    log('=' * 120)
+
     log(f'\n************  Experiment {e + 1}/{len(experiments)}  *************')
     batches = experiment['batches']
     pipeline_batches = experiment['pipeline_batches']
@@ -57,12 +65,12 @@ for e, experiment in enumerate(experiments):
     hc_optimizer = RandomHillClimbingOptimizer(steps=evals, batches=batches, pipeline_batches=pipeline_batches)
     sa_optimizer = SimulatedAnnealingOptimizer(steps=evals, temp_schedule=exponential_multiplicative_decay(50, 0.98),
                                                batches=batches, pipeline_batches=pipeline_batches)
-    ga_optimizer = GAOptimizer(steps=evals//pop_size, elite_size=10, mutation_rate=0.05, use_caching=True,
+    ga_optimizer = GAOptimizer(steps=evals // pop_size, elite_size=10, mutation_rate=0.05, use_caching=True,
                                batches=batches, pipeline_batches=pipeline_batches, population_size=pop_size)
     optimizers = [hc_optimizer, sa_optimizer, ga_optimizer]
 
     for n, net_path in enumerate(experiment['net_paths']):
-        log(f'Net {n+1}/{len(experiment["net_paths"])}: {net_path}')
+        log(f'Net {n + 1}/{len(experiment["net_paths"])}: {net_path}')
 
         with open(net_path) as f:
             net_string = f.read()
@@ -111,3 +119,14 @@ for e, experiment in enumerate(experiments):
 
     log('\n\n')
 
+
+def map_run_experiment(x):
+    run_experiment(*x)
+
+
+if WORKERS > 1:
+    pool = Pool(WORKERS)
+    pool.map(map_run_experiment, enumerate(experiments))
+else:
+    for e, experiment in enumerate(experiments):
+        run_experiment(e, experiment)
