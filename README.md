@@ -7,6 +7,10 @@ instead relying on FLOP calculations carried out by Paleo to simulate any networ
 
 Also included are a number of optimization techniques for finding the best configuration for a given network to run on a given device graph.
 
+## Running the experiments
+
+The experiments can be run by executing the python script `exprimo/experiments.py`
+
 ## References
 * Addanki,  R.,  Venkatakrishnan,  S.  B.,  Gupta,  S.,  Mao,  H.,  and  Alizadeh,  M.
 (2019).  Placeto:  Learning generalizable device placement algorithms for distributed machine learning.
