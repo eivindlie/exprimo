@@ -226,6 +226,8 @@ class ComputationGraph:
                             sublayer_parents = [f'{block_name}/{n}' for n in sublayer_params['parents']]
                             sublayer_parents = _parents(sublayer_parents, s)
 
+                        sublayer.params['parents'] = sublayer_parents
+
                         assert sublayer_name not in names_to_specs, f'Duplicate {sublayer_name}.'
                         names_to_specs[sublayer_name] = sublayer
 
