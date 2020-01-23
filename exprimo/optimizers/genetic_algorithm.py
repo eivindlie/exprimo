@@ -13,7 +13,7 @@ from exprimo.optimizers.utils import generate_random_placement, evaluate_placeme
 class GAOptimizer(BaseOptimizer):
 
     def __init__(self, population_size=100, mutation_rate=0.01, elite_size=20, steps=500,
-                 early_stopping_threshold=None, use_caching=False, *args, **kwargs):
+                 early_stopping_threshold=None, use_caching=False, crossover_type='1-point', *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.population_size = population_size
         self.mutation_rate = mutation_rate
@@ -21,6 +21,7 @@ class GAOptimizer(BaseOptimizer):
         self.steps = steps
         self.early_stopping_threshold = early_stopping_threshold
         self.use_caching = use_caching
+        self.crossover_type = crossover_type
 
     def optimize(self, net_string, device_graph):
         net = json.loads(net_string)
@@ -85,8 +86,16 @@ class GAOptimizer(BaseOptimizer):
             return mating_pool
 
         def breed(parent1, parent2):
-            split = random.randint(0, len(parent1) - 1)
-            child = parent1[:split] + parent2[split:]
+            if self.crossover_type == '1-point':
+                split = random.randint(0, len(parent1) - 1)
+                child = parent1[:split] + parent2[split:]
+            elif self.crossover_type == 'uniform':
+                child = []
+                for i in range(len(parent1)):
+                    if random.random() > 0.5:
+                        child.append(parent1[i])
+                    else:
+                        child.append(parent1[i])
             return child
 
         def breed_population(mating_pool, elite_size):
