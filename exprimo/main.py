@@ -8,8 +8,8 @@ from plotting import plot_event_trace
 from exprimo.optimizers.utils import prefix_heuristic, create_colocation_groups, apply_placement
 
 if __name__ == '__main__':
-    graph_file = '../nets/inception_v3.json'
-    device_file = '../device_graphs/cluster2.json'
+    graph_file = '../nets/inception_v3-colocrl4.json'
+    device_file = '../device_graphs/colocrl-4.json'
     batches = 1
     pipeline_batches = 1
 
