@@ -215,6 +215,9 @@ class ComputationGraph:
                             sublayer_name = f'{sublayer_name}@{s}'
                             sublayer_params['splits'] = num_splits
 
+                        if 'device' not in sublayer_params and 'device' in layer_params:
+                            sublayer_params['device'] = layer_params['device']
+
                         sublayer = LayerSpec(sublayer_name, sublayer_params)
 
                         # Update parents
