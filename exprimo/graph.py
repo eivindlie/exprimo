@@ -260,3 +260,10 @@ class ComputationGraph:
         self._create_topological_order()
         if self.attach_ops:
             self._attach_layer_op()
+
+
+def get_flattened_layer_names(net_string):
+    graph = ComputationGraph()
+    graph.load_from_string(net_string)
+
+    return graph.topological_order
