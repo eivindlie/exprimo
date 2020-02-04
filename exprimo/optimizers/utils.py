@@ -49,6 +49,11 @@ def apply_placement(net_string, placement, groups):
 
     for i, device in enumerate(placement):
         for layer in groups[i]:
-            net['layers'][layer]['device'] = device
+            if layer in net['layers']:
+                net['layers'][layer]['device'] = device
+            else:
+                # Layer is inside a block
+                block = layer.split('/')[0]
+                net['layers'][block]['layers'][layer]['device'] = device
 
     return net
