@@ -1,0 +1,68 @@
+{
+  "comm_channels": [
+    {
+      "type": "pcie3",
+      "bandwidth": 128
+    },
+    {
+      "type": "ethernet",
+      "bandwidth": 1
+    }
+  ],
+  "devices": [
+    {
+      "model": "Intel Xeon Processor E5 v3 Family",
+      "clock": 41400,
+      "peak_gflops": 650,
+      "memory": 50,
+      "mem_bandwidth": 68,
+      "type": "cpu",
+      "neighbours": [
+        {
+          "comm_channel": 0,
+          "device": 1
+        },
+        {
+          "comm_channel": 0,
+          "device": 2
+        }
+      ]
+    },
+    {
+      "model": "NVIDIA K80",
+      "clock": 560,
+      "peak_gflops": 5600,
+      "memory": 24,
+      "mem_bandwidth": 480,
+      "type": "gpu",
+      "neighbours": [
+        {
+          "comm_channel": 0,
+          "device": 0
+        },
+        {
+          "comm_channel": 0,
+          "device": 2
+        }
+      ]
+    },
+    {
+      "model": "NVIDIA K80",
+      "clock": 560,
+      "peak_gflops": 5600,
+      "memory": 24,
+      "mem_bandwidth": 480,
+      "type": "gpu",
+      "neighbours": [
+        {
+          "comm_channel": 0,
+          "device": 1
+        },
+        {
+          "comm_channel": 0,
+          "device": 2
+        }
+      ]
+    }
+  ]
+}
