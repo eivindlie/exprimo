@@ -6,6 +6,7 @@ from tqdm import tqdm
 from exprimo import DeviceGraph
 from exprimo.optimizers.base import BaseOptimizer
 from exprimo.optimizers.utils import evaluate_placement, apply_placement
+from graph import get_flattened_layer_names
 
 
 def exponential_multiplicative_decay(initial_value, decay):
@@ -24,7 +25,7 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
         n_devices = len(device_graph.devices)
         net = json.loads(net_string)
 
-        groups = self.create_colocation_groups(net['layers'].keys())
+        groups = self.create_colocation_groups(get_flattened_layer_names(net_string))
 
         placement = [randint(0, n_devices - 1) for n in range(len(groups))]  # [0] * len(groups)
         score = evaluate_placement(apply_placement(net_string, placement, groups), device_graph,
