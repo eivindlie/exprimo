@@ -7,6 +7,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from exprimo.optimizers.base import BaseOptimizer
+from graph import get_flattened_layer_names
 from optimizers.utils import apply_placement, evaluate_placement
 
 
@@ -25,7 +26,7 @@ class GAIndirectOptimizer(BaseOptimizer):
 
     def optimize(self, net_string, device_graph):
         net = json.loads(net_string)
-        groups = self.create_colocation_groups(net['layers'].keys())
+        groups = self.create_colocation_groups(get_flattened_layer_names(net_string))
 
         n_groups = len(groups)
         n_devices = len(device_graph.devices)

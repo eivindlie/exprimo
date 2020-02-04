@@ -6,6 +6,7 @@ from exprimo.device import DeviceGraph
 from exprimo.optimizers.base import BaseOptimizer
 
 from exprimo.optimizers.utils import prefix_heuristic, apply_placement, evaluate_placement
+from graph import get_flattened_layer_names
 
 
 class LinearSearchOptimizer(BaseOptimizer):
@@ -23,7 +24,7 @@ class LinearSearchOptimizer(BaseOptimizer):
         """
 
         net = json.loads(net_string)
-        groups = self.create_colocation_groups(net['layers'].keys())
+        groups = self.create_colocation_groups(get_flattened_layer_names(net_string))
 
         best_score = -1
         best_net = None
