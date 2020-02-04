@@ -48,7 +48,7 @@ if __name__ == '__main__':
     #     print(f'{layer_name}: {layer["device"]}')
     net_string = json.dumps(net_dict)
 
-    graph = ComputationGraph()
+    graph = ComputationGraph(force_device=None)
     graph.load_from_string(net_string)
     device_graph = DeviceGraph.load_from_file(device_file)
     simulator = Simulator(graph, device_graph)

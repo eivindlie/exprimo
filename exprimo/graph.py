@@ -38,10 +38,11 @@ class LayerSpec:
 
 class ComputationGraph:
 
-    def __init__(self, path=None, attach_ops=True):
+    def __init__(self, path=None, attach_ops=True, force_device=None):
         self.nested_list = None
         self.topological_order = None
         self.attach_ops = attach_ops
+        self.force_device = force_device
 
         if path:
             self.load(path)
@@ -257,6 +258,8 @@ class ComputationGraph:
         for layer_name, layer_spec in names_to_specs.items():
             if 'device' not in layer_spec.params:
                 layer_spec.params['device'] = 0
+            if self.force_device is not None:
+                layer_spec.params['device'] = self.force_device
 
         graph_walker = GraphWalker(names_to_specs)
         self.nested_list = graph_walker.start(names_to_specs['data'])
