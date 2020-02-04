@@ -8,6 +8,7 @@ from tqdm import tqdm
 
 from exprimo.optimizers.base import BaseOptimizer
 from exprimo.optimizers.utils import generate_random_placement, evaluate_placement, apply_placement
+from exprimo.graph import get_flattened_layer_names
 
 
 class GAOptimizer(BaseOptimizer):
@@ -24,8 +25,7 @@ class GAOptimizer(BaseOptimizer):
         self.crossover_type = crossover_type
 
     def optimize(self, net_string, device_graph):
-        net = json.loads(net_string)
-        groups = self.create_colocation_groups(net['layers'].keys())
+        groups = self.create_colocation_groups(get_flattened_layer_names(net_string))
 
         n_groups = len(groups)
         n_devices = len(device_graph.devices)
