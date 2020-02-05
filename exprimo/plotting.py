@@ -29,9 +29,9 @@ def plot_event_trace(events, simulator, show_transfer_lines=True, show_memory_us
         _, memory_x, memory_y = simulator.calculate_memory_usage(events, return_memory_history=True)
 
         plot_height = 1 / (len(devices) + 1)
-        for device in range(len(devices)):
+        for d, device in enumerate(devices):
             # max_memory = simulator.device_graph.devices[device].device.memory * 10**9
-            ax = gnt.inset_axes((0, plot_height * (device + 1) - 0.005, 1, plot_height / 2), sharex=gnt, zorder=1)
+            ax = gnt.inset_axes((0, plot_height * (d + 1) - 0.005, 1, plot_height / 2), sharex=gnt, zorder=1)
             # ax.set_ylim(0, max_memory)
             ax.axis('off')
             ax.fill_between(memory_x, memory_y[device], facecolor='grey', alpha=0.2)
