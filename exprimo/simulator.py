@@ -207,7 +207,7 @@ class Simulator:
             for event in events:
                 print(event)
 
-        peak_memory_usage = self.calculate_peak_memory_usage(events)
+        peak_memory_usage = self.calculate_memory_usage(events)
 
         if print_memory_usage:
             print('\n')
@@ -241,7 +241,7 @@ class Simulator:
             return score, events
         return score
 
-    def calculate_peak_memory_usage(self, events):
+    def calculate_memory_usage(self, events, return_memory_history=False):
         def calculate_tensor_size(shape, dtype='float32'):
             return np.prod(shape) * np.dtype(dtype).itemsize
 
@@ -251,6 +251,9 @@ class Simulator:
 
         for op in self.computation_graph.topological_order:
             memory_usage[op['device']] += op.operation.weights_in_bytes
+
+        usage_history = np.reshape(memory_usage, (-1, 1))
+        usage_history_timestamps = [0]
 
         peak_memory_usage = np.copy(memory_usage)
 
@@ -351,6 +354,12 @@ class Simulator:
 
             # Check if any devices now use more memory than previous recorded peak
             peak_memory_usage = np.maximum(peak_memory_usage, memory_usage)
+
+            usage_history = np.append(usage_history, memory_usage.reshape(-1, 1), axis=1)
+            usage_history_timestamps.append(event.end_time)
+
+        if return_memory_history:
+            return tuple(peak_memory_usage), tuple(usage_history_timestamps, usage_history)
 
         return tuple(peak_memory_usage)
 
