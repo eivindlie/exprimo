@@ -359,7 +359,7 @@ class Simulator:
             usage_history_timestamps.append(event.end_time)
 
         if return_memory_history:
-            return tuple(peak_memory_usage), tuple(usage_history_timestamps, usage_history)
+            return tuple(peak_memory_usage), usage_history_timestamps, usage_history
 
         return tuple(peak_memory_usage)
 

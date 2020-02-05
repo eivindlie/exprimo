@@ -55,7 +55,7 @@ if __name__ == '__main__':
     run_time, events = simulator.simulate(batch_size=128, batches=batches, pipeline_batches=pipeline_batches,
                                           return_event_trace=True, print_event_trace=False)
 
-    plot_event_trace(events)
+    plot_event_trace(events, simulator, show_transfer_lines=False)
 
     print()
     print(f'Total batch run time: {run_time:,.2f}ms')

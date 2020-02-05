@@ -3,7 +3,9 @@ import matplotlib
 from matplotlib.colors import Normalize
 
 
-def plot_event_trace(events, show_transfer_lines=True, cmap='Accent'):
+def plot_event_trace(events, simulator, show_transfer_lines=True, show_memory_usage=True, cmap='Accent'):
+    matplotlib.use('TkAgg')
+
     op_done_events = [e for e in events if e.type == 'op_done']
     transfer_done_events = [e for e in events if e.type == 'transfer_done']
     batches = max(events, key=lambda e: e.batch).batch + 1
@@ -21,7 +23,22 @@ def plot_event_trace(events, show_transfer_lines=True, cmap='Accent'):
     gnt.set_yticks([5 + 5 + 10 * i for i in range(len(devices))])
     gnt.set_yticklabels(devices)
 
+    gnt.patch.set_alpha(0)
+
     gnt.grid(True)
+    gnt.zorder = 10
+
+    if show_memory_usage:
+        _, memory_x, memory_y = simulator.calculate_memory_usage(events, return_memory_history=True)
+
+        gnt_pos = gnt.get_position()
+        plot_height = (gnt_pos.height - gnt_pos.y0) / (len(devices) + 1)
+        for device in range(len(devices)):
+            max_memory = simulator.device_graph.devices[device].device.memory * 10**9
+            ax = fig.add_axes((gnt_pos.x0, gnt_pos.y0 + plot_height * (device + 1), gnt_pos.width, plot_height / 2), sharex=gnt)
+            ax.set_ylim(0, max_memory)
+            # ax.axis('off')
+            ax.fill_between(memory_x, memory_y[device], facecolor='grey')
 
     cmap_func = matplotlib.cm.get_cmap(cmap, 2*batches)
     cmap_norm = Normalize(vmin=0, vmax=2*batches)
