@@ -241,6 +241,7 @@ class Simulator:
             return score, events
         return score
 
+    @staticmethod
     def calculate_memory_usage(self, events, return_memory_history=False):
         def calculate_tensor_size(shape, dtype='float32'):
             return np.prod(shape) * np.dtype(dtype).itemsize
@@ -359,7 +360,7 @@ class Simulator:
             usage_history_timestamps.append(event.end_time)
 
         if return_memory_history:
-            return tuple(peak_memory_usage), tuple(usage_history_timestamps, usage_history)
+            return tuple(peak_memory_usage), usage_history_timestamps, usage_history
 
         return tuple(peak_memory_usage)
 
