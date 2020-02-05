@@ -47,10 +47,13 @@ class Simulator:
             :return: Returns True if a new batch was scheduled, False otherwise.
             """
             nonlocal last_scheduled_batch
+
+            # Stop if all batches have already been scheduled
             if last_scheduled_batch + 1 >= batches:
                 return False
 
-            running_batches = set(e.batch for e in event_queue)
+            running_batches = set(e.batch for e in event_queue) | set(o[2] for q in op_queues for o in q) \
+                              | set(t[0][2] for q in transfer_queues for t in q)
 
             if len(running_batches) >= pipeline_batches:
                 return False
@@ -116,7 +119,7 @@ class Simulator:
 
             if not backward:
                 available_tensors[op['device']].append((op.name, event.batch))
-            
+
             transfers = []
             for child in children:
                 if child['device'] != op['device']:
@@ -214,7 +217,7 @@ class Simulator:
             mem_strings = []
             print('Device:'.rjust(18), end='')
             for i, device in enumerate(self.device_graph.devices):
-                mem_string = f'{round(peak_memory_usage[i] / 2**20, 2)} MiB'
+                mem_string = f'{round(peak_memory_usage[i] / 2 ** 20, 2)} MiB'
                 col_width = max(len(mem_string), len(device.name)) + 5
                 mem_string = mem_string.rjust(col_width)
                 mem_strings.append(mem_string)
@@ -230,8 +233,8 @@ class Simulator:
         if check_memory_usage:
             memory_overuse = 0
             for i, device in enumerate(self.device_graph.devices):
-                if peak_memory_usage[i] > device.device.memory * 10**9:
-                    memory_overuse += peak_memory_usage[i] - device.device.memory * 10**9
+                if peak_memory_usage[i] > device.device.memory * 10 ** 9:
+                    memory_overuse += peak_memory_usage[i] - device.device.memory * 10 ** 9
             if memory_penalization_factor:
                 score += memory_overuse * memory_penalization_factor
             elif memory_overuse > 0:
