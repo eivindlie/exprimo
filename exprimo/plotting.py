@@ -3,7 +3,7 @@ import matplotlib
 from matplotlib.colors import Normalize
 
 
-def plot_event_trace(events, simulator, show_transfer_lines=True, show_memory_usage=True, cmap='Accent'):
+def plot_event_trace(events, simulator, show_transfer_lines=True, show_memory_usage=True, cmap='Paired'):
     op_done_events = [e for e in events if e.type == 'op_done']
     transfer_done_events = [e for e in events if e.type == 'transfer_done']
     batches = max(events, key=lambda e: e.batch).batch + 1
