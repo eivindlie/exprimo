@@ -8,10 +8,10 @@ from plotting import plot_event_trace
 from exprimo.optimizers.utils import prefix_heuristic, create_colocation_groups, apply_placement
 
 if __name__ == '__main__':
-    graph_file = '../nets/inception_v3-colocrl4.json'
-    device_file = '../device_graphs/colocrl-4.json'
-    batches = 1
-    pipeline_batches = 1
+    graph_file = '../experiment_results/nets/3-1-3-4.json'
+    device_file = '../device_graphs/cluster2.json'
+    batches = 10
+    pipeline_batches = 2
 
     with open(graph_file) as f:
         net_dict = json.load(f)
