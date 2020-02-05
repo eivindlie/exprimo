@@ -111,6 +111,8 @@ def run_experiment(experiment_id, experiment, repeats=10):
                     print('No acceptable solution found')
                 else:
                     print(f'{execution_time:.2f}ms')
+
+                # experiment - network - optimizer - run
                 with open(f'../experiment_results/nets/{e + 1}-{n + 1}-{o + 1}-{i + 1}.json', 'w') as f:
                     f.write(best_net)
 
