@@ -4,7 +4,7 @@ from matplotlib.colors import Normalize
 
 
 def plot_event_trace(events, simulator, show_transfer_lines=True, show_memory_usage=True, cmap='Accent'):
-    matplotlib.use('TkAgg')
+    # matplotlib.use('TkAgg')
 
     op_done_events = [e for e in events if e.type == 'op_done']
     transfer_done_events = [e for e in events if e.type == 'transfer_done']
@@ -26,19 +26,18 @@ def plot_event_trace(events, simulator, show_transfer_lines=True, show_memory_us
     gnt.patch.set_alpha(0)
 
     gnt.grid(True)
-    gnt.zorder = 10
+    # gnt.axis('off')
 
     if show_memory_usage:
         _, memory_x, memory_y = simulator.calculate_memory_usage(events, return_memory_history=True)
 
-        gnt_pos = gnt.get_position()
-        plot_height = (gnt_pos.height - gnt_pos.y0) / (len(devices) + 1)
+        plot_height = 1 / (len(devices) + 1)
         for device in range(len(devices)):
             max_memory = simulator.device_graph.devices[device].device.memory * 10**9
-            ax = fig.add_axes((gnt_pos.x0, gnt_pos.y0 + plot_height * (device + 1), gnt_pos.width, plot_height / 2), sharex=gnt)
-            ax.set_ylim(0, max_memory)
-            # ax.axis('off')
-            ax.fill_between(memory_x, memory_y[device], facecolor='grey')
+            ax = gnt.inset_axes((0, plot_height * (device + 1) - 0.005, 1, plot_height / 2), sharex=gnt, zorder=1)
+            # ax.set_ylim(0, max_memory)
+            ax.axis('off')
+            ax.fill_between(memory_x, memory_y[device], facecolor='grey', alpha=0.2)
 
     cmap_func = matplotlib.cm.get_cmap(cmap, 2*batches)
     cmap_norm = Normalize(vmin=0, vmax=2*batches)
@@ -46,7 +45,7 @@ def plot_event_trace(events, simulator, show_transfer_lines=True, show_memory_us
         color = cmap_func(cmap_norm(2*event.batch + int(event.backward)))
         device_index = devices.index(event.device)
         gnt.broken_barh([(event.start_time, event.end_time - event.start_time)], (5 + 2 + 10 * device_index, 6),
-                        color=color)
+                        color=color, zorder=10, alpha=0.9)
 
     if show_transfer_lines:
         for event in transfer_done_events:
