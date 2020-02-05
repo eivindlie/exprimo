@@ -4,8 +4,6 @@ from matplotlib.colors import Normalize
 
 
 def plot_event_trace(events, simulator, show_transfer_lines=True, show_memory_usage=True, cmap='Accent'):
-    # matplotlib.use('TkAgg')
-
     op_done_events = [e for e in events if e.type == 'op_done']
     transfer_done_events = [e for e in events if e.type == 'transfer_done']
     batches = max(events, key=lambda e: e.batch).batch + 1
@@ -26,14 +24,13 @@ def plot_event_trace(events, simulator, show_transfer_lines=True, show_memory_us
     gnt.patch.set_alpha(0)
 
     gnt.grid(True)
-    # gnt.axis('off')
 
     if show_memory_usage:
         _, memory_x, memory_y = simulator.calculate_memory_usage(events, return_memory_history=True)
 
         plot_height = 1 / (len(devices) + 1)
         for device in range(len(devices)):
-            max_memory = simulator.device_graph.devices[device].device.memory * 10**9
+            # max_memory = simulator.device_graph.devices[device].device.memory * 10**9
             ax = gnt.inset_axes((0, plot_height * (device + 1) - 0.005, 1, plot_height / 2), sharex=gnt, zorder=1)
             # ax.set_ylim(0, max_memory)
             ax.axis('off')
