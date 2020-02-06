@@ -6,6 +6,8 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
+import matplotlib.pyplot as plt
+
 from exprimo.optimizers.base import BaseOptimizer
 from exprimo.optimizers.utils import generate_random_placement, evaluate_placement, apply_placement
 from exprimo.graph import get_flattened_layer_names
@@ -32,6 +34,8 @@ class GAOptimizer(BaseOptimizer):
 
         best_score = 0
         early_stopping_counter = 0
+
+        fitness_history = []
 
         if self.use_caching:
             fitness_cache = {}
@@ -131,6 +135,8 @@ class GAOptimizer(BaseOptimizer):
         for g in tqdm(range(self.steps)):
             pop_rank = create_ranking(pop)
 
+            fitness_history.append(pop_rank[0][1])
+
             if pop_rank[0][1] > best_score:
                 best_score = pop_rank[0][1]
                 early_stopping_counter = 0
@@ -155,4 +161,8 @@ class GAOptimizer(BaseOptimizer):
 
         ranking = create_ranking(pop)
         best_solution = pop[ranking[0][0]]
+
+        plt.plot(fitness_history)
+        plt.show()
+
         return json.dumps(apply_placement(net_string, best_solution, groups))
