@@ -157,6 +157,7 @@ class GAOptimizer(BaseOptimizer):
             children = recombine(mating_pool)
             candidates = mutate_population(children)
             pop = select_offspring(pop, candidates)
+            pop[random.randint(0, len(pop) - 1)] = ranked_pop[0]
 
         if self.plot_fitness_history:
             plt.plot(fitness_history)
