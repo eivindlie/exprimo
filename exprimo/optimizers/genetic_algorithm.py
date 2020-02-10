@@ -3,6 +3,7 @@ import random
 
 import numpy as np
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 from exprimo.optimizers.base import BaseOptimizer
 from exprimo.graph import get_flattened_layer_names
@@ -26,7 +27,7 @@ class GAOptimizer(BaseOptimizer):
 
     def __init__(self, mutation_rate=0.05, crossover_rate=0.8, crossover_type='one-point',
                  parent_selection_function='linear', parent_selection_function_s=2,
-                 population_size=100, generations=100, **kwargs):
+                 population_size=100, generations=100, plot_fitness_history=False, **kwargs):
         """
         Initializes the GA optimizer, setting important hyperparameters.
         :param mutation_rate: The rate at which mutation will be applied, set at the gene level.
@@ -53,6 +54,7 @@ class GAOptimizer(BaseOptimizer):
         self.parent_selection_distribution = _create_parent_selection_function(parent_selection_function,
                                                                                parent_selection_function_s)
         self.generations = generations
+        self.plot_fitness_history = plot_fitness_history
 
     def optimize(self, net_string, device_graph):
         n_devices = len(device_graph.devices)
@@ -142,12 +144,23 @@ class GAOptimizer(BaseOptimizer):
 
         pop = initialize(self.population_size)
 
+        if self.plot_fitness_history:
+            fitness_history = []
+
         for i in tqdm(range(self.generations)):
             ranked_pop = rank(pop)
+
+            if self.plot_fitness_history:
+                fitness_history.append(evaluate(pop[0]))
+
             mating_pool = select_parents(ranked_pop)
             children = recombine(mating_pool)
             candidates = mutate_population(children)
             pop = select_offspring(pop, candidates)
+
+        if self.plot_fitness_history:
+            plt.plot(fitness_history)
+            plt.show()
 
         ranked_pop = rank(pop)
         best_solution = ranked_pop[0]
