@@ -4,9 +4,9 @@ from random import randint
 from tqdm import tqdm
 
 from exprimo import DeviceGraph
-from graph import get_flattened_layer_names
 from optimizers.base import BaseOptimizer
 from optimizers.utils import generate_random_placement, evaluate_placement, apply_placement
+from exprimo.graph import get_flattened_layer_names
 
 
 class HillClimbingOptimizer(BaseOptimizer):
@@ -65,8 +65,7 @@ class RandomHillClimbingOptimizer(BaseOptimizer):
 
     def optimize(self, net_string, device_graph):
         n_devices = len(device_graph.devices)
-        net = json.loads(net_string)
-        groups = self.create_colocation_groups(net['layers'].keys())
+        groups = self.create_colocation_groups(get_flattened_layer_names(net_string))
 
         placement = [0] * len(groups)  # generate_random_placement(len(groups), n_devices)
         score = evaluate_placement(apply_placement(net_string, placement, groups), device_graph)
