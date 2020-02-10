@@ -24,11 +24,13 @@ pipeline_batches = 1
 #                                 use_caching=True,
 #                                 colocation_heuristic=prefix_heuristic(prefix_length=5))
 
-optimizer = ParticleSwarmOptimizer()
+optimizer = ParticleSwarmOptimizer(w=10, l1=20, l2=10, steps=20)
 
 device_graph = DeviceGraph.load_from_file('../device_graphs/cluster2.json')
 with open('../nets/resnet50.json') as f:
     net_string = f.read()
+
+print(f'Optimizing using {optimizer}')
 
 best_net = optimizer.optimize(net_string, device_graph)
 net_dict = json.loads(best_net)
