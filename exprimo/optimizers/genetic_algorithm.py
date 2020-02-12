@@ -91,7 +91,7 @@ class GAOptimizer(BaseOptimizer):
                 fn_arg = zip(population, repeat(net_string), repeat(groups), repeat(device_graph))
                 fitness_scores = self.worker_pool.starmap(_evaluate, fn_arg)
                 fitness_db = dict(zip(population, fitness_scores))
-                return sorted(population, key=lambda x: fitness_db[x])
+                return sorted(population, key=lambda x: -fitness_db[x])
             return sorted(population, key=lambda x: -evaluate(x))
 
         def select_parents(population, points=None):
