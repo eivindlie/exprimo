@@ -185,7 +185,7 @@ class GAOptimizer(BaseOptimizer):
             ranked_pop = rank(pop)
 
             if self.plot_fitness_history:
-                fitness_history.append(evaluate(pop[0]))
+                fitness_history.append(1 / evaluate(ranked_pop[0]))
 
             mating_pool = select_parents(ranked_pop)
             children = recombine(mating_pool)
@@ -210,3 +210,6 @@ class Candidate:
     def __init__(self, placement, mutation_rate=0):
         self.placement = placement
         self.mutation_rate = mutation_rate
+
+    def __str__(self):
+        return f'Placement: {self.placement}\t Mutation rate: {self.mutation_rate}'
