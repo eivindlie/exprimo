@@ -43,7 +43,8 @@ class GAOptimizer(BaseOptimizer):
     def __init__(self, mutation_rate=0.05, crossover_rate=0.8, crossover_type='one-point',
                  parent_selection_function='linear', parent_selection_function_s=2,
                  population_size=100, generations=100, plot_fitness_history=False,
-                 evolve_mutation_rate=False, elite_size=1, print_diversity=False, **kwargs):
+                 evolve_mutation_rate=False, elite_size=1, print_diversity=False,
+                 min_mutation_rate=0.05, max_mutation_rate=0.9, **kwargs):
         """
         Initializes the GA optimizer, setting important hyperparameters.
         :param mutation_rate: The rate at which mutation will be applied, set at the gene level.
@@ -75,6 +76,9 @@ class GAOptimizer(BaseOptimizer):
         self.plot_fitness_history = plot_fitness_history
         self.print_diversity = print_diversity
 
+        self.max_mutation_rate = max_mutation_rate
+        self.min_mutation_rate = min_mutation_rate
+
         if self.n_threads > 1:
             self.worker_pool = Pool(self.n_threads)
 
@@ -85,7 +89,8 @@ class GAOptimizer(BaseOptimizer):
         def initialize(population_size):
             if self.evolve_mutation_rate:
                 return [Candidate(generate_random_placement(len(groups), n_devices),
-                                  min(max(random.normalvariate(self.mutation_rate, 0.1), 0.01), 0.95))
+                                  min(max(random.normalvariate(self.mutation_rate, 0.1), self.min_mutation_rate),
+                                      self.max_mutation_rate))
                         for _ in range(population_size)]
 
             return [Candidate(generate_random_placement(len(groups), n_devices)) for i in range(population_size)]
@@ -181,7 +186,8 @@ class GAOptimizer(BaseOptimizer):
                 placement = individual.placement
                 placement = [random.randint(0, n_devices - 1) if random.random() < mutation_rate else g
                              for g in placement]
-                new_mutation_rate = max(min(mutation_rate + random.normalvariate(0, 0.05), 0.95), 0)
+                new_mutation_rate = max(min(mutation_rate + random.normalvariate(0, 0.05), self.max_mutation_rate),
+                                        self.min_mutation_rate)
                 return Candidate(placement, new_mutation_rate)
             else:
                 placement = [random.randint(0, n_devices - 1) if random.random() < self.mutation_rate else g

@@ -17,7 +17,9 @@ ga_args = {
     'mutation_rate': 0.6,
     'evolve_mutation_rate': True,
     'verbose': 5,
-    'elite_size': 5
+    'elite_size': 5,
+    'max_mutation_rate': 0.9,
+    'min_mutation_rate': 0.05,
 }
 
 print(ga_args)
