@@ -209,6 +209,9 @@ class GAOptimizer(BaseOptimizer):
         if self.plot_fitness_history:
             fitness_history = []
 
+        if self.print_diversity:
+            diversity_history = []
+
         for i in tqdm(range(self.generations), file=sys.stdout):
             ranked_pop = rank(pop)
 
@@ -225,6 +228,7 @@ class GAOptimizer(BaseOptimizer):
                 best_time = 1 / best_score
                 if self.print_diversity:
                     diversity = _calculate_binary_difference_diversity(ranked_pop)
+                    diversity_history.append(diversity)
                     tqdm.write(
                         f'[{i + 1}/{self.generations}] Best current time: {best_time:.2f}ms Diversity: {diversity:.4f}')
                 else:
@@ -232,7 +236,14 @@ class GAOptimizer(BaseOptimizer):
 
         if self.plot_fitness_history:
             plt.plot(fitness_history)
+            plt.title('Fitness')
             plt.show()
+
+        if self.print_diversity:
+            plt.plot(diversity_history)
+            plt.title('Diversity')
+            plt.show()
+
 
         ranked_pop = rank(pop)
         best_solution = ranked_pop[0]
