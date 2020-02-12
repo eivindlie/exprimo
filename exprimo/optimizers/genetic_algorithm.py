@@ -14,12 +14,14 @@ def _create_parent_selection_function(type, s=2):
     if type in ('linear', 'lin'):
         def linear(n_parents):
             return np.array([((2 - s) / n_parents) + ((2 * i * (s - 1)) / (n_parents * (n_parents - 1)))
-                            for i in range(n_parents - 1, -1, -1)])
+                             for i in range(n_parents - 1, -1, -1)])
+
         return linear
     elif type in ('exponential', 'exp'):
         def exponential(n_parents):
             probs = np.array([1.0 - np.exp(-i) for i in range(n_parents - 1, -1, -1)])
             return probs / probs.sum()
+
         return exponential
 
 
@@ -27,7 +29,8 @@ class GAOptimizer(BaseOptimizer):
 
     def __init__(self, mutation_rate=0.05, crossover_rate=0.8, crossover_type='one-point',
                  parent_selection_function='linear', parent_selection_function_s=2,
-                 population_size=100, generations=100, plot_fitness_history=False, **kwargs):
+                 population_size=100, generations=100, plot_fitness_history=False,
+                 evolve_mutation_rate=False, **kwargs):
         """
         Initializes the GA optimizer, setting important hyperparameters.
         :param mutation_rate: The rate at which mutation will be applied, set at the gene level.
@@ -54,6 +57,7 @@ class GAOptimizer(BaseOptimizer):
         self.parent_selection_distribution = _create_parent_selection_function(parent_selection_function,
                                                                                parent_selection_function_s)
         self.generations = generations
+        self.evolve_mutation_rate = evolve_mutation_rate
         self.plot_fitness_history = plot_fitness_history
 
     def optimize(self, net_string, device_graph):
@@ -61,10 +65,15 @@ class GAOptimizer(BaseOptimizer):
         groups = self.create_colocation_groups(get_flattened_layer_names(net_string))
 
         def initialize(population_size):
-            return [generate_random_placement(len(groups), n_devices) for i in range(population_size)]
+            if self.evolve_mutation_rate:
+                return [Candidate(generate_random_placement(len(groups), n_devices),
+                        min(max(random.normalvariate(self.mutation_rate, 0.1), 0.01), 0.95))
+                        for _ in range(population_size)]
+
+            return [Candidate(generate_random_placement(len(groups), n_devices)) for i in range(population_size)]
 
         def evaluate(individual):
-            return 1 / evaluate_placement(apply_placement(net_string, individual, groups), device_graph)
+            return 1 / evaluate_placement(apply_placement(net_string, individual.placement, groups), device_graph)
 
         def rank(population):
             return sorted(population, key=lambda x: -evaluate(x))
@@ -95,6 +104,9 @@ class GAOptimizer(BaseOptimizer):
             if random.random() > self.crossover_rate:
                 return parent1, parent2
 
+            mutation_rate1, mutation_rate2 = parent1.mutation_rate, parent2.mutation_rate
+            parent1, parent2 = parent1.placement, parent2.placement
+
             if self.crossover == 'uniform' or self.crossover >= len(parent1) - 1:
                 child1, child2 = [], []
 
@@ -117,11 +129,19 @@ class GAOptimizer(BaseOptimizer):
                 parent_sel = int(random.random())
                 crossover_points = [0] + crossover_points + [len(parent1)]
                 for i in range(len(crossover_points) - 1):
-                    children[parent_sel][crossover_points[i]:crossover_points[i+1]] \
-                        = parent1[crossover_points[i]:crossover_points[i+1]]
+                    children[parent_sel][crossover_points[i]:crossover_points[i + 1]] \
+                        = parent1[crossover_points[i]:crossover_points[i + 1]]
                     children[(parent_sel + 1) % 2][crossover_points[i]:crossover_points[i + 1]] \
                         = parent2[crossover_points[i]:crossover_points[i + 1]]
                     parent_sel = (parent_sel + 1) % 2
+
+            if self.evolve_mutation_rate:
+                mix_rate = random.normalvariate(0.5, 0.1)
+                mr1 = mutation_rate1 * mix_rate + mutation_rate2 * (1 - mix_rate)
+                mr2 = mutation_rate2 * mix_rate + mutation_rate1 * (1 - mix_rate)
+                children = Candidate(children[0], mr1), Candidate(children[1], mr2)
+            else:
+                children = Candidate(children[0]), Candidate(children[1])
             return children
 
         def recombine(mating_pool):
@@ -133,8 +153,17 @@ class GAOptimizer(BaseOptimizer):
             return children
 
         def mutate(individual):
-            return [random.randint(0, n_devices - 1) if random.random() < self.mutation_rate else g
-                    for g in individual]
+            if self.evolve_mutation_rate:
+                mutation_rate = individual.mutation_rate
+                placement = individual.placement
+                placement = [random.randint(0, n_devices - 1) if random.random() < mutation_rate else g
+                             for g in placement]
+                new_mutation_rate = max(min(mutation_rate + random.normalvariate(0, 0.05), 0.95), 0)
+                return Candidate(placement, new_mutation_rate)
+            else:
+                placement = [random.randint(0, n_devices - 1) if random.random() < self.mutation_rate else g
+                             for g in individual.placement]
+                return Candidate(placement)
 
         def mutate_population(population):
             return [mutate(ind) for ind in population]
@@ -159,10 +188,21 @@ class GAOptimizer(BaseOptimizer):
             pop = select_offspring(pop, candidates)
             pop[random.randint(0, len(pop) - 1)] = ranked_pop[0]
 
+            if self.verbose and (i + 1) % int(self.verbose) == 0:
+                best_score = evaluate(ranked_pop[0])
+                best_time = 1 / best_score
+                print(f'[{i + 1}/{self.generations}] Best current time: {best_time:.2f}ms')
+
         if self.plot_fitness_history:
             plt.plot(fitness_history)
             plt.show()
 
         ranked_pop = rank(pop)
         best_solution = ranked_pop[0]
-        return json.dumps(apply_placement(net_string, best_solution, groups))
+        return json.dumps(apply_placement(net_string, best_solution.placement, groups))
+
+
+class Candidate:
+    def __init__(self, placement, mutation_rate=0):
+        self.placement = placement
+        self.mutation_rate = mutation_rate

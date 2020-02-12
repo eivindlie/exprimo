@@ -15,7 +15,8 @@ pipeline_batches = 1
 # optimizer = SimulatedAnnealingOptimizer(temp_schedule=exponential_multiplicative_decay(50, 0.98),
 #                                         steps=30000, batches=batches,
 #                                         pipeline_batches=pipeline_batches, verbose=True)
-optimizer = GAOptimizer(plot_fitness_history=True, generations=100)
+optimizer = GAOptimizer(plot_fitness_history=True, generations=100, mutation_rate=0.3, evolve_mutation_rate=True,
+                        verbose=5)
 # optimizer = GAIndirectOptimizer(population_size=50, mutation_rate=0.05, elite_size=10, steps=500,
 #                                 verbose=False,
 #                                 use_caching=True,
