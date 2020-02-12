@@ -43,7 +43,7 @@ class GAOptimizer(BaseOptimizer):
     def __init__(self, mutation_rate=0.05, crossover_rate=0.8, crossover_type='one-point',
                  parent_selection_function='linear', parent_selection_function_s=2,
                  population_size=100, generations=100, plot_fitness_history=False,
-                 evolve_mutation_rate=False, elite_size=0, print_diversity=False, **kwargs):
+                 evolve_mutation_rate=False, elite_size=1, print_diversity=False, **kwargs):
         """
         Initializes the GA optimizer, setting important hyperparameters.
         :param mutation_rate: The rate at which mutation will be applied, set at the gene level.
