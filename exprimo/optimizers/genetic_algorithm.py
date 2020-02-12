@@ -1,6 +1,8 @@
 import json
 import random
 import sys
+from multiprocessing import Pool
+from itertools import repeat
 
 import numpy as np
 from tqdm import tqdm
@@ -24,6 +26,10 @@ def _create_parent_selection_function(type, s=2):
             return probs / probs.sum()
 
         return exponential
+
+
+def _evaluate(individual, net_string, groups, device_graph):
+    return 1 / evaluate_placement(apply_placement(net_string, individual.placement, groups), device_graph)
 
 
 class GAOptimizer(BaseOptimizer):
@@ -62,6 +68,9 @@ class GAOptimizer(BaseOptimizer):
         self.evolve_mutation_rate = evolve_mutation_rate
         self.plot_fitness_history = plot_fitness_history
 
+        if self.n_threads > 1:
+            self.worker_pool = Pool(self.n_threads)
+
     def optimize(self, net_string, device_graph):
         n_devices = len(device_graph.devices)
         groups = self.create_colocation_groups(get_flattened_layer_names(net_string))
@@ -75,9 +84,14 @@ class GAOptimizer(BaseOptimizer):
             return [Candidate(generate_random_placement(len(groups), n_devices)) for i in range(population_size)]
 
         def evaluate(individual):
-            return 1 / evaluate_placement(apply_placement(net_string, individual.placement, groups), device_graph)
+            return _evaluate(individual, net_string, groups, device_graph)
 
         def rank(population):
+            if self.n_threads > 1:
+                fn_arg = zip(population, repeat(net_string), repeat(groups), repeat(device_graph))
+                fitness_scores = self.worker_pool.starmap(_evaluate, fn_arg)
+                fitness_db = dict(zip(population, fitness_scores))
+                return sorted(population, key=lambda x: fitness_db[x])
             return sorted(population, key=lambda x: -evaluate(x))
 
         def select_parents(population, points=None):

@@ -12,12 +12,12 @@ pipeline_batches = 1
 
 ga_args = {
     'plot_fitness_history': True,
-    'generations': 100,
-    'population_size': 500,
+    'generations': 500,
+    'population_size': 100,
     'mutation_rate': 0.3,
     'evolve_mutation_rate': True,
     'verbose': 5,
-    'elite_size': 10
+    'elite_size': 1
 }
 
 print(ga_args)
