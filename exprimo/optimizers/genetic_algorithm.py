@@ -30,7 +30,7 @@ class GAOptimizer(BaseOptimizer):
     def __init__(self, mutation_rate=0.05, crossover_rate=0.8, crossover_type='one-point',
                  parent_selection_function='linear', parent_selection_function_s=2,
                  population_size=100, generations=100, plot_fitness_history=False,
-                 evolve_mutation_rate=False, **kwargs):
+                 evolve_mutation_rate=False, elite_size=0, **kwargs):
         """
         Initializes the GA optimizer, setting important hyperparameters.
         :param mutation_rate: The rate at which mutation will be applied, set at the gene level.
@@ -44,6 +44,7 @@ class GAOptimizer(BaseOptimizer):
         self.mutation_rate = mutation_rate
         self.crossover_rate = crossover_rate
         self.population_size = population_size
+        self.elite_size = elite_size
 
         if crossover_type == 'uniform':
             self.crossover = 'uniform'
@@ -67,7 +68,7 @@ class GAOptimizer(BaseOptimizer):
         def initialize(population_size):
             if self.evolve_mutation_rate:
                 return [Candidate(generate_random_placement(len(groups), n_devices),
-                        min(max(random.normalvariate(self.mutation_rate, 0.1), 0.01), 0.95))
+                                  min(max(random.normalvariate(self.mutation_rate, 0.1), 0.01), 0.95))
                         for _ in range(population_size)]
 
             return [Candidate(generate_random_placement(len(groups), n_devices)) for i in range(population_size)]
@@ -168,7 +169,11 @@ class GAOptimizer(BaseOptimizer):
         def mutate_population(population):
             return [mutate(ind) for ind in population]
 
-        def select_offspring(previous_generation, candidates):
+        def select_offspring(previous_generation_ranked, candidates):
+            if self.elite_size:
+                random.shuffle(candidates)
+                return previous_generation_ranked[:self.elite_size] \
+                       + candidates[:self.population_size - self.elite_size]
             return candidates
 
         pop = initialize(self.population_size)
@@ -186,7 +191,6 @@ class GAOptimizer(BaseOptimizer):
             children = recombine(mating_pool)
             candidates = mutate_population(children)
             pop = select_offspring(pop, candidates)
-            pop[random.randint(0, len(pop) - 1)] = ranked_pop[0]
 
             if self.verbose and (i + 1) % int(self.verbose) == 0:
                 best_score = evaluate(ranked_pop[0])
