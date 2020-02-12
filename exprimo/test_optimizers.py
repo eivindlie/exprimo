@@ -14,10 +14,10 @@ ga_args = {
     'plot_fitness_history': True,
     'generations': 500,
     'population_size': 100,
-    'mutation_rate': 0.3,
+    'mutation_rate': 0.6,
     'evolve_mutation_rate': True,
     'verbose': 5,
-    'elite_size': 1
+    'elite_size': 5
 }
 
 print(ga_args)

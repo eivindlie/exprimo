@@ -32,6 +32,11 @@ def _evaluate(individual, net_string, groups, device_graph):
     return 1 / evaluate_placement(apply_placement(net_string, individual.placement, groups), device_graph)
 
 
+def _calculate_binary_difference_diversity(population):
+    return sum(
+        int(g[0] != g[1]) for ind1 in population for ind2 in population for g in zip(ind1.placement, ind2.placement))
+
+
 class GAOptimizer(BaseOptimizer):
 
     def __init__(self, mutation_rate=0.05, crossover_rate=0.8, crossover_type='one-point',
