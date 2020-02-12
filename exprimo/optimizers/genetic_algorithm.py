@@ -34,7 +34,8 @@ def _evaluate(individual, net_string, groups, device_graph):
 
 def _calculate_binary_difference_diversity(population):
     return sum(
-        int(g[0] != g[1]) for ind1 in population for ind2 in population for g in zip(ind1.placement, ind2.placement))
+        int(g[0] != g[1]) for ind1 in population for ind2 in population for g in
+        zip(ind1.placement, ind2.placement)) / (len(population[0].placement) * len(population) ** 2)
 
 
 class GAOptimizer(BaseOptimizer):
@@ -42,7 +43,7 @@ class GAOptimizer(BaseOptimizer):
     def __init__(self, mutation_rate=0.05, crossover_rate=0.8, crossover_type='one-point',
                  parent_selection_function='linear', parent_selection_function_s=2,
                  population_size=100, generations=100, plot_fitness_history=False,
-                 evolve_mutation_rate=False, elite_size=0, **kwargs):
+                 evolve_mutation_rate=False, elite_size=0, print_diversity=False, **kwargs):
         """
         Initializes the GA optimizer, setting important hyperparameters.
         :param mutation_rate: The rate at which mutation will be applied, set at the gene level.
@@ -72,6 +73,7 @@ class GAOptimizer(BaseOptimizer):
         self.generations = generations
         self.evolve_mutation_rate = evolve_mutation_rate
         self.plot_fitness_history = plot_fitness_history
+        self.print_diversity = print_diversity
 
         if self.n_threads > 1:
             self.worker_pool = Pool(self.n_threads)
@@ -215,7 +217,12 @@ class GAOptimizer(BaseOptimizer):
             if self.verbose and (i + 1) % int(self.verbose) == 0:
                 best_score = evaluate(ranked_pop[0])
                 best_time = 1 / best_score
-                tqdm.write(f'[{i + 1}/{self.generations}] Best current time: {best_time:.2f}ms')
+                if self.print_diversity:
+                    diversity = _calculate_binary_difference_diversity(ranked_pop)
+                    tqdm.write(
+                        f'[{i + 1}/{self.generations}] Best current time: {best_time:.2f}ms Diversity: {diversity:.4f}')
+                else:
+                    tqdm.write(f'[{i + 1}/{self.generations}] Best current time: {best_time:.2f}ms')
 
         if self.plot_fitness_history:
             plt.plot(fitness_history)
