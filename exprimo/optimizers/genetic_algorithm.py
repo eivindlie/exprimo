@@ -191,7 +191,7 @@ class GAOptimizer(BaseOptimizer):
             mating_pool = select_parents(ranked_pop)
             children = recombine(mating_pool)
             candidates = mutate_population(children)
-            pop = select_offspring(pop, candidates)
+            pop = select_offspring(ranked_pop, candidates)
 
             if self.verbose and (i + 1) % int(self.verbose) == 0:
                 best_score = evaluate(ranked_pop[0])
