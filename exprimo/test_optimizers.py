@@ -10,26 +10,27 @@ from optimizers.utils import prefix_heuristic
 batches = 1
 pipeline_batches = 1
 
-ga_args = {
+device_graph_path = '../device_graphs/cluster2-reduced-resnet.json'
+net_path = '../nets/resnet50.json'
+
+args = {
     'plot_fitness_history': True,
     'generations': 500,
     'population_size': 100,
-    'mutation_rate': 0.6,
+    'mutation_rate': 0.4,
     'evolve_mutation_rate': True,
-    'verbose': 5,
+    'verbose': 25,
     'elite_size': 5,
     'max_mutation_rate': 0.9,
     'min_mutation_rate': 0.05,
+    'print_diversity': True
 }
-
-print(ga_args)
-
 # optimizer = RandomHillClimbingOptimizer(patience=100)
 # optimizer = LinearSearchOptimizer(prefix_heuristic(prefix_length=4))
 # optimizer = SimulatedAnnealingOptimizer(temp_schedule=exponential_multiplicative_decay(50, 0.98),
 #                                         steps=30000, batches=batches,
 #                                         pipeline_batches=pipeline_batches, verbose=True)
-optimizer = GAOptimizer(**ga_args)
+optimizer = GAOptimizer(**args)
 # optimizer = GAIndirectOptimizer(population_size=50, mutation_rate=0.05, elite_size=10, steps=500,
 #                                 verbose=False,
 #                                 use_caching=True,
@@ -37,11 +38,14 @@ optimizer = GAOptimizer(**ga_args)
 
 # optimizer = ParticleSwarmOptimizer(w=10, l1=20, l2=10, steps=20)
 
-device_graph = DeviceGraph.load_from_file('../device_graphs/cluster2.json')
-with open('../nets/resnet50.json') as f:
+device_graph = DeviceGraph.load_from_file(device_graph_path)
+with open(net_path) as f:
     net_string = f.read()
 
-print(f'Optimizing using {optimizer}')
+print(f'Optimizing {net_path} on {device_graph_path} using {optimizer}')
+print(args)
+print()
+
 
 best_net = optimizer.optimize(net_string, device_graph)
 net_dict = json.loads(best_net)
