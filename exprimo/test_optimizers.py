@@ -10,7 +10,7 @@ from optimizers.utils import prefix_heuristic
 batches = 1
 pipeline_batches = 1
 
-device_graph_path = '../device_graphs/cluster2-reduced-resnet.json'
+device_graph_path = '../device_graphs/cluster2.json'
 net_path = '../nets/resnet50.json'
 
 args = {
@@ -23,7 +23,8 @@ args = {
     'elite_size': 5,
     'max_mutation_rate': 0.9,
     'min_mutation_rate': 0.05,
-    'print_diversity': True
+    'print_diversity': True,
+    'include_trivial_solutions_in_initialization': True
 }
 # optimizer = RandomHillClimbingOptimizer(patience=100)
 # optimizer = LinearSearchOptimizer(prefix_heuristic(prefix_length=4))

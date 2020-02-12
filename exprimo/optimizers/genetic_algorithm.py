@@ -44,7 +44,8 @@ class GAOptimizer(BaseOptimizer):
                  parent_selection_function='linear', parent_selection_function_s=2,
                  population_size=100, generations=100, plot_fitness_history=False,
                  evolve_mutation_rate=False, elite_size=1, print_diversity=False,
-                 min_mutation_rate=0.05, max_mutation_rate=0.9, **kwargs):
+                 min_mutation_rate=0.05, max_mutation_rate=0.9,
+                 include_trivial_solutions_in_initialization=True, **kwargs):
         """
         Initializes the GA optimizer, setting important hyperparameters.
         :param mutation_rate: The rate at which mutation will be applied, set at the gene level.
@@ -78,6 +79,7 @@ class GAOptimizer(BaseOptimizer):
 
         self.max_mutation_rate = max_mutation_rate
         self.min_mutation_rate = min_mutation_rate
+        self.include_trivial_solutions_in_initialization = include_trivial_solutions_in_initialization
 
         if self.n_threads > 1:
             self.worker_pool = Pool(self.n_threads)
@@ -87,13 +89,21 @@ class GAOptimizer(BaseOptimizer):
         groups = self.create_colocation_groups(get_flattened_layer_names(net_string))
 
         def initialize(population_size):
-            if self.evolve_mutation_rate:
-                return [Candidate(generate_random_placement(len(groups), n_devices),
-                                  min(max(random.normalvariate(self.mutation_rate, 0.1), self.min_mutation_rate),
-                                      self.max_mutation_rate))
-                        for _ in range(population_size)]
+            placements = []
 
-            return [Candidate(generate_random_placement(len(groups), n_devices)) for i in range(population_size)]
+            if self.include_trivial_solutions_in_initialization:
+                for j in range(n_devices):
+                    placements.append([j] * len(groups))
+
+            while len(placements) < self.population_size:
+                placements.append(generate_random_placement(len(groups), n_devices))
+
+            if self.evolve_mutation_rate:
+                return [Candidate(p, min(max(random.normalvariate(self.mutation_rate, 0.1), self.min_mutation_rate),
+                                    self.max_mutation_rate))
+                        for p in placements]
+
+            return [Candidate(p) for p in placements]
 
         def evaluate(individual):
             return _evaluate(individual, net_string, groups, device_graph)
