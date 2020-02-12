@@ -1,5 +1,6 @@
 import json
 import random
+import sys
 
 import numpy as np
 from tqdm import tqdm
@@ -181,7 +182,7 @@ class GAOptimizer(BaseOptimizer):
         if self.plot_fitness_history:
             fitness_history = []
 
-        for i in tqdm(range(self.generations)):
+        for i in tqdm(range(self.generations), file=sys.stdout):
             ranked_pop = rank(pop)
 
             if self.plot_fitness_history:
@@ -195,7 +196,7 @@ class GAOptimizer(BaseOptimizer):
             if self.verbose and (i + 1) % int(self.verbose) == 0:
                 best_score = evaluate(ranked_pop[0])
                 best_time = 1 / best_score
-                print(f'[{i + 1}/{self.generations}] Best current time: {best_time:.2f}ms')
+                tqdm.write(f'[{i + 1}/{self.generations}] Best current time: {best_time:.2f}ms')
 
         if self.plot_fitness_history:
             plt.plot(fitness_history)

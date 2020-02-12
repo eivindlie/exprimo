@@ -16,7 +16,7 @@ pipeline_batches = 1
 #                                         steps=30000, batches=batches,
 #                                         pipeline_batches=pipeline_batches, verbose=True)
 optimizer = GAOptimizer(plot_fitness_history=True, generations=100, mutation_rate=0.3, evolve_mutation_rate=True,
-                        verbose=5, elite_size=5)
+                        verbose=5, elite_size=0)
 # optimizer = GAIndirectOptimizer(population_size=50, mutation_rate=0.05, elite_size=10, steps=500,
 #                                 verbose=False,
 #                                 use_caching=True,
