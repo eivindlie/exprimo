@@ -18,13 +18,17 @@ args = {
     'generations': 500,
     'population_size': 100,
     'mutation_rate': 0.4,
+    'crossover_rate': 0.8,
+    'crossover_type': '1-point',
     'evolve_mutation_rate': True,
     'verbose': 25,
     'elite_size': 5,
     'max_mutation_rate': 0.9,
     'min_mutation_rate': 0.05,
     'print_diversity': True,
-    'include_trivial_solutions_in_initialization': True
+    'include_trivial_solutions_in_initialization': False,
+    'pipeline_batches': pipeline_batches,
+    'batches': batches
 }
 # optimizer = RandomHillClimbingOptimizer(patience=100)
 # optimizer = LinearSearchOptimizer(prefix_heuristic(prefix_length=4))
