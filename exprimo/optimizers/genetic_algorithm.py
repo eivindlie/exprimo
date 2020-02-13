@@ -28,8 +28,9 @@ def _create_parent_selection_function(type, s=2):
         return exponential
 
 
-def _evaluate(individual, net_string, groups, device_graph):
-    return 1 / evaluate_placement(apply_placement(net_string, individual.placement, groups), device_graph)
+def _evaluate(individual, net_string, groups, device_graph, pipeline_batches=1, batches=1):
+    return 1 / evaluate_placement(apply_placement(net_string, individual.placement, groups), device_graph,
+                                  pipeline_batches=pipeline_batches, batches=batches)
 
 
 def _calculate_binary_difference_diversity(population):
@@ -106,11 +107,13 @@ class GAOptimizer(BaseOptimizer):
             return [Candidate(p) for p in placements]
 
         def evaluate(individual):
-            return _evaluate(individual, net_string, groups, device_graph)
+            return _evaluate(individual, net_string, groups, device_graph,
+                             pipeline_batches=self.pipeline_batches, batches=self.batches)
 
         def rank(population):
             if self.n_threads > 1:
-                fn_arg = zip(population, repeat(net_string), repeat(groups), repeat(device_graph))
+                fn_arg = zip(population, repeat(net_string), repeat(groups), repeat(device_graph),
+                             repeat(self.pipeline_batches), repeat(self.batches))
                 fitness_scores = self.worker_pool.starmap(_evaluate, fn_arg)
                 fitness_db = dict(zip(population, fitness_scores))
                 return sorted(population, key=lambda x: -fitness_db[x])
