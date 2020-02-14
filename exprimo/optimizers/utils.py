@@ -57,11 +57,12 @@ def apply_placement(net_string, placement, groups):
         for layer in groups[i]:
             layer_name = layer.name
             if layer_name in net['layers']:
-                net['layers'][layer_name]['device'] = device
+                layer = net['layers'][layer_name]
             else:
                 # Layer is inside a block
                 block_name = layer_name.split('/')[0]
                 layer_subname = layer_name[len(block_name) + 1:]
-                net['layers'][block_name]['layers'][layer_subname]['device'] = device
+                layer = net['layers'][block_name]['layers'][layer_subname]
+            layer['device'] = device
 
     return net
