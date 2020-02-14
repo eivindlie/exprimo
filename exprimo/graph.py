@@ -6,6 +6,9 @@ Changes are made in order to support specific device assignment of layers.
 """
 
 import json
+from copy import deepcopy
+import collections
+
 from paleo import layers
 from paleo.graph import GraphWalker
 
@@ -174,13 +177,52 @@ class ComputationGraph:
                 transformed_parents.append(block_endpoints.get(parent_name, parent_name))
             return transformed_parents
 
+        sharded_layers = {}
+
+        def _shard(layer_spec, endpoint_block=None):
+            devices = layer_spec.params['device']
+            assert isinstance(devices, collections.Sequence), 'devices must be a Sequence for sharding to be allowed!'
+
+            dim_vector_name = None
+            if layer_spec.params['type'] == 'Convolution':
+                dim_vector_name = 'filter'
+            elif layer_spec.params['type'] == 'Pooling':
+                dim_vector_name = 'ksize'
+
+            channel_sizes = [layer_spec.params[dim_vector_name][-1] // len(devices)] * len(devices)
+            i = 0
+            while sum(channel_sizes) < layer_spec.params[dim_vector_name][-1]:
+                channel_sizes[i] += 1
+                i += 1
+
+            shard_names = []
+            for i, device in enumerate(devices):
+                shard_params = deepcopy(layer_spec.params)
+                shard_name = f'{layer_spec.name}_shard{i}'
+                shard_params['device'] = device
+                shard_params[dim_vector_name][-1] = channel_sizes[i]
+                shard_names.append(shard_name)
+                shard_spec = LayerSpec(shard_name, shard_params)
+                assert shard_name not in names_to_specs, f'Duplicate {shard_name}.'
+                names_to_specs[shard_name] = shard_spec
+
+            sharded_layers[layer_name] = shard_names
+            if endpoint_block:
+                sharded_layers[endpoint_block] = shard_names
+
         # Transform all specs into LayerSpec objects
         for layer_name, layer_params in net['layers'].items():
             if layer_params.get('type', None) in ['Block']:
                 block_name = layer_name
                 block_parents = _parents(layer_params['parents'])
 
+                # If block provides an endpoint, subsequent layers can refer to the block name as parent.
+                if 'endpoint' in layer_params:
+                    block_endpoints[block_name] = f'{block_name}/{layer_params["endpoint"]}'
+
                 for sublayer_name, sublayer_params in layer_params['layers'].items():
+                    is_endpoint = 'endpoint' in layer_params and layer_params['endpoint'] == sublayer_name
+
                     sublayer_name = f'{block_name}/{sublayer_name}'
 
                     if 'device' not in sublayer_params and 'device' in layer_params:
@@ -199,18 +241,32 @@ class ComputationGraph:
 
                     sublayer.params['parents'] = sublayer_parents
 
-                    assert sublayer_name not in names_to_specs, f'Duplicate {sublayer_name}.'
-                    names_to_specs[sublayer_name] = sublayer
-
-                # If block provides an endpoint, subsequent layers can refer to the block name as parent.
-                if 'endpoint' in layer_params:
-                    block_endpoints[block_name] = f'{block_name}/{layer_params["endpoint"]}'
+                    if 'device' in sublayer.params and isinstance(sublayer.params['device'], collections.Sequence):
+                        endpoint_block = layer_name if is_endpoint else None
+                        _shard(sublayer, endpoint_block)
+                    else:
+                        assert sublayer_name not in names_to_specs, f'Duplicate {sublayer_name}.'
+                        names_to_specs[sublayer_name] = sublayer
 
             else:
                 layer_params['parents'] = _parents(layer_params['parents'])
                 layer = LayerSpec(layer_name, layer_params)
-                assert layer_name not in names_to_specs, f'Duplicate {layer_name}'
-                names_to_specs[layer_name] = layer
+
+                if 'device' in layer.params and isinstance(layer.params['device'], collections.Sequence):
+                    _shard(layer)
+                else:
+                    assert layer_name not in names_to_specs, f'Duplicate {layer_name}'
+                    names_to_specs[layer_name] = layer
+
+        # Update parents list for children of sharded layers
+        for layer_name, layer_spec in names_to_specs.items():
+            new_parents = []
+            for parent in layer_spec['parents']:
+                if parent in sharded_layers:
+                    new_parents.extend(sharded_layers[parent])
+                else:
+                    new_parents.append(parent)
+            layer_spec.params['parents'] = new_parents
 
         # Add edges
         for layer_name, layer_spec in names_to_specs.items():
