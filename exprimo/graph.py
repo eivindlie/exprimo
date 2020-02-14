@@ -167,73 +167,40 @@ class ComputationGraph:
         names_to_specs = dict()
         block_endpoints = dict()
 
-        layernames_to_splits = dict()
-
-        def _parents(parents, current_split=None):
+        def _parents(parents):
             # Replace with endpoint if parent is a block.
             transformed_parents = []
-
             for parent_name in parents:
-                # Pointing to a specific split is not supported.
-                # Will be replaced by explicit device placement.
-                if '@all' in parent_name:
-                    parent_name = parent_name.replace('@all', '')
-                    splits = layernames_to_splits[parent_name]
-                    for s in range(splits):
-                        transformed_parents.append(block_endpoints.get(parent_name, parent_name) + f'@{s}')
-                elif '@self' in parent_name:
-                    parent_name = parent_name.replace('@self', '')
-                    assert parent_name in layernames_to_splits, f'Parent {parent_name} is not split.'
-                    transformed_parents.append(block_endpoints.get(parent_name, parent_name) + f'@{current_split}')
-                else:
-                    transformed_parents.append(block_endpoints.get(parent_name, parent_name))
+                transformed_parents.append(block_endpoints.get(parent_name, parent_name))
             return transformed_parents
-
-        # Counting splits.
-        # TODO Can probably consider removing splits altogether.
-        for layer_name, layer_params in net['layers'].items():
-            if layer_params.get('type', None) == 'ModelParallel':
-                block_name = layer_name
-                num_splits = layer_params.get('splits', 1)
-                for sublayer_name in layer_params['layers']:
-                    layernames_to_splits[f'{block_name}/{sublayer_name}'] = num_splits
 
         # Transform all specs into LayerSpec objects
         for layer_name, layer_params in net['layers'].items():
-            if layer_params.get('type', None) in ['Block', 'ModelParallel']:
-                is_model_parallel = (layer_params['type'] == 'ModelParallel')
+            if layer_params.get('type', None) in ['Block']:
                 block_name = layer_name
                 block_parents = _parents(layer_params['parents'])
 
-                # For model parallel, the specified layers are repeated
-                num_splits = layer_params.get('splits', 1)
+                for sublayer_name, sublayer_params in layer_params['layers'].items():
+                    sublayer_name = f'{block_name}/{sublayer_name}'
 
-                for s in range(num_splits):
-                    for sublayer_name, sublayer_params in layer_params['layers'].items():
-                        sublayer_name = f'{block_name}/{sublayer_name}'
+                    if 'device' not in sublayer_params and 'device' in layer_params:
+                        sublayer_params['device'] = layer_params['device']
 
-                        if is_model_parallel:
-                            sublayer_name = f'{sublayer_name}@{s}'
-                            sublayer_params['splits'] = num_splits
+                    sublayer = LayerSpec(sublayer_name, sublayer_params)
 
-                        if 'device' not in sublayer_params and 'device' in layer_params:
-                            sublayer_params['device'] = layer_params['device']
+                    # Update parents
+                    if len(sublayer_params['parents']) == 0:
+                        # Use the parent of the block
+                        sublayer_parents = block_parents
+                    else:
+                        # Add blockname to the parent names
+                        sublayer_parents = [f'{block_name}/{n}' for n in sublayer_params['parents']]
+                        sublayer_parents = _parents(sublayer_parents)
 
-                        sublayer = LayerSpec(sublayer_name, sublayer_params)
+                    sublayer.params['parents'] = sublayer_parents
 
-                        # Update parents
-                        if len(sublayer_params['parents']) == 0:
-                            # Use the parent of the block
-                            sublayer_parents = block_parents
-                        else:
-                            # Add blockname to the parent names
-                            sublayer_parents = [f'{block_name}/{n}' for n in sublayer_params['parents']]
-                            sublayer_parents = _parents(sublayer_parents, s)
-
-                        sublayer.params['parents'] = sublayer_parents
-
-                        assert sublayer_name not in names_to_specs, f'Duplicate {sublayer_name}.'
-                        names_to_specs[sublayer_name] = sublayer
+                    assert sublayer_name not in names_to_specs, f'Duplicate {sublayer_name}.'
+                    names_to_specs[sublayer_name] = sublayer
 
                 # If block provides an endpoint, subsequent layers can refer to the block name as parent.
                 if 'endpoint' in layer_params:
