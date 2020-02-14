@@ -42,6 +42,7 @@ def _calculate_binary_difference_diversity(population):
 class GAOptimizer(BaseOptimizer):
 
     def __init__(self, mutation_rate=0.05, crossover_rate=0.8, crossover_type='one-point',
+                 parent_selection_mechanism='rank', tournament_size=10,
                  parent_selection_function='linear', parent_selection_function_s=2,
                  population_size=100, generations=100, plot_fitness_history=False,
                  evolve_mutation_rate=False, elite_size=1, print_diversity=False,
@@ -71,6 +72,9 @@ class GAOptimizer(BaseOptimizer):
         else:
             raise Exception('Invalid crossover type.')
 
+        self.parent_selection_mechanism = parent_selection_mechanism
+
+        self.tournament_size = tournament_size
         self.parent_selection_distribution = _create_parent_selection_function(parent_selection_function,
                                                                                parent_selection_function_s)
         self.generations = generations
@@ -110,35 +114,46 @@ class GAOptimizer(BaseOptimizer):
             return _evaluate(individual, net_string, groups, device_graph,
                              pipeline_batches=self.pipeline_batches, batches=self.batches)
 
-        def rank(population):
+        def rank(population, return_scores=False):
             if self.n_threads > 1:
                 fn_arg = zip(population, repeat(net_string), repeat(groups), repeat(device_graph),
                              repeat(self.pipeline_batches), repeat(self.batches))
                 fitness_scores = self.worker_pool.starmap(_evaluate, fn_arg)
-                fitness_db = dict(zip(population, fitness_scores))
+            else:
+                fitness_scores = list(map(evaluate, population))
+            fitness_db = dict(zip(population, fitness_scores))
+
+            if return_scores:
+                fitness_scores = sorted(fitness_scores, key=lambda x: -x)
+                return sorted(population, key=lambda x: -fitness_db[x]), fitness_scores
+            else:
                 return sorted(population, key=lambda x: -fitness_db[x])
-            return sorted(population, key=lambda x: -evaluate(x))
 
-        def select_parents(population, points=None):
-            if points is None:
-                points = len(population)
-
-            prob_dist = self.parent_selection_distribution(points)
-            cum_dist = np.zeros(len(population))
-            cum_sum = 0
-            for i in range(len(population)):
-                cum_sum += prob_dist[i]
-                cum_dist[i] = cum_sum
+        def select_parents(population, fitness_scores, n_parents=None):
             mating_pool = []
+            if n_parents is None:
+                n_parents = len(population)
 
-            i = 0
-            r = random.random() * 1 / points
-            while len(mating_pool) < points:
-                while r <= cum_dist[i]:
-                    mating_pool.append(population[i])
-                    r += 1 / points
-                i += 1
+            if self.parent_selection_mechanism == 'rank':
+                prob_dist = self.parent_selection_distribution(n_parents)
+                cum_dist = np.zeros(len(population))
+                cum_sum = 0
+                for i in range(len(population)):
+                    cum_sum += prob_dist[i]
+                    cum_dist[i] = cum_sum
 
+                i = 0
+                r = random.random() * 1 / n_parents
+                while len(mating_pool) < n_parents:
+                    while r <= cum_dist[i]:
+                        mating_pool.append(population[i])
+                        r += 1 / n_parents
+                    i += 1
+            elif self.parent_selection_mechanism == 'tournament':
+                while len(mating_pool) < n_parents:
+                    competitors = random.sample(tuple(zip(population, fitness_scores)), self.tournament_size)
+                    winner = max(competitors, key=lambda x: x[1])[0]
+                    mating_pool.append(winner)
             return mating_pool
 
         def crossover(parent1, parent2):
@@ -227,18 +242,18 @@ class GAOptimizer(BaseOptimizer):
             diversity_history = []
 
         for i in tqdm(range(self.generations), file=sys.stdout):
-            ranked_pop = rank(pop)
+            ranked_pop, fitness_scores = rank(pop, return_scores=True)
 
             if self.plot_fitness_history:
-                fitness_history.append(1 / evaluate(ranked_pop[0]))
+                fitness_history.append(1 / fitness_scores[0])
 
-            mating_pool = select_parents(ranked_pop)
+            mating_pool = select_parents(ranked_pop, fitness_scores)
             children = recombine(mating_pool)
             candidates = mutate_population(children)
             pop = select_offspring(ranked_pop, candidates)
 
             if self.verbose and (i + 1) % int(self.verbose) == 0:
-                best_score = evaluate(ranked_pop[0])
+                best_score = fitness_scores[0]
                 best_time = 1 / best_score
                 if self.print_diversity:
                     diversity = _calculate_binary_difference_diversity(ranked_pop)

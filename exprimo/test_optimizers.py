@@ -11,7 +11,7 @@ batches = 1
 pipeline_batches = 1
 
 device_graph_path = '../device_graphs/cluster2.json'
-net_path = '../nets/resnet50.json'
+net_path = '../nets/resnet34.json'
 
 args = {
     'plot_fitness_history': True,
@@ -20,6 +20,7 @@ args = {
     'mutation_rate': 0.4,
     'crossover_rate': 0.8,
     'crossover_type': '1-point',
+    'parent_selection_mechanism': 'rank',
     'evolve_mutation_rate': True,
     'verbose': 25,
     'elite_size': 5,
