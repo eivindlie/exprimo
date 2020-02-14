@@ -259,11 +259,21 @@ class ComputationGraph:
                     names_to_specs[layer_name] = layer
 
         # Update parents list for children of sharded layers
-        for layer_name, layer_spec in names_to_specs.items():
+        for layer_name, layer_spec in names_to_specs.copy().items():
             new_parents = []
             for parent in layer_spec['parents']:
                 if parent in sharded_layers:
-                    new_parents.extend(sharded_layers[parent])
+                    conc_layer_params = {
+                        'type': 'Concatenate',
+                        'parents': sharded_layers[parent],
+                        'device': layer_spec.params['device'],
+                        'dim': 3
+                    }
+                    conc_layer_name = f'{layer_name}_conc_{parent}'
+                    conc_layer_spec = LayerSpec(conc_layer_name, conc_layer_params)
+                    names_to_specs[conc_layer_name] = conc_layer_spec
+
+                    new_parents.append(conc_layer_name)
                 else:
                     new_parents.append(parent)
             layer_spec.params['parents'] = new_parents
