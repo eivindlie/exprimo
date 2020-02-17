@@ -10,7 +10,7 @@
                 3
             ],
             "parents": [],
-            "device": 2
+            "device": 1
         },
         "conv1": {
             "type": "Convolution",
@@ -30,7 +30,7 @@
                 1
             ],
             "padding": "SAME",
-            "device": 2
+            "device": 1
         },
         "pool1": {
             "type": "Pooling",
@@ -50,7 +50,7 @@
                 1
             ],
             "padding": "VALID",
-            "device": 2
+            "device": 1
         },
         "res2a_branch1": {
             "type": "Convolution",
@@ -1246,14 +1246,14 @@
                 "pool5"
             ],
             "num_outputs": 1000,
-            "device": 0
+            "device": 1
         },
         "prob": {
             "type": "Softmax",
             "parents": [
                 "fc1000"
             ],
-            "device": 0
+            "device": 1
         }
     }
 }
