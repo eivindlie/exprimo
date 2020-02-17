@@ -3,6 +3,7 @@ import random
 import sys
 from multiprocessing import Pool
 from itertools import repeat
+from collections import Sequence
 
 import numpy as np
 from tqdm import tqdm
@@ -213,6 +214,18 @@ class GAOptimizer(BaseOptimizer):
             return children
 
         def mutate_single_gene(gene):
+            if random.random() < 0.2:
+                if type(gene) != list:
+                    if isinstance(gene, Sequence):
+                        gene = list(gene)
+                    else:
+                        gene = [gene]
+
+                new_gene = list(set(gene + [random.randint(0, n_devices - 1)]))
+                if len(new_gene) == 1:
+                    new_gene = new_gene[0]
+
+                return new_gene
             return random.randint(0, n_devices - 1)
 
         def mutate(individual):
