@@ -7,6 +7,8 @@ class FlopsProfiler:
     def profile(layer_spec, device, backward=False, batch_size=None):
         layer = layer_spec.operation
 
+        assert layer is not None, f'{layer_spec} has no operation'
+
         if batch_size:
             layer.batch_size = batch_size
 
