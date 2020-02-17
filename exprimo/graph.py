@@ -59,21 +59,26 @@ class ComputationGraph:
         net = json.loads(string)
         self._build(net)
 
-    def _create_topological_order(self):
+    def _create_topological_order(self, names_to_specs):
+        incoming = {}
+        S = []
 
-        def flatten(layer):
-            if isinstance(layer, (tuple, list)):
-                _layer_list = []
+        self.topological_order = []
 
-                for l in layer:
-                    _layer_list.extend(flatten(l))
-                return _layer_list
-            return [layer]
+        for name, spec in names_to_specs.items():
+            n_incoming = len(spec.inbounds)
+            incoming[spec] = n_incoming
+            if n_incoming == 0:
+                S.append(spec)
 
-        if self.topological_order is None:
-            self.topological_order = []
-            for layer in self.nested_list:
-                self.topological_order.extend(flatten(layer))
+        while len(S):
+            node = S.pop()
+            self.topological_order.append(node)
+
+            for n in node.outbounds:
+                incoming[n] -= 1
+                if incoming[n] == 0:
+                    S.append(n)
 
     def _attach_layer_op(self):
         names_to_specs = dict()
@@ -294,9 +299,7 @@ class ComputationGraph:
             if self.force_device is not None:
                 layer_spec.params['device'] = self.force_device
 
-        graph_walker = GraphWalker(names_to_specs)
-        self.nested_list = graph_walker.start(names_to_specs['data'])
-        self._create_topological_order()
+        self._create_topological_order(names_to_specs)
         if self.attach_ops:
             self._attach_layer_op()
 
