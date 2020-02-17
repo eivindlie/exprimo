@@ -191,8 +191,12 @@ class ComputationGraph:
             dim_vector_name = None
             if layer_spec.params['type'] == 'Convolution':
                 dim_vector_name = 'filter'
-            elif layer_spec.params['type'] == 'Pooling':
-                dim_vector_name = 'ksize'
+            # elif layer_spec.params['type'] == 'Pooling':
+            #     dim_vector_name = 'ksize'
+            else:
+                layer_spec.params['device'] = layer_spec.params['device'][0]
+                names_to_specs[layer_spec.name] = layer_spec
+                return
 
             channel_sizes = [layer_spec.params[dim_vector_name][-1] // len(devices)] * len(devices)
             i = 0
