@@ -8,7 +8,7 @@ from plotting import plot_event_trace
 from exprimo.optimizers.utils import prefix_heuristic, create_colocation_groups, apply_placement
 
 if __name__ == '__main__':
-    graph_file = '../nets/resnet50_sharded.json'
+    graph_file = '../nets/resnet50.json'
     device_file = '../device_graphs/cluster2.json'
     batches = 1
     pipeline_batches = 1
