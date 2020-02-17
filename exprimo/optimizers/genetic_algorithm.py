@@ -208,18 +208,21 @@ class GAOptimizer(BaseOptimizer):
                 children.extend(crossover(mating_pool[i], mating_pool[i + 1]))
             return children
 
+        def mutate_single_gene(gene):
+            return random.randint(0, n_devices - 1)
+
         def mutate(individual):
             if self.evolve_mutation_rate:
                 mutation_rate = individual.mutation_rate
                 new_mutation_rate = max(min(mutation_rate + random.normalvariate(0, 0.05), self.max_mutation_rate),
                                         self.min_mutation_rate)
                 placement = individual.placement
-                placement = [random.randint(0, n_devices - 1) if random.random() < new_mutation_rate else g
+                placement = [mutate_single_gene(g) if random.random() < new_mutation_rate else g
                              for g in placement]
 
                 return Candidate(placement, new_mutation_rate)
             else:
-                placement = [random.randint(0, n_devices - 1) if random.random() < self.mutation_rate else g
+                placement = [mutate_single_gene(g) if random.random() < self.mutation_rate else g
                              for g in individual.placement]
                 return Candidate(placement)
 
