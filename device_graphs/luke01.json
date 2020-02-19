@@ -46,7 +46,7 @@
       "neighbours": [
         {
           "comm_channel": 2,
-          "device": 1
+          "device": 0
         },
         {
           "comm_channel": 0,
