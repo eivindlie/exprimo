@@ -43,6 +43,7 @@ def _calculate_binary_difference_diversity(population):
 class GAOptimizer(BaseOptimizer):
 
     def __init__(self, mutation_rate=0.05, crossover_rate=0.8, crossover_type='one-point',
+                 mutation_sharding_rate=0.2,
                  parent_selection_mechanism='rank', tournament_size=10,
                  parent_selection_function='linear', parent_selection_function_s=2,
                  population_size=100, generations=100, plot_fitness_history=False,
@@ -64,6 +65,8 @@ class GAOptimizer(BaseOptimizer):
         self.crossover_rate = crossover_rate
         self.population_size = population_size
         self.elite_size = elite_size
+
+        self.mutation_sharding_rate = mutation_sharding_rate
 
         if crossover_type == 'uniform':
             self.crossover = 'uniform'
@@ -214,7 +217,7 @@ class GAOptimizer(BaseOptimizer):
             return children
 
         def mutate_single_gene(gene):
-            if random.random() < 0.2:
+            if random.random() < self.mutation_sharding_rate:
                 if type(gene) != list:
                     if isinstance(gene, Sequence):
                         gene = list(gene)
