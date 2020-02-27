@@ -17,6 +17,7 @@ args = {
     'generations': 500,
     'population_size': 100,
     'mutation_rate': 0.4,
+    'mutation_sharding_rate': 0,
     'crossover_rate': 0.8,
     'crossover_type': '1-point',
     'parent_selection_mechanism': 'rank',
@@ -69,3 +70,20 @@ plot_event_trace(events, simulator)
 print('\n')
 # print(f'Best discovered configuration: {[layer["device"] for layer in net_dict["layers"].values()]}')
 print(f'Execution time: {execution_time:.2f}ms')
+
+
+device_assignment = {}
+
+for layer_name in net_dict['layers'].keys():
+    layer = net_dict['layers'][layer_name]
+
+    device_assignment[layer] = layer['device']
+
+    if layer['type'] == 'Block':
+        for sublayer_name in layer['layers'].keys():
+            sublayer = layer['layers'][sublayer_name]
+            # TODO Should probably use a combination of block and sublayer names...
+            device_assignment[sublayer_name] = layer['device']
+
+with open(f'experiment_results/device_assignments/resnet50.json', 'w') as f:
+    json.dump(device_assignment, f)
