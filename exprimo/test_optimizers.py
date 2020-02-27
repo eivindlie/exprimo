@@ -14,7 +14,7 @@ net_path = 'nets/resnet50.json'
 
 args = {
     'plot_fitness_history': True,
-    'generations': 500,
+    'generations': 50,
     'population_size': 100,
     'mutation_rate': 0.4,
     'mutation_sharding_rate': 0,
@@ -86,4 +86,4 @@ for layer_name in net_dict['layers'].keys():
             device_assignment[sublayer_name] = layer['device']
 
 with open(f'experiment_results/device_assignments/resnet50.json', 'w') as f:
-    json.dump(device_assignment, f)
+    json.dump(device_assignment, f, indent=4)
