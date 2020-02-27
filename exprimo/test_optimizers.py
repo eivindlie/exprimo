@@ -77,7 +77,7 @@ device_assignment = {}
 for layer_name in net_dict['layers'].keys():
     layer = net_dict['layers'][layer_name]
 
-    device_assignment[layer] = layer['device']
+    device_assignment[layer_name] = layer['device']
 
     if layer['type'] == 'Block':
         for sublayer_name in layer['layers'].keys():
