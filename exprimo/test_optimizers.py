@@ -10,8 +10,8 @@ from optimizers.utils import prefix_heuristic
 batches = 1
 pipeline_batches = 1
 
-device_graph_path = '../device_graphs/malvik.json'
-net_path = '../nets/resnet50.json'
+device_graph_path = 'device_graphs/malvik.json'
+net_path = 'nets/resnet50.json'
 
 args = {
     'plot_fitness_history': True,
@@ -76,7 +76,7 @@ device_assignment = {}
 for layer_name in net_dict['layers'].keys():
     layer = net_dict['layers'][layer_name]
 
-    device_assignment[layer] = layer['device']
+    device_assignment[layer_name] = layer['device']
 
     if layer['type'] == 'Block':
         for sublayer_name in layer['layers'].keys():
