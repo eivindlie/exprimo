@@ -3,7 +3,6 @@ import json
 from exprimo import DeviceGraph, Simulator, plot_event_trace, ComputationGraph
 from exprimo.optimizers import SimulatedAnnealingOptimizer, HillClimbingOptimizer, RandomHillClimbingOptimizer, \
     GAOptimizer, exponential_multiplicative_decay
-from optimizers.genetic_algorithm_indirect import GAIndirectOptimizer
 from optimizers.particle_swarm_optimizer import ParticleSwarmOptimizer
 from optimizers.utils import prefix_heuristic
 
