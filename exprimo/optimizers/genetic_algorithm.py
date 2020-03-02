@@ -47,7 +47,8 @@ class GAOptimizer(BaseOptimizer):
                  population_size=100, generations=100, plot_fitness_history=False,
                  evolve_mutation_rate=False, elite_size=1, print_diversity=False,
                  min_mutation_rate=0.05, max_mutation_rate=0.9,
-                 include_trivial_solutions_in_initialization=True, **kwargs):
+                 include_trivial_solutions_in_initialization=True,
+                 checkpoint_dir=None, checkpoint_period=-1, **kwargs):
         """
         Initializes the GA optimizer, setting important hyperparameters.
         :param mutation_rate: The rate at which mutation will be applied, set at the gene level.
@@ -88,6 +89,9 @@ class GAOptimizer(BaseOptimizer):
 
         if self.n_threads > 1:
             self.worker_pool = Pool(self.n_threads)
+
+        self.checkpoint_dir = checkpoint_dir
+        self.checkpoint_period = checkpoint_period
 
     def optimize(self, net_string, device_graph):
         n_devices = len(device_graph.devices)
@@ -243,6 +247,11 @@ class GAOptimizer(BaseOptimizer):
 
         for i in tqdm(range(self.generations), file=sys.stdout):
             ranked_pop, fitness_scores = rank(pop, return_scores=True)
+
+            if self.checkpoint_period != -1 and i % self.checkpoint_period == 0:
+                best_solution = apply_placement(net_string, ranked_pop[0].placement, groups)
+                with open(f'{self.checkpoint_dir}/gen_{i}.json', 'w') as f:
+                    json.dump(best_solution, f)
 
             if self.plot_fitness_history:
                 fitness_history.append(1 / fitness_scores[0])

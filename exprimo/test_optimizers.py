@@ -9,8 +9,8 @@ from optimizers.utils import prefix_heuristic
 batches = 1
 pipeline_batches = 1
 
-device_graph_path = '../device_graphs/cluster2.json'
-net_path = '../nets/resnet34.json'
+device_graph_path = 'device_graphs/cluster2.json'
+net_path = 'nets/resnet34.json'
 
 args = {
     'plot_fitness_history': True,
@@ -28,7 +28,9 @@ args = {
     'print_diversity': True,
     'include_trivial_solutions_in_initialization': False,
     'pipeline_batches': pipeline_batches,
-    'batches': batches
+    'batches': batches,
+    'checkpoint_period': 25,
+    'checkpoint_dir': 'experiment_results/sim_real_comp/nets'
 }
 # optimizer = RandomHillClimbingOptimizer(patience=100)
 # optimizer = LinearSearchOptimizer(prefix_heuristic(prefix_length=4))
