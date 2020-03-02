@@ -245,13 +245,22 @@ class GAOptimizer(BaseOptimizer):
         if self.print_diversity:
             diversity_history = []
 
+        if self.checkpoint_period != -1:
+            with open(f'{self.checkpoint_dir}/scores.csv', 'w') as f:
+                f.write('')
+
         for i in tqdm(range(self.generations), file=sys.stdout):
             ranked_pop, fitness_scores = rank(pop, return_scores=True)
 
             if self.checkpoint_period != -1 and i % self.checkpoint_period == 0:
                 best_solution = apply_placement(net_string, ranked_pop[0].placement, groups)
+                best_solution['score'] = 1 / fitness_scores[0]
+
+                with open(f'{self.checkpoint_dir}/scores.csv', 'a') as f:
+                    f.write(f'{i}, {best_solution["score"]}')
+
                 with open(f'{self.checkpoint_dir}/gen_{i}.json', 'w') as f:
-                    json.dump(best_solution, f)
+                    json.dump(best_solution, f, indent=4)
 
             if self.plot_fitness_history:
                 fitness_history.append(1 / fitness_scores[0])
