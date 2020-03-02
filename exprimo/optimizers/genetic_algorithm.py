@@ -278,7 +278,7 @@ class GAOptimizer(BaseOptimizer):
                 with open(f'{self.checkpoint_dir}/scores.csv', 'a') as f:
                     f.write(f'{i}, {best_solution["score"]}\n')
 
-                with open(f'{self.checkpoint_dir}/gen_{i}.json', 'w') as f:
+                with open(f'{self.checkpoint_dir}/gen_{i:04}.json', 'w') as f:
                     json.dump(best_solution, f, indent=4)
 
             if self.plot_fitness_history:
