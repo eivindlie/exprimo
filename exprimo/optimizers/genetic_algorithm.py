@@ -276,7 +276,7 @@ class GAOptimizer(BaseOptimizer):
                 best_solution['score'] = 1 / fitness_scores[0]
 
                 with open(f'{self.checkpoint_dir}/scores.csv', 'a') as f:
-                    f.write(f'{i}, {best_solution["score"]}')
+                    f.write(f'{i}, {best_solution["score"]}\n')
 
                 with open(f'{self.checkpoint_dir}/gen_{i}.json', 'w') as f:
                     json.dump(best_solution, f, indent=4)
