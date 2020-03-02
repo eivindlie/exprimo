@@ -14,7 +14,7 @@ net_path = 'nets/resnet50.json'
 
 args = {
     'plot_fitness_history': True,
-    'generations': 50,
+    'generations': 500,
     'population_size': 100,
     'mutation_rate': 0.4,
     'mutation_sharding_rate': 0,
@@ -30,9 +30,9 @@ args = {
     'include_trivial_solutions_in_initialization': False,
     'pipeline_batches': pipeline_batches,
     'batches': batches,
-    'checkpoint_period': 25,
-    'checkpoint_dir': 'experiment_results/sim_real_comp/nets',
-    'n_threads': -1
+    'n_threads': -1,
+    'checkpoint_period': 5,
+    'checkpoint_dir': 'experiment_results/sim_real_comp/nets'
 }
 # optimizer = RandomHillClimbingOptimizer(patience=100)
 # optimizer = LinearSearchOptimizer(prefix_heuristic(prefix_length=4))
@@ -71,19 +71,3 @@ print('\n')
 # print(f'Best discovered configuration: {[layer["device"] for layer in net_dict["layers"].values()]}')
 print(f'Execution time: {execution_time:.2f}ms')
 
-
-device_assignment = {}
-
-for layer_name in net_dict['layers'].keys():
-    layer = net_dict['layers'][layer_name]
-
-    device_assignment[layer_name] = layer['device']
-
-    if layer['type'] == 'Block':
-        for sublayer_name in layer['layers'].keys():
-            sublayer = layer['layers'][sublayer_name]
-            # TODO Should probably use a combination of block and sublayer names...
-            device_assignment[sublayer_name] = layer['device']
-
-with open(f'experiment_results/device_assignments/resnet50.json', 'w') as f:
-    json.dump(device_assignment, f, indent=4)
