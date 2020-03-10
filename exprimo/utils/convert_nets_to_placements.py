@@ -19,8 +19,7 @@ for file in os.listdir(directory):
                 if layer['type'] == 'Block':
                     for sublayer_name in layer['layers'].keys():
                         sublayer = layer['layers'][sublayer_name]
-                        # TODO Should probably use a combination of block and sublayer names...
-                        device_assignment[sublayer_name] = layer['device']
+                        device_assignment[f'{layer_name}/{sublayer_name}'] = layer['device']
 
             with open(os.path.join(save_directory, file), 'w') as f:
                 json.dump(device_assignment, f, indent=4)
