@@ -1,8 +1,8 @@
 import os
 import json
 
-directory = 'nets'
-save_directory = 'nets/device_assignments'
+directory = 'experiment_results/sim_real_comp/inception/nets'
+save_directory = 'experiment_results/sim_real_comp/inception/device_assignments'
 
 device_assignment = {}
 
@@ -23,7 +23,7 @@ for file in os.listdir(directory):
                     for sublayer_name in layer['layers'].keys():
                         sublayer = layer['layers'][sublayer_name]
                         try:
-                            device_assignment[f'{layer_name}/{sublayer_name}'] = layer['device']
+                            device_assignment[f'{layer_name}/{sublayer_name}'] = sublayer['device']
                         except KeyError:
                             device_assignment[f'{layer_name}/{sublayer_name}'] = 0
 
