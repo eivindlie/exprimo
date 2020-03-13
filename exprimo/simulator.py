@@ -28,7 +28,8 @@ class Simulator:
 
     def simulate(self, batch_size=None, batches=1, check_memory_usage=True, pipeline_batches=1,
                  memory_penalization_factor=None,
-                 print_event_trace=True, include_backward=True, return_event_trace=False, print_memory_usage=True):
+                 print_event_trace=True, include_backward=True, return_event_trace=False, print_memory_usage=True,
+                 comp_penalization=None, comm_penalization=None):
         op_queues = [deque() for device in self.device_graph.devices]
         transfer_queues = [deque() for comm_channel in self.device_graph.comm_channels]
         comm_free = [True for i in range(len(self.device_graph.comm_channels))]
@@ -82,7 +83,8 @@ class Simulator:
 
         def run_op(op, backward, start_time, batch=0):
             device = self.device_graph.devices[op['device']].device
-            run_time = FlopsProfiler.profile(op, device, backward, batch_size)
+            run_time = FlopsProfiler.profile(op, device, backward, batch_size, comp_penalization=comp_penalization,
+                                             comm_penalization=comm_penalization)
             end_time = start_time + run_time
             event_queue.push(Event('op_done', op['device'], start_time,
                                    end_time=end_time, operation=(op, backward, batch), batch=batch))
@@ -98,7 +100,8 @@ class Simulator:
             transfer_time = 0
             for transferred_op in transferred_ops:
                 transfer_time += TransferProfiler.profile(transferred_op, comm_channel, parent_device,
-                                                          backward, batch_size)
+                                                          backward, batch_size, comm_penalization=comm_penalization,
+                                                          comp_penalization=comp_penalization)
             end_time = start_time + transfer_time
             event_queue.push(Event('transfer_done', comm_channel_id, start_time,
                                    operation=((op, backward, batch), target_ops),

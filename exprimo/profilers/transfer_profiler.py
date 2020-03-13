@@ -10,7 +10,8 @@ def calculate_tensor_size(shape, dtype='float32'):
 
 class TransferProfiler:
     @staticmethod
-    def profile(layer_spec, comm_channel, parent_device, backward=False, batch_size=None, dtype='float32'):
+    def profile(layer_spec, comm_channel, parent_device, backward=False, batch_size=None, dtype='float32',
+                comm_penalization=None, comp_penalization=None):
         layer = layer_spec.operation
 
         if batch_size:
@@ -21,6 +22,8 @@ class TransferProfiler:
         profiler_options.direction = direction
         profiler_options.use_cudnn_heuristics = False
         profiler_options.include_bias_and_activation = False
+        profiler_options.ppp_comp = comp_penalization
+        profiler_options.ppp_comm = comm_penalization
 
         profiler = PaleoFlopsProfiler(profiler_options, parent_device)
 
