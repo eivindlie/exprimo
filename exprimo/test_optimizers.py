@@ -33,7 +33,7 @@ args = {
     'batches': batches,
     'n_threads': -1,
     'checkpoint_period': 5,
-    'checkpoint_dir': 'experiment_results/sim_real_comp/nets',
+    'checkpoint_dir': 'experiment_results/sim_real_comp/resnet/nets',
 
     'benchmarking_population_size': 100,
     'benchmarking_generations': 10,
