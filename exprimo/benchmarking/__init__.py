@@ -1,0 +1,11 @@
+from statistics import mean
+from exprimo.benchmarking.benchmark import benchmark_with_placement
+
+
+def create_benchmark_function(model_type, batches=50, drop_batches=1, aggregate_function=mean, lr=0.01):
+    def benchmark_placement(placement):
+        batch_times = benchmark_with_placement(model_type, placement, batches=batches, drop_batches=drop_batches,
+                                               aggregate_function=aggregate_function, lr=lr)
+        return aggregate_function(batch_times)
+
+    return benchmark_placement
