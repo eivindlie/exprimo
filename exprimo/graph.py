@@ -9,8 +9,8 @@ import json
 from copy import deepcopy
 import collections
 
-from paleo import layers
-from paleo.graph import GraphWalker
+from paleo.paleo import layers
+from paleo.paleo.graph import GraphWalker
 
 
 class LayerSpec:
