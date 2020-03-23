@@ -35,7 +35,7 @@ args = {
     'checkpoint_period': 5,
     'checkpoint_dir': 'experiment_results/sim_real_comp/resnet/nets',
 
-    'benchmarking_population_size': 100,
+    'benchmarking_population_size': 30,
     'benchmarking_generations': 10,
     'benchmarking_function': create_benchmark_function('resnet'),
 }

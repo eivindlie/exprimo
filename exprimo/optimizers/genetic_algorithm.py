@@ -325,6 +325,11 @@ class GAOptimizer(BaseOptimizer):
 
         if self.benchmarking_generations and self.benchmarking_function:
             print('Optimizing with benchmarking...')
+
+            if self.benchmarking_population_size < self.population_size:
+                ranked_pop = rank(pop)
+                pop = select_offspring(ranked_pop, pop, population_size=self.benchmarking_population_size)
+
             run_optimization(self.benchmarking_generations, benchmarking_function=self.benchmarking_function,
                              population_size=self.benchmarking_population_size, start_generation=self.generations)
 
