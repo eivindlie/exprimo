@@ -7,8 +7,8 @@ from collections import deque, defaultdict
 
 import numpy as np
 
-from device import DeviceGraph
-from graph import ComputationGraph
+from exprimo.device import DeviceGraph
+from exprimo.graph import ComputationGraph
 from exprimo.profilers import FlopsProfiler
 from exprimo.profilers import TransferProfiler
 

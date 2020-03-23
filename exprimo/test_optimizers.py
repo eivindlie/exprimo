@@ -4,8 +4,8 @@ from exprimo import DeviceGraph, Simulator, plot_event_trace, ComputationGraph
 from exprimo.optimizers import SimulatedAnnealingOptimizer, HillClimbingOptimizer, RandomHillClimbingOptimizer, \
     GAOptimizer, exponential_multiplicative_decay
 from exprimo.benchmarking import create_benchmark_function
-from optimizers.particle_swarm_optimizer import ParticleSwarmOptimizer
-from optimizers.utils import prefix_heuristic
+from exprimo.optimizers.particle_swarm_optimizer import ParticleSwarmOptimizer
+from exprimo.optimizers.utils import prefix_heuristic
 
 batches = 1
 pipeline_batches = 1

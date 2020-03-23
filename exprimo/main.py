@@ -1,9 +1,9 @@
 import json
 
-from graph import ComputationGraph
-from device import DeviceGraph
-from simulator import Simulator
-from plotting import plot_event_trace
+from exprimo.graph import ComputationGraph
+from exprimo.device import DeviceGraph
+from exprimo.simulator import Simulator
+from exprimo.plotting import plot_event_trace
 
 from exprimo.optimizers.utils import prefix_heuristic, create_colocation_groups, apply_placement
 
