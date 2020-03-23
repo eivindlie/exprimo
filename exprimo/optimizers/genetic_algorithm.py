@@ -30,9 +30,11 @@ def _create_parent_selection_function(type, s=2):
         return exponential
 
 
-def _evaluate(individual, net_string, groups, device_graph, pipeline_batches=1, batches=1):
+def _evaluate(individual, net_string, groups, device_graph, pipeline_batches=1, batches=1, simulator_comp_penalty=1,
+              simulator_comm_penalty=1):
     return 1 / evaluate_placement(apply_placement(net_string, individual.placement, groups), device_graph,
-                                  pipeline_batches=pipeline_batches, batches=batches)
+                                  pipeline_batches=pipeline_batches, batches=batches,
+                                  comp_penalty=simulator_comp_penalty, comm_penalty=simulator_comm_penalty)
 
 
 def _calculate_binary_difference_diversity(population):
@@ -53,6 +55,7 @@ class GAOptimizer(BaseOptimizer):
                  benchmarking_population_size=100, benchmarking_generations=50,
                  benchmarking_function=None,
                  include_trivial_solutions_in_initialization=True,
+                 simulator_comp_penalty=1, simulator_comm_penalty=1,
                  checkpoint_dir=None, checkpoint_period=-1, **kwargs):
         """
         Initializes the GA optimizer, setting important hyperparameters.
@@ -72,6 +75,9 @@ class GAOptimizer(BaseOptimizer):
         self.benchmarking_population_size = benchmarking_population_size
         self.benchmarking_generations = benchmarking_generations
         self.benchmarking_function = benchmarking_function
+
+        self.simulator_comp_penalty = simulator_comp_penalty
+        self.simulator_comm_penalty = simulator_comm_penalty
 
         self.mutation_sharding_rate = mutation_sharding_rate
 
@@ -127,7 +133,9 @@ class GAOptimizer(BaseOptimizer):
 
         def evaluate(individual):
             return _evaluate(individual, net_string, groups, device_graph,
-                             pipeline_batches=self.pipeline_batches, batches=self.batches)
+                             pipeline_batches=self.pipeline_batches, batches=self.batches,
+                             simulator_comm_penalty=self.simulator_comm_penalty,
+                             simulator_comp_penalty=self.simulator_comp_penalty)
 
         def rank(population, return_scores=False, benchmarking_function=None):
             if benchmarking_function:
@@ -139,7 +147,8 @@ class GAOptimizer(BaseOptimizer):
             else:
                 if self.worker_pool:
                     fn_arg = zip(population, repeat(net_string), repeat(groups), repeat(device_graph),
-                                 repeat(self.pipeline_batches), repeat(self.batches))
+                                 repeat(self.pipeline_batches), repeat(self.batches),
+                                 repeat(self.simulator_comp_penalty), repeat(self.simulator_comm_penalty))
                     fitness_scores = self.worker_pool.starmap(_evaluate, fn_arg)
                 else:
                     fitness_scores = list(map(evaluate, population))

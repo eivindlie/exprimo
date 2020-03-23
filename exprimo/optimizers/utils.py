@@ -35,7 +35,7 @@ def generate_random_placement(n_groups, n_devices):
 
 
 def evaluate_placement(net, device_graph, batch_size=128, batches=1, pipeline_batches=1, memory_penalization_factor=1,
-                       noise_std=0):
+                       noise_std=0, comp_penalty=1, comm_penalty=1):
     net_string = json.dumps(net)
     graph = ComputationGraph()
     graph.load_from_string(net_string)
@@ -43,7 +43,8 @@ def evaluate_placement(net, device_graph, batch_size=128, batches=1, pipeline_ba
 
     time = simulator.simulate(print_event_trace=False, print_memory_usage=False,
                               batch_size=batch_size, batches=batches, pipeline_batches=pipeline_batches,
-                              memory_penalization_factor=memory_penalization_factor)
+                              memory_penalization_factor=memory_penalization_factor, comp_penalization=comp_penalty,
+                              comm_penalization=comm_penalty)
 
     if noise_std:
         time += random.normalvariate(0, noise_std)
