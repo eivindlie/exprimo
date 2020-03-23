@@ -323,6 +323,9 @@ class GAOptimizer(BaseOptimizer):
         print('Optimizing with simulator...')
         run_optimization(self.generations)
 
+        self.worker_pool.close()
+        self.worker_pool = None
+
         if self.benchmarking_generations and self.benchmarking_function:
             print('Optimizing with benchmarking...')
 
