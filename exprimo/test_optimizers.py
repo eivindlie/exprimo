@@ -3,6 +3,7 @@ import json
 from exprimo import DeviceGraph, Simulator, plot_event_trace, ComputationGraph
 from exprimo.optimizers import SimulatedAnnealingOptimizer, HillClimbingOptimizer, RandomHillClimbingOptimizer, \
     GAOptimizer, exponential_multiplicative_decay
+from exprimo.benchmarking import create_benchmark_function
 from optimizers.particle_swarm_optimizer import ParticleSwarmOptimizer
 from optimizers.utils import prefix_heuristic
 
@@ -14,7 +15,7 @@ net_path = 'nets/resnet50.json'
 
 args = {
     'plot_fitness_history': True,
-    'generations': 500,
+    'generations': 100,
     'population_size': 100,
     'mutation_rate': 0.4,
     'mutation_sharding_rate': 0,
@@ -32,7 +33,11 @@ args = {
     'batches': batches,
     'n_threads': -1,
     'checkpoint_period': 5,
-    'checkpoint_dir': 'experiment_results/sim_real_comp/nets'
+    'checkpoint_dir': 'experiment_results/sim_real_comp/nets',
+
+    'benchmarking_population_size': 100,
+    'benchmarking_generations': 10,
+    'benchmarking_function': create_benchmark_function('resnet'),
 }
 # optimizer = RandomHillClimbingOptimizer(patience=100)
 # optimizer = LinearSearchOptimizer(prefix_heuristic(prefix_length=4))

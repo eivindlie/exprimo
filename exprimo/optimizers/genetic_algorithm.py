@@ -303,7 +303,8 @@ class GAOptimizer(BaseOptimizer):
                         diversity = _calculate_binary_difference_diversity(ranked_pop)
                         diversity_history.append(diversity)
                         tqdm.write(
-                            f'[{i + 1}/{self.generations}] Best current time: {best_time:.2f}ms Diversity: {diversity:.4f}')
+                            f'[{i + 1}/{self.generations}] Best current time: {best_time:.2f}ms '
+                            f'Diversity: {diversity:.4f}')
                     else:
                         tqdm.write(f'[{i + 1}/{self.generations}] Best current time: {best_time:.2f}ms')
 
