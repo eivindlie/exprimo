@@ -283,7 +283,8 @@ class GAOptimizer(BaseOptimizer):
             with open(f'{self.checkpoint_dir}/scores.csv', 'w') as f:
                 f.write('')
 
-        def run_optimization(generations, population_size=self.population_size, benchmarking_function=None):
+        def run_optimization(generations, population_size=self.population_size, benchmarking_function=None,
+                             start_generation=0):
             nonlocal pop
 
             for i in tqdm(range(generations), file=sys.stdout):
@@ -294,9 +295,9 @@ class GAOptimizer(BaseOptimizer):
                     best_solution['score'] = 1 / fitness_scores[0]
 
                     with open(f'{self.checkpoint_dir}/scores.csv', 'a') as f:
-                        f.write(f'{i}, {best_solution["score"]}\n')
+                        f.write(f'{i + start_generation}, {best_solution["score"]}\n')
 
-                    with open(f'{self.checkpoint_dir}/gen_{i:04}.json', 'w') as f:
+                    with open(f'{self.checkpoint_dir}/gen_{i + start_generation:04}.json', 'w') as f:
                         json.dump(best_solution, f, indent=4)
 
                 if self.plot_fitness_history:
@@ -314,10 +315,10 @@ class GAOptimizer(BaseOptimizer):
                         diversity = _calculate_binary_difference_diversity(ranked_pop)
                         diversity_history.append(diversity)
                         tqdm.write(
-                            f'[{i + 1}/{self.generations}] Best current time: {best_time:.2f}ms '
+                            f'[{i + 1}/{generations}] Best current time: {best_time:.2f}ms '
                             f'Diversity: {diversity:.4f}')
                     else:
-                        tqdm.write(f'[{i + 1}/{self.generations}] Best current time: {best_time:.2f}ms')
+                        tqdm.write(f'[{i + 1}/{generations}] Best current time: {best_time:.2f}ms')
 
         print('Optimizing with simulator...')
         run_optimization(self.generations)
@@ -325,7 +326,7 @@ class GAOptimizer(BaseOptimizer):
         if self.benchmarking_generations and self.benchmarking_function:
             print('Optimizing with benchmarking...')
             run_optimization(self.benchmarking_generations, benchmarking_function=self.benchmarking_function,
-                             population_size=self.benchmarking_population_size)
+                             population_size=self.benchmarking_population_size, start_generation=self.generations)
 
         if self.plot_fitness_history:
             plt.plot(fitness_history)
