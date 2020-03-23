@@ -6,7 +6,7 @@ def create_benchmark_function(model_type, batches=50, drop_batches=1, aggregate_
                               device_map=None):
     def benchmark_placement(placement):
         batch_times = benchmark_with_placement(model_type, placement, batches=batches, drop_batches=drop_batches,
-                                               aggregate_function=aggregate_function, lr=lr, device_map=device_map)
+                                               lr=lr, device_map=device_map)
         return aggregate_function(batch_times)
 
     return benchmark_placement
