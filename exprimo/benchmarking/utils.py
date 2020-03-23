@@ -10,7 +10,10 @@ DEVICE_MAP = {
 }
 
 
-def load_model_with_placement(model_type, placement, lr=0.01, classes=1000, device_map=DEVICE_MAP):
+def load_model_with_placement(model_type, placement, lr=0.01, classes=1000, device_map=None):
+    if device_map is None:
+        device_map = DEVICE_MAP
+
     if model_type.lower() in ['resnet', 'resnet50', 'resnet-50']:
         model_type = 'resnet50'
     elif model_type.lower() in ['inception', 'inception_v3', 'inceptionv3']:

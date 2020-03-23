@@ -29,11 +29,13 @@ def train_single_batch(model, data, criterion, optimizer):
     optimizer.step()
 
 
-def benchmark_with_placement(model_type, placement='cuda:0', batches=50, drop_batches=1, lr=0.01, verbose=False):
+def benchmark_with_placement(model_type, placement='cuda:0', batches=50, drop_batches=1, lr=0.01, verbose=False,
+                             device_map=None):
     if verbose:
         print('Starting benchmark...')
 
-    model, criterion, optimizer, input_device, output_device = load_model_with_placement(model_type, placement, lr=lr)
+    model, criterion, optimizer, input_device, output_device = load_model_with_placement(model_type, placement, lr=lr,
+                                                                                         device_map=device_map)
 
     model.train()
     batch_times = []
