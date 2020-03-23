@@ -6,7 +6,7 @@ from tqdm import tqdm
 from exprimo import DeviceGraph
 from exprimo.optimizers.base import BaseOptimizer
 from exprimo.optimizers.utils import evaluate_placement, apply_placement
-from graph import get_flattened_layer_names
+from exprimo.graph import get_flattened_layer_names
 
 
 def exponential_multiplicative_decay(initial_value, decay):

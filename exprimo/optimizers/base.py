@@ -1,6 +1,6 @@
 from abc import abstractmethod
 
-from optimizers.utils import create_colocation_groups
+from exprimo.optimizers.utils import create_colocation_groups
 import multiprocessing
 
 

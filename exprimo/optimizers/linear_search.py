@@ -6,7 +6,7 @@ from exprimo.device import DeviceGraph
 from exprimo.optimizers.base import BaseOptimizer
 
 from exprimo.optimizers.utils import prefix_heuristic, apply_placement, evaluate_placement
-from graph import get_flattened_layer_names
+from exprimo.graph import get_flattened_layer_names
 
 
 class LinearSearchOptimizer(BaseOptimizer):

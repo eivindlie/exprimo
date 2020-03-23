@@ -4,8 +4,8 @@ from random import randint
 from tqdm import tqdm
 
 from exprimo import DeviceGraph
-from optimizers.base import BaseOptimizer
-from optimizers.utils import generate_random_placement, evaluate_placement, apply_placement
+from exprimo.optimizers.base import BaseOptimizer
+from exprimo.optimizers.utils import generate_random_placement, evaluate_placement, apply_placement
 from exprimo.graph import get_flattened_layer_names
 
 

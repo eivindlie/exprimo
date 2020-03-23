@@ -1,6 +1,6 @@
 import torch
 
-from resnet import resnet50
+from exprimo.benchmarking.resnet import resnet50
 
 DEVICE_MAP = {
     0: 'cpu',
