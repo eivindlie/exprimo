@@ -4,7 +4,7 @@ from paleo.profilers.base import ProfilerOptions
 
 class FlopsProfiler:
     @staticmethod
-    def profile(layer_spec, device, backward=False, batch_size=None, comm_penalization=None, comp_penalization=None):
+    def profile(layer_spec, device, backward=False, batch_size=None, comm_penalization=1, comp_penalization=1):
         layer = layer_spec.operation
 
         assert layer is not None, f'{layer_spec} has no operation'

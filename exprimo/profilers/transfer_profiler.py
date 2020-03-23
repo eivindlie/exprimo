@@ -11,7 +11,7 @@ def calculate_tensor_size(shape, dtype='float32'):
 class TransferProfiler:
     @staticmethod
     def profile(layer_spec, comm_channel, parent_device, backward=False, batch_size=None, dtype='float32',
-                comm_penalization=None, comp_penalization=None):
+                comm_penalization=1, comp_penalization=1):
         layer = layer_spec.operation
 
         if batch_size:

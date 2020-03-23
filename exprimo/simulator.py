@@ -29,7 +29,7 @@ class Simulator:
     def simulate(self, batch_size=None, batches=1, check_memory_usage=True, pipeline_batches=1,
                  memory_penalization_factor=None,
                  print_event_trace=True, include_backward=True, return_event_trace=False, print_memory_usage=True,
-                 comp_penalization=None, comm_penalization=None):
+                 comp_penalization=1, comm_penalization=1):
         op_queues = [deque() for device in self.device_graph.devices]
         transfer_queues = [deque() for comm_channel in self.device_graph.comm_channels]
         comm_free = [True for i in range(len(self.device_graph.comm_channels))]
