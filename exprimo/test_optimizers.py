@@ -34,6 +34,8 @@ args = {
     'n_threads': -1,
     'checkpoint_period': 5,
     'checkpoint_dir': 'experiment_results/sim_real_comp/resnet/nets',
+    'simulator_comp_penalty': 0.9,
+    'simulator_comm_penalty': 0.25,
 
     'benchmarking_population_size': 30,
     'benchmarking_generations': 10,
