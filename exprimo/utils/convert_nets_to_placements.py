@@ -4,9 +4,8 @@ import json
 directory = 'experiment_results/sim_real_comp/inception/nets'
 save_directory = 'experiment_results/sim_real_comp/inception/device_assignments'
 
-device_assignment = {}
-
 for file in os.listdir(directory):
+    device_assignment = {}
     if file.endswith('.json'):
         with open(os.path.join(directory, file)) as f:
             net_dict = json.load(f)

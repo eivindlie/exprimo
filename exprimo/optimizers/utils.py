@@ -66,3 +66,23 @@ def apply_placement(net_string, placement, groups):
             layer['device'] = device
 
     return net
+
+
+def get_device_assignment(net_dict):
+    device_assignment = {}
+
+    for layer_name in net_dict['layers'].keys():
+        layer = net_dict['layers'][layer_name]
+
+        try:
+            device_assignment[layer_name] = layer['device']
+        except KeyError:
+            device_assignment[layer_name] = 0
+
+        if layer['type'] == 'Block':
+            for sublayer_name in layer['layers'].keys():
+                sublayer = layer['layers'][sublayer_name]
+                try:
+                    device_assignment[f'{layer_name}/{sublayer_name}'] = sublayer['device']
+                except KeyError:
+                    device_assignment[f'{layer_name}/{sublayer_name}'] = 0

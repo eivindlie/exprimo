@@ -11,7 +11,8 @@ import matplotlib.pyplot as plt
 
 from exprimo.optimizers.base import BaseOptimizer
 from exprimo.graph import get_flattened_layer_names
-from exprimo.optimizers.utils import evaluate_placement, apply_placement, generate_random_placement
+from exprimo.optimizers.utils import evaluate_placement, apply_placement, generate_random_placement, \
+    get_device_assignment
 
 
 def _create_parent_selection_function(type, s=2):
@@ -128,13 +129,21 @@ class GAOptimizer(BaseOptimizer):
             return _evaluate(individual, net_string, groups, device_graph,
                              pipeline_batches=self.pipeline_batches, batches=self.batches)
 
-        def rank(population, return_scores=False):
-            if self.n_threads > 1:
-                fn_arg = zip(population, repeat(net_string), repeat(groups), repeat(device_graph),
-                             repeat(self.pipeline_batches), repeat(self.batches))
-                fitness_scores = self.worker_pool.starmap(_evaluate, fn_arg)
+        def rank(population, return_scores=False, benchmarking_function=None):
+            if benchmarking_function:
+                def benchmark(individual):
+                    device_assignment = get_device_assignment(apply_placement(net_string, individual.placement, groups))
+                    return benchmarking_function(device_assignment)
+
+                fitness_scores = list(map(benchmark, population))
             else:
-                fitness_scores = list(map(evaluate, population))
+                if self.n_threads > 1:
+                    fn_arg = zip(population, repeat(net_string), repeat(groups), repeat(device_graph),
+                                 repeat(self.pipeline_batches), repeat(self.batches))
+                    fitness_scores = self.worker_pool.starmap(_evaluate, fn_arg)
+                else:
+                    fitness_scores = list(map(evaluate, population))
+
             fitness_db = dict(zip(population, fitness_scores))
 
             if return_scores:
@@ -275,6 +284,8 @@ class GAOptimizer(BaseOptimizer):
                 f.write('')
 
         def run_optimization(generations, population_size=self.population_size, benchmarking_function=None):
+            nonlocal pop
+
             for i in tqdm(range(generations), file=sys.stdout):
                 ranked_pop, fitness_scores = rank(pop, return_scores=True, benchmarking_function=benchmarking_function)
 
