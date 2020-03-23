@@ -15,7 +15,7 @@ net_path = 'nets/resnet50.json'
 
 args = {
     'plot_fitness_history': True,
-    'generations': 100,
+    'generations': 500,
     'population_size': 100,
     'mutation_rate': 0.4,
     'mutation_sharding_rate': 0,
