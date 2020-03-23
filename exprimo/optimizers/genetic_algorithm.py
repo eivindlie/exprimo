@@ -49,6 +49,8 @@ class GAOptimizer(BaseOptimizer):
                  population_size=100, generations=100, plot_fitness_history=False,
                  evolve_mutation_rate=False, elite_size=1, print_diversity=False,
                  min_mutation_rate=0.05, max_mutation_rate=0.9,
+                 benchmarking_population_size=100, benchmarking_generations=50,
+                 benchmarking_function=None,
                  include_trivial_solutions_in_initialization=True,
                  checkpoint_dir=None, checkpoint_period=-1, **kwargs):
         """
@@ -65,6 +67,10 @@ class GAOptimizer(BaseOptimizer):
         self.crossover_rate = crossover_rate
         self.population_size = population_size
         self.elite_size = elite_size
+
+        self.benchmarking_population_size = benchmarking_population_size
+        self.benchmarking_generations = benchmarking_generations
+        self.benchmarking_function = benchmarking_function
 
         self.mutation_sharding_rate = mutation_sharding_rate
 
@@ -108,7 +114,7 @@ class GAOptimizer(BaseOptimizer):
                 for j in range(n_devices):
                     placements.append([j] * len(groups))
 
-            while len(placements) < self.population_size:
+            while len(placements) < population_size:
                 placements.append(generate_random_placement(len(groups), n_devices))
 
             if self.evolve_mutation_rate:
@@ -249,11 +255,11 @@ class GAOptimizer(BaseOptimizer):
         def mutate_population(population):
             return [mutate(ind) for ind in population]
 
-        def select_offspring(previous_generation_ranked, candidates):
+        def select_offspring(previous_generation_ranked, candidates, population_size=self.population_size):
             if self.elite_size:
                 random.shuffle(candidates)
                 return previous_generation_ranked[:self.elite_size] \
-                       + candidates[:self.population_size - self.elite_size]
+                       + candidates[:population_size - self.elite_size]
             return candidates
 
         pop = initialize(self.population_size)
@@ -268,37 +274,46 @@ class GAOptimizer(BaseOptimizer):
             with open(f'{self.checkpoint_dir}/scores.csv', 'w') as f:
                 f.write('')
 
-        for i in tqdm(range(self.generations), file=sys.stdout):
-            ranked_pop, fitness_scores = rank(pop, return_scores=True)
+        def run_optimization(generations, population_size=self.population_size, benchmarking_function=None):
+            for i in tqdm(range(generations), file=sys.stdout):
+                ranked_pop, fitness_scores = rank(pop, return_scores=True, benchmarking_function=benchmarking_function)
 
-            if self.checkpoint_period != -1 and i % self.checkpoint_period == 0:
-                best_solution = apply_placement(net_string, ranked_pop[0].placement, groups)
-                best_solution['score'] = 1 / fitness_scores[0]
+                if self.checkpoint_period != -1 and i % self.checkpoint_period == 0:
+                    best_solution = apply_placement(net_string, ranked_pop[0].placement, groups)
+                    best_solution['score'] = 1 / fitness_scores[0]
 
-                with open(f'{self.checkpoint_dir}/scores.csv', 'a') as f:
-                    f.write(f'{i}, {best_solution["score"]}\n')
+                    with open(f'{self.checkpoint_dir}/scores.csv', 'a') as f:
+                        f.write(f'{i}, {best_solution["score"]}\n')
 
-                with open(f'{self.checkpoint_dir}/gen_{i:04}.json', 'w') as f:
-                    json.dump(best_solution, f, indent=4)
+                    with open(f'{self.checkpoint_dir}/gen_{i:04}.json', 'w') as f:
+                        json.dump(best_solution, f, indent=4)
 
-            if self.plot_fitness_history:
-                fitness_history.append(1 / fitness_scores[0])
+                if self.plot_fitness_history:
+                    fitness_history.append(1 / fitness_scores[0])
 
-            mating_pool = select_parents(ranked_pop, fitness_scores)
-            children = recombine(mating_pool)
-            candidates = mutate_population(children)
-            pop = select_offspring(ranked_pop, candidates)
+                mating_pool = select_parents(ranked_pop, fitness_scores)
+                children = recombine(mating_pool)
+                candidates = mutate_population(children)
+                pop = select_offspring(ranked_pop, candidates, population_size=population_size)
 
-            if self.verbose and (i + 1) % int(self.verbose) == 0:
-                best_score = fitness_scores[0]
-                best_time = 1 / best_score
-                if self.print_diversity:
-                    diversity = _calculate_binary_difference_diversity(ranked_pop)
-                    diversity_history.append(diversity)
-                    tqdm.write(
-                        f'[{i + 1}/{self.generations}] Best current time: {best_time:.2f}ms Diversity: {diversity:.4f}')
-                else:
-                    tqdm.write(f'[{i + 1}/{self.generations}] Best current time: {best_time:.2f}ms')
+                if self.verbose and (i + 1) % int(self.verbose) == 0:
+                    best_score = fitness_scores[0]
+                    best_time = 1 / best_score
+                    if self.print_diversity:
+                        diversity = _calculate_binary_difference_diversity(ranked_pop)
+                        diversity_history.append(diversity)
+                        tqdm.write(
+                            f'[{i + 1}/{self.generations}] Best current time: {best_time:.2f}ms Diversity: {diversity:.4f}')
+                    else:
+                        tqdm.write(f'[{i + 1}/{self.generations}] Best current time: {best_time:.2f}ms')
+
+        print('Optimizing with simulator...')
+        run_optimization(self.generations)
+
+        if self.benchmarking_generations and self.benchmarking_function:
+            print('Optimizing with benchmarking...')
+            run_optimization(self.benchmarking_generations, benchmarking_function=self.benchmarking_function,
+                             population_size=self.benchmarking_population_size)
 
         if self.plot_fitness_history:
             plt.plot(fitness_history)
