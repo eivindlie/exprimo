@@ -10,7 +10,7 @@ from exprimo.optimizers.utils import prefix_heuristic
 batches = 1
 pipeline_batches = 1
 
-device_graph_path = 'device_graphs/malvik.json'
+device_graph_path = 'device_graphs/malvik-single-cpu.json'
 net_path = 'nets/resnet50.json'
 
 args = {

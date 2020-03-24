@@ -4,9 +4,8 @@ from exprimo.benchmarking.resnet import resnet50
 
 DEVICE_MAP = {
     0: 'cpu',
-    1: 'cpu',
-    2: 'cuda:0',
-    3: 'cuda:1'
+    1: 'cuda:0',
+    2: 'cuda:1'
 }
 
 

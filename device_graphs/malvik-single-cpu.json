@@ -12,8 +12,8 @@
   "devices": [
     {
       "model": "Intel Xeon Gold 6132",
-      "clock": 72800,
-      "peak_gflops": 900,
+      "clock": 145600,
+      "peak_gflops": 1800,
       "memory": 395,
       "mem_bandwidth": 76.8,
       "type": "cpu",
