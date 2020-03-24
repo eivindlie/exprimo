@@ -1,6 +1,7 @@
 import torch
 
 from exprimo.benchmarking.resnet import resnet50
+from exprimo.benchmarking.inception import inception_v3
 
 DEVICE_MAP = {
     0: 'cpu',
@@ -33,7 +34,7 @@ def load_model_with_placement(model_type, placement, lr=0.01, classes=1000, devi
     elif model_type == 'inception':
         first_layer = 'Conv2d_1a_3x3'
         last_layer = 'softmax'
-        # model = inception_v3(pretrained=False, placement=placement, num_classes=classes, init_weights=False)
+        model = inception_v3(pretrained=False, placement=placement, num_classes=classes, init_weights=False)
 
     if isinstance(placement, str):
         input_device = output_device = torch.device(placement)
