@@ -16,6 +16,18 @@ def train_single_batch(model, data, criterion, optimizer):
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
+    return loss
+
+
+def train_single_batch_inception(model, data, criterion, optimizer):
+    output, aux_output = model(data[0])
+    loss1 = criterion(output, data[1])
+    loss2 = criterion(aux_output, data[1])
+    loss = loss1 + 0.4 * loss2
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+    return loss
 
 
 def benchmark_with_placement(model_type, placement='cuda:0', batches=50, drop_batches=1, lr=0.01, verbose=False,
@@ -43,7 +55,7 @@ def benchmark_with_placement(model_type, placement='cuda:0', batches=50, drop_ba
         dataset = torchvision.datasets.FakeData(transform=preprocess, size=500)
     elif model_type == 'inception':
         dataset = torchvision.datasets.FakeData(transform=preprocess, image_size=(3, 299, 299), size=500)
-    
+
     train_loader = torch.utils.data.DataLoader(
         dataset, batch_size=BATCH_SIZE, shuffle=True
     )
@@ -58,7 +70,10 @@ def benchmark_with_placement(model_type, placement='cuda:0', batches=50, drop_ba
             data = data[0].to(input_device), data[1].to(output_device)
 
             start = time.time()
-            train_single_batch(model, data, criterion, optimizer)
+            if model_type == 'inception':
+                train_single_batch_inception(model, data, criterion, optimizer)
+            else:
+                train_single_batch(model, data, criterion, optimizer)
             torch.cuda.synchronize()
             end = time.time()
 
