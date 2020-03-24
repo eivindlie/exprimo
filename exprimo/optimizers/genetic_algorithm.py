@@ -141,7 +141,7 @@ class GAOptimizer(BaseOptimizer):
             if benchmarking_function:
                 def benchmark(individual):
                     device_assignment = get_device_assignment(apply_placement(net_string, individual.placement, groups))
-                    return benchmarking_function(device_assignment)
+                    return 1 / benchmarking_function(device_assignment)
 
                 fitness_scores = list(map(benchmark, population))
             else:
