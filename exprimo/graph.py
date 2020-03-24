@@ -312,4 +312,4 @@ def get_flattened_layer_names(net_string):
     graph = ComputationGraph()
     graph.load_from_string(net_string)
 
-    return graph.topological_order
+    return map(lambda x: x.name, graph.topological_order)

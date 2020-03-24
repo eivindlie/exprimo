@@ -55,8 +55,7 @@ def apply_placement(net_string, placement, groups):
     net = json.loads(net_string)
 
     for i, device in enumerate(placement):
-        for layer in groups[i]:
-            layer_name = layer.name
+        for layer_name in groups[i]:
             if layer_name in net['layers']:
                 layer = net['layers'][layer_name]
             else:

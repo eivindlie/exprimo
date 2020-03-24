@@ -106,6 +106,8 @@ class GAOptimizer(BaseOptimizer):
 
         if self.n_threads > 1:
             self.worker_pool = Pool(self.n_threads)
+        else:
+            self.worker_pool = None
 
         self.checkpoint_dir = checkpoint_dir
         self.checkpoint_period = checkpoint_period
