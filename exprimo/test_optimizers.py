@@ -11,7 +11,7 @@ batches = 1
 pipeline_batches = 1
 
 device_graph_path = 'device_graphs/malvik-single-cpu.json'
-net_path = 'nets/resnet50.json'
+net_path = 'nets/inception_v3.json'
 
 args = {
     'plot_fitness_history': True,
@@ -40,7 +40,7 @@ args = {
 
     'benchmarking_population_size': 30,
     'benchmarking_generations': 10,
-    'benchmarking_function': create_benchmark_function('resnet', verbose=True, batches=5, drop_batches=1),
+    'benchmarking_function': create_benchmark_function('inception_v3', verbose=True, batches=5, drop_batches=1),
 }
 # optimizer = RandomHillClimbingOptimizer(patience=100)
 # optimizer = LinearSearchOptimizer(prefix_heuristic(prefix_length=4))
