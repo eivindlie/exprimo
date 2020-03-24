@@ -36,7 +36,7 @@ args = {
     'checkpoint_dir': 'experiment_results/sim_real_comp/resnet/nets',
     'simulator_comp_penalty': 0.9,
     'simulator_comm_penalty': 0.25,
-    'colocation_heuristic': prefix_heuristic(prefix_length=5),
+    # 'colocation_heuristic': prefix_heuristic(prefix_length=5),
 
     'benchmarking_population_size': 30,
     'benchmarking_generations': 10,
