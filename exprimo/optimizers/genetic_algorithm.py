@@ -145,7 +145,7 @@ class GAOptimizer(BaseOptimizer):
                     device_assignment = get_device_assignment(apply_placement(net_string, individual.placement, groups))
                     return 1 / benchmarking_function(device_assignment)
 
-                fitness_scores = list(map(benchmark, population))
+                fitness_scores = list(map(benchmark, tqdm(population)))
             else:
                 if self.worker_pool:
                     fn_arg = zip(population, repeat(net_string), repeat(groups), repeat(device_graph),
