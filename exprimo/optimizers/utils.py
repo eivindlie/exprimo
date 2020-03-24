@@ -87,3 +87,4 @@ def get_device_assignment(net_dict):
                     device_assignment[f'{layer_name}/{sublayer_name}'] = sublayer['device']
                 except KeyError:
                     device_assignment[f'{layer_name}/{sublayer_name}'] = 0
+    return device_assignment
