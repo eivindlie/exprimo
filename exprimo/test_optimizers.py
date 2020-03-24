@@ -40,7 +40,7 @@ args = {
 
     'benchmarking_population_size': 30,
     'benchmarking_generations': 10,
-    'benchmarking_function': create_benchmark_function('resnet', verbose=True, batches=5, drop_batches=0),
+    'benchmarking_function': create_benchmark_function('resnet', verbose=True, batches=5, drop_batches=1),
 }
 # optimizer = RandomHillClimbingOptimizer(patience=100)
 # optimizer = LinearSearchOptimizer(prefix_heuristic(prefix_length=4))
