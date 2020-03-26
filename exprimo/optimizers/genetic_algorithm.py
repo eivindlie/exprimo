@@ -126,7 +126,7 @@ class GAOptimizer(BaseOptimizer):
                     placements.append([j] * len(groups))
 
             while len(placements) < population_size:
-                placements.append(generate_random_placement(len(groups), n_devices), allow_device_0=self.allow_cpu)
+                placements.append(generate_random_placement(len(groups), n_devices, allow_device_0=self.allow_cpu))
 
             if self.evolve_mutation_rate:
                 return [Candidate(p, min(max(random.normalvariate(self.mutation_rate, 0.1), self.min_mutation_rate),
