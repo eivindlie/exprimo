@@ -4,3 +4,4 @@ pandas==0.25.3
 numpy==1.17.4
 torch==1.4.0
 torchvision==0.5.0
+seaborn
