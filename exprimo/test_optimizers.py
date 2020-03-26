@@ -29,6 +29,7 @@ args = {
     'min_mutation_rate': 0.05,
     'print_diversity': True,
     'include_trivial_solutions_in_initialization': False,
+    'allow_cpu': False,
     'pipeline_batches': pipeline_batches,
     'batches': batches,
     'n_threads': -1,
@@ -39,7 +40,7 @@ args = {
     # 'colocation_heuristic': prefix_heuristic(prefix_length=5),
 
     'benchmarking_population_size': 30,
-    'benchmarking_generations': 10,
+    'benchmarking_generations': 0,
     'benchmarking_function': create_benchmark_function('resnet', batches=5, drop_batches=1),
 }
 # optimizer = RandomHillClimbingOptimizer(patience=100)
