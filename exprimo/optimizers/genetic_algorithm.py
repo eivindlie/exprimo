@@ -56,7 +56,8 @@ class GAOptimizer(BaseOptimizer):
                  benchmarking_function=None,
                  include_trivial_solutions_in_initialization=True,
                  simulator_comp_penalty=1, simulator_comm_penalty=1,
-                 checkpoint_dir=None, checkpoint_period=-1, **kwargs):
+                 checkpoint_dir=None, checkpoint_period=-1,
+                 allow_cpu=True, **kwargs):
         """
         Initializes the GA optimizer, setting important hyperparameters.
         :param mutation_rate: The rate at which mutation will be applied, set at the gene level.
@@ -103,6 +104,7 @@ class GAOptimizer(BaseOptimizer):
         self.max_mutation_rate = max_mutation_rate
         self.min_mutation_rate = min_mutation_rate
         self.include_trivial_solutions_in_initialization = include_trivial_solutions_in_initialization
+        self.allow_cpu = allow_cpu
 
         if self.n_threads > 1:
             self.worker_pool = Pool(self.n_threads)
@@ -124,7 +126,7 @@ class GAOptimizer(BaseOptimizer):
                     placements.append([j] * len(groups))
 
             while len(placements) < population_size:
-                placements.append(generate_random_placement(len(groups), n_devices))
+                placements.append(generate_random_placement(len(groups), n_devices), allow_device_0=self.allow_cpu)
 
             if self.evolve_mutation_rate:
                 return [Candidate(p, min(max(random.normalvariate(self.mutation_rate, 0.1), self.min_mutation_rate),
@@ -250,12 +252,18 @@ class GAOptimizer(BaseOptimizer):
                     else:
                         gene = [gene]
 
-                new_gene = list(set(gene + [random.randint(0, n_devices - 1)]))
+                if self.allow_cpu:
+                    new_gene = list(set(gene + [random.randint(0, n_devices - 1)]))
+                else:
+                    new_gene = list(set(gene + [random.randint(1, n_devices - 1)]))
                 if len(new_gene) == 1:
                     new_gene = new_gene[0]
 
                 return new_gene
-            return random.randint(0, n_devices - 1)
+
+            if self.allow_cpu:
+                return random.randint(0, n_devices - 1)
+            return random.randint(1, n_devices - 1)
 
         def mutate(individual):
             if self.evolve_mutation_rate:

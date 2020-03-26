@@ -27,10 +27,13 @@ def create_colocation_groups(layer_names, colocation_heuristic):
     return groups
 
 
-def generate_random_placement(n_groups, n_devices):
+def generate_random_placement(n_groups, n_devices, allow_device_0=True):
     placement = []
     for i in range(n_groups):
-        placement.append(randint(0, n_devices - 1))
+        if allow_device_0:
+            placement.append(randint(0, n_devices - 1))
+        else:
+            placement.append(randint(1, n_devices - 1))
     return placement
 
 
