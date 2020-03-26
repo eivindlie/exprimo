@@ -31,7 +31,7 @@ def train_single_batch_inception(model, data, criterion, optimizer):
 
 
 def benchmark_with_placement(model_type, placement='cuda:0', batches=50, drop_batches=1, lr=0.01, verbose=False,
-                             device_map=None):
+                             device_map=None, gpu_memory_limit=None):
     if verbose:
         print('Starting benchmark...')
 
@@ -66,21 +66,46 @@ def benchmark_with_placement(model_type, placement='cuda:0', batches=50, drop_ba
             if verbose:
                 print(f'Batch {b + 1}/{batches + drop_batches}', end='')
 
-            torch.cuda.synchronize()
-            data = data[0].to(input_device), data[1].to(output_device)
+            memory_exceeded = False
 
-            start = time.time()
-            if model_type == 'inception':
-                train_single_batch_inception(model, data, criterion, optimizer)
-            else:
-                train_single_batch(model, data, criterion, optimizer)
-            torch.cuda.synchronize()
-            end = time.time()
+            if gpu_memory_limit:
+                for i in range(torch.cuda.device_count()):
+                    torch.cuda.reset_max_memory_allocated(device=torch.device(f'cuda:{i}'))
+
+            try:
+                torch.cuda.synchronize()
+                data = data[0].to(input_device), data[1].to(output_device)
+
+                start = time.time()
+                if model_type == 'inception':
+                    train_single_batch_inception(model, data, criterion, optimizer)
+                else:
+                    train_single_batch(model, data, criterion, optimizer)
+                torch.cuda.synchronize()
+                end = time.time()
+
+                if gpu_memory_limit:
+                    for i in range(torch.cuda.device_count()):
+                        if isinstance(gpu_memory_limit, int):
+                            memory_exceeded = memory_exceeded \
+                                              or torch.cuda.max_memory_allocated(
+                                                    torch.device(f'cuda:{i}')) > gpu_memory_limit
+            except RuntimeError as e:
+                if 'out of memory' in str(e):
+                    memory_exceeded = True
+                else:
+                    raise e
 
             batch_times.append((end - start) * 1000)
 
             if verbose:
-                print(f' {batch_times[-1]}ms')
+                if memory_exceeded:
+                    print('Memory exceeded')
+                else:
+                    print(f' {batch_times[-1]}ms')
+
+            if memory_exceeded:
+                return -1
 
             b += 1
             if b >= batches + drop_batches:
