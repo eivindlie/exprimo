@@ -31,7 +31,7 @@ def train_single_batch_inception(model, data, criterion, optimizer):
 
 
 def benchmark_with_placement(model_type, placement='cuda:0', batches=50, drop_batches=1, lr=0.01, verbose=False,
-                             device_map=None, gpu_memory_limit=None):
+                             device_map=None, gpu_memory_limit=None, return_memory_overflow=False):
     if verbose:
         print('Starting benchmark...')
 
@@ -67,6 +67,7 @@ def benchmark_with_placement(model_type, placement='cuda:0', batches=50, drop_ba
                 print(f'Batch {b + 1}/{batches + drop_batches}', end='')
 
             memory_exceeded = False
+            memory_overflow = 0
 
             if gpu_memory_limit:
                 for i in range(torch.cuda.device_count()):
@@ -87,12 +88,13 @@ def benchmark_with_placement(model_type, placement='cuda:0', batches=50, drop_ba
                 if gpu_memory_limit:
                     for i in range(torch.cuda.device_count()):
                         if isinstance(gpu_memory_limit, int):
-                            memory_exceeded = memory_exceeded \
-                                              or torch.cuda.max_memory_allocated(
-                                                    torch.device(f'cuda:{i}')) > (gpu_memory_limit * 10**9)
+                            max_memory_usage = torch.cuda.max_memory_allocated(torch.device(f'cuda:{i}'))
+                            memory_exceeded = memory_exceeded or max_memory_usage > (gpu_memory_limit * 10**9)
+                            memory_overflow += min(max_memory_usage / 10**9 - gpu_memory_limit, 0)
             except RuntimeError as e:
                 if 'out of memory' in str(e):
                     memory_exceeded = True
+                    memory_overflow = -1
                 else:
                     raise e
 
@@ -105,6 +107,8 @@ def benchmark_with_placement(model_type, placement='cuda:0', batches=50, drop_ba
                     print(f' {batch_times[-1]}ms')
 
             if memory_exceeded:
+                if return_memory_overflow:
+                    return -1, memory_overflow
                 return -1
 
             b += 1
