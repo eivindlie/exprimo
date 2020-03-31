@@ -2,59 +2,42 @@ import json
 
 from exprimo import DeviceGraph, Simulator, plot_event_trace, ComputationGraph
 from exprimo.optimizers import SimulatedAnnealingOptimizer, HillClimbingOptimizer, RandomHillClimbingOptimizer, \
-    GAOptimizer, exponential_multiplicative_decay
+    GAOptimizer, exponential_multiplicative_decay, LinearSearchOptimizer
 from exprimo.benchmarking import create_benchmark_function
 from exprimo.optimizers.particle_swarm_optimizer import ParticleSwarmOptimizer
 from exprimo.optimizers.utils import prefix_heuristic
 
-batches = 1
-pipeline_batches = 1
+config_path = 'configs/malvik-resnet50.json'
 
-device_graph_path = 'device_graphs/malvik-single-cpu.json'
-net_path = 'nets/resnet50.json'
+with open(config_path) as f:
+    config = json.load(f)
 
-args = {
-    'plot_fitness_history': True,
-    'generations': 500,
-    'population_size': 50,
-    'mutation_rate': 0.5,
-    'mutation_sharding_rate': 0,
-    'crossover_rate': 0.8,
-    'crossover_type': '1-point',
-    'parent_selection_mechanism': 'rank',
-    'evolve_mutation_rate': True,
-    'verbose': 25,
-    'elite_size': 5,
-    'max_mutation_rate': 0.9,
-    'min_mutation_rate': 0.05,
-    'print_diversity': True,
-    'include_trivial_solutions_in_initialization': False,
-    'allow_cpu': False,
-    'pipeline_batches': pipeline_batches,
-    'batches': batches,
-    'n_threads': -1,
-    'checkpoint_period': 5,
-    'checkpoint_dir': 'experiment_results/sim_real_comp/resnet/nets',
-    'simulator_comp_penalty': 0.9,
-    'simulator_comm_penalty': 0.25,
-    # 'colocation_heuristic': prefix_heuristic(prefix_length=5),
+device_graph_path = config['device_graph_path']
+net_path = config['net_path']
 
-    'benchmarking_population_size': 30,
-    'benchmarking_generations': 0,
-    'benchmarking_function': create_benchmark_function('resnet', batches=5, drop_batches=1),
+batches = config.get('batches', 1)
+pipeline_batches = config.get('pipeline_batches', 1)
+
+args = config.get('optimizer_args', {})
+args['batches'] = batches
+args['pipeline_batches'] = pipeline_batches
+
+if 'benchmarking_function' in args:
+    args['benchmarking_function'] = create_benchmark_function(**args['benchmarking_function'])
+
+
+optimizers = {
+    'random_hill_climber': RandomHillClimbingOptimizer,
+    'linear_search': LinearSearchOptimizer,
+    'simulated_annealing': SimulatedAnnealingOptimizer,
+    'sa': SimulatedAnnealingOptimizer,
+    'genetic_algorithm': GAOptimizer,
+    'ga': GAOptimizer,
+    'pso': ParticleSwarmOptimizer,
+    'particle_swarm': ParticleSwarmOptimizer
 }
-# optimizer = RandomHillClimbingOptimizer(patience=100)
-# optimizer = LinearSearchOptimizer(prefix_heuristic(prefix_length=4))
-# optimizer = SimulatedAnnealingOptimizer(temp_schedule=exponential_multiplicative_decay(50, 0.98),
-#                                         steps=30000, batches=batches,
-#                                         pipeline_batches=pipeline_batches, verbose=True)
-optimizer = GAOptimizer(**args)
-# optimizer = GAIndirectOptimizer(population_size=50, mutation_rate=0.05, elite_size=10, steps=500,
-#                                 verbose=False,
-#                                 use_caching=True,
-#                                 colocation_heuristic=prefix_heuristic(prefix_length=5))
 
-# optimizer = ParticleSwarmOptimizer(w=10, l1=20, l2=10, steps=20)
+optimizer = optimizers[config['optimizer']](**args)
 
 device_graph = DeviceGraph.load_from_file(device_graph_path)
 with open(net_path) as f:
