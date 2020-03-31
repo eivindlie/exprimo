@@ -1,13 +1,16 @@
 import json
+import sys
 
 from exprimo import DeviceGraph, Simulator, plot_event_trace, ComputationGraph
 from exprimo.optimizers import SimulatedAnnealingOptimizer, HillClimbingOptimizer, RandomHillClimbingOptimizer, \
-    GAOptimizer, exponential_multiplicative_decay, LinearSearchOptimizer
+    GAOptimizer, LinearSearchOptimizer
 from exprimo.benchmarking import create_benchmark_function
 from exprimo.optimizers.particle_swarm_optimizer import ParticleSwarmOptimizer
-from exprimo.optimizers.utils import prefix_heuristic
 
 config_path = 'configs/malvik-resnet50.json'
+
+if len(sys.argv) > 1:
+    config_path = sys.argv[1]
 
 with open(config_path) as f:
     config = json.load(f)
@@ -28,6 +31,7 @@ if 'benchmarking_function' in args:
 
 optimizers = {
     'random_hill_climber': RandomHillClimbingOptimizer,
+    'hill_climber': HillClimbingOptimizer,
     'linear_search': LinearSearchOptimizer,
     'simulated_annealing': SimulatedAnnealingOptimizer,
     'sa': SimulatedAnnealingOptimizer,
