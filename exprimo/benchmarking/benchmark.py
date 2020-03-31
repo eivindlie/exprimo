@@ -117,4 +117,6 @@ def benchmark_with_placement(model_type, placement='cuda:0', batches=50, drop_ba
 
     del model, criterion, optimizer, input_device, output_device
 
+    if return_memory_overflow:
+        return batch_times[drop_batches:], memory_overflow
     return batch_times[drop_batches:]
