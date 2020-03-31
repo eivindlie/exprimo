@@ -7,54 +7,24 @@
     {
       "type": "pcie3",
       "bandwidth": 128
-    },
-    {
-      "type": "inter-cpu",
-      "bandwidth": 614
     }
   ],
   "devices": [
     {
       "model": "Intel Xeon Gold 6132",
-      "clock": 72800,
-      "peak_gflops": 900,
+      "clock": 145600,
+      "peak_gflops": 1800,
       "memory": 395,
       "mem_bandwidth": 76.8,
       "type": "cpu",
       "neighbours": [
         {
-          "comm_channel": 2,
+          "comm_channel": 0,
           "device": 1
         },
         {
-          "comm_channel": 0,
-          "device": 2
-        },
-        {
           "comm_channel": 1,
-          "device": 3
-        }
-      ]
-    },
-    {
-      "model": "Intel Xeon E5-2650 v4",
-      "clock": 72800,
-      "peak_gflops": 900,
-      "memory": 395,
-      "mem_bandwidth": 76.8,
-      "type": "cpu",
-      "neighbours": [
-        {
-          "comm_channel": 2,
-          "device": 0
-        },
-        {
-          "comm_channel": 0,
           "device": 2
-        },
-        {
-          "comm_channel": 1,
-          "device": 3
         }
       ]
     },
@@ -72,11 +42,7 @@
         },
         {
           "comm_channel": 0,
-          "device": 1
-        },
-        {
-          "comm_channel": 0,
-          "device": 3
+          "device": 2
         }
       ]
     },
@@ -95,10 +61,6 @@
         {
           "comm_channel": 1,
           "device": 1
-        },
-        {
-          "comm_channel": 1,
-          "device": 2
         }
       ]
     }
