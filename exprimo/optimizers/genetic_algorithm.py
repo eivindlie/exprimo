@@ -145,7 +145,17 @@ class GAOptimizer(BaseOptimizer):
             if benchmarking_function:
                 def benchmark(individual):
                     device_assignment = get_device_assignment(apply_placement(net_string, individual.placement, groups))
-                    return 1 / benchmarking_function(device_assignment)
+                    time, memory_overflow = benchmarking_function(device_assignment, return_memory_overflow=True)
+
+                    # Time is set to -1 if memory overflows - but we check with memory_overflow instead
+                    time = max(time, 0)
+
+                    if memory_overflow == -1:
+                        memory_overflow = 1
+
+                    time += memory_overflow * 10**9 * 1
+
+                    return 1 / time
 
                 fitness_scores = list(map(benchmark, tqdm(population)))
             else:
