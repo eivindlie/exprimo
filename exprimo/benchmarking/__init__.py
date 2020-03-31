@@ -9,8 +9,14 @@ def create_benchmark_function(model_type, batches=50, drop_batches=1, aggregate_
                                                lr=lr, device_map=device_map, verbose=verbose,
                                                gpu_memory_limit=gpu_memory_limit,
                                                return_memory_overflow=True)
+
+        if batch_times != -1:
+            time = aggregate_function(batch_times)
+        else:
+            time = -1
+
         if return_memory_overflow:
-            return aggregate_function(batch_times), memory_overflow
-        return aggregate_function(batch_times)
+            return time, memory_overflow
+        return time
 
     return benchmark_placement
