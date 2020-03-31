@@ -58,10 +58,13 @@ net_dict = json.loads(best_net)
 graph = ComputationGraph()
 graph.load_from_string(best_net)
 simulator = Simulator(graph, device_graph)
-execution_time, events = simulator.simulate(batch_size=128, print_memory_usage=True, print_event_trace=True,
+execution_time, events = simulator.simulate(batch_size=128,
+                                            print_memory_usage=config.get('print_memory_usage', False),
+                                            print_event_trace=config.get('print_event_trace', False),
                                             return_event_trace=True, batches=batches, pipeline_batches=pipeline_batches)
 
-plot_event_trace(events, simulator)
+if config.get('plot_event_trace', True):
+    plot_event_trace(events, simulator)
 
 print('\n')
 # print(f'Best discovered configuration: {[layer["device"] for layer in net_dict["layers"].values()]}')
