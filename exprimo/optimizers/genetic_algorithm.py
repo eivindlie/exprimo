@@ -153,8 +153,7 @@ class GAOptimizer(BaseOptimizer):
                     if memory_overflow == -1:
                         memory_overflow = 1
 
-                    if memory_overflow > 0:
-                        time += memory_overflow * 10**9 * 1
+                    time += memory_overflow * 10**9 * 1
 
                     return 1 / time
 
