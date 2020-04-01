@@ -320,10 +320,6 @@ class GAOptimizer(BaseOptimizer):
             for i in tqdm(range(generations), file=sys.stdout):
                 ranked_pop, fitness_scores = rank(pop, return_scores=True, benchmarking_function=benchmarking_function)
 
-                if self.verbose and i == 0:
-                    best_time = 1 / fitness_scores[0]
-                    tqdm.write(f'[Initial population] Best current time: {best_time:.2f}ms')
-
                 if self.checkpoint_period != -1 and i % self.checkpoint_period == 0:
                     best_solution = apply_placement(net_string, ranked_pop[0].placement, groups)
                     best_solution['score'] = 1 / fitness_scores[0]
@@ -342,7 +338,7 @@ class GAOptimizer(BaseOptimizer):
                 candidates = mutate_population(children)
                 pop = select_offspring(ranked_pop, candidates, population_size=population_size)
 
-                if self.verbose and (i + 1) % int(self.verbose) == 0:
+                if self.verbose and (i + 1) % int(self.verbose) == 0 or i == 0:
                     best_score = fitness_scores[0]
                     best_time = 1 / best_score
                     if self.print_diversity:
