@@ -90,7 +90,7 @@ def benchmark_with_placement(model_type, placement='cuda:0', batches=50, drop_ba
                         if isinstance(gpu_memory_limit, int):
                             max_memory_usage = torch.cuda.max_memory_allocated(torch.device(f'cuda:{i}'))
                             memory_exceeded = memory_exceeded or max_memory_usage > (gpu_memory_limit * 10**9)
-                            memory_overflow += min(max_memory_usage / 10**9 - gpu_memory_limit, 0)
+                            memory_overflow += max(max_memory_usage / 10**9 - gpu_memory_limit, 0)
             except RuntimeError as e:
                 if 'out of memory' in str(e):
                     memory_exceeded = True
