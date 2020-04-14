@@ -1,3 +1,4 @@
+import collections
 import json
 from random import randint
 import random
@@ -90,3 +91,13 @@ def get_device_assignment(net_dict):
                 except KeyError:
                     device_assignment[f'{layer_name}/{sublayer_name}'] = 0
     return device_assignment
+
+
+def flatten(l, depth=-1, current_depth=0, include_none=True):
+    for el in l:
+        if isinstance(el, collections.Iterable) and not isinstance(el, (str, bytes)) \
+                and (depth == -1 or current_depth < depth):
+            yield from flatten(el, current_depth=current_depth+1, depth=depth, include_none=include_none)
+        else:
+            if include_none or el is not None:
+                yield el
