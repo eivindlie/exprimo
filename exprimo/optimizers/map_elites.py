@@ -67,15 +67,10 @@ class MapElitesOptimizer(BaseOptimizer):
             self.dimension_sizes[0] = n_devices
 
         if self.dimension_sizes[1] == -1:
-            self.dimension_sizes[1] = n_devices - 1
+            self.dimension_sizes[1] = n_devices
 
-        archive = [
-            [
-                [
-                    None for _ in range(self.dimension_sizes[2])
-                ] for _ in range(self.dimension_sizes[1])
-            ] for _ in range(self.dimension_sizes[0])
-        ]
+        archive_scores = np.ones(self.dimension_sizes) * -1
+        archive_individuals = np.zeros(list(self.dimension_sizes) + [len(groups)], dtype=int)
 
         def evaluate(individual):
             return _evaluate(individual, net_string, groups, device_graph, self.dimension_sizes, self.pipeline_batches,
@@ -99,9 +94,10 @@ class MapElitesOptimizer(BaseOptimizer):
                 while len(candidates) < n:
                     candidates.append(generate_random_placement(len(groups), n_devices, allow_device_0=self.allow_cpu))
             else:
-                flattened_archive = list(flatten(archive, depth=2, include_none=False))
+                selectable_indices = np.argwhere(archive_scores != -1)
                 while len(candidates) < n:
-                    candidate = random.choice(flattened_archive)[1]
+                    idx = random.choice(selectable_indices)
+                    candidate = archive_individuals[idx[0], idx[1], idx[2], :].tolist()
                     candidate = mutate(candidate)
                     candidates.append(candidate)
 
@@ -123,8 +119,12 @@ class MapElitesOptimizer(BaseOptimizer):
             for result in eval_results:
                 score, description, individual = result
 
-                previous_elite = archive[description[0]][description[1]][description[2]]
-                if previous_elite is None or previous_elite[0] < score:
-                    archive[description[0]][description[1]][description[2]] = (score, individual)
+                previous_elite_score = archive_scores[description[0], description[1], description[2]]
+                if previous_elite_score is -1 or previous_elite_score < score:
+                    archive_scores[description[0], description[1], description[2]] = score
+                    archive_individuals[description[0], description[1], description[2], :] = individual
 
-        return archive
+            if self.verbose and i % self.verbose == 0:
+                print(f'[{i}/{self.steps}] Best time: {1 / archive_scores.max():.4f}ms')
+
+        return archive_scores, archive_individuals
