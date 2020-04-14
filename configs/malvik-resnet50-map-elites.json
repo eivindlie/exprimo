@@ -1,0 +1,18 @@
+{
+  "device_graph_path": "device_graphs/malvik.json",
+  "net_path": "nets/resnet50.json",
+  "optimizer": "map_elites",
+  "optimizer_args": {
+    "dimension_sizes": [-1, -1, 10],
+    "initial_size": 50,
+
+    "simulator_comp_penalty": 0.9,
+    "simulator_comm_penalty": 0.25,
+    "allow_cpu": false,
+    "pipeline_batches": 1,
+    "batches": 1,
+
+    "verbose": 5,
+    "n_threads": 1
+  }
+}
