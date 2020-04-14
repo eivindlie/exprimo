@@ -307,6 +307,25 @@ class ComputationGraph:
         if self.attach_ops:
             self._attach_layer_op()
 
+    def get_number_of_jumps(self, return_max_jumps=False):
+        """
+        Returns the number of jumps - i.e. the number of pairs of consecutive operations that are placed on different
+        devices.
+        :param return_max_jumps: If True, the maximum possible number of jumps is also returned.
+        """
+
+        num_jumps = 0
+        max_jumps = 0
+        for layer in self.topological_order:
+            for parent in layer.parents:
+                max_jumps += 1
+                if layer['device'] != parent['device']:
+                    num_jumps += 1
+
+        if return_max_jumps:
+            return num_jumps, max_jumps
+        return num_jumps
+
 
 def get_flattened_layer_names(net_string):
     graph = ComputationGraph()
