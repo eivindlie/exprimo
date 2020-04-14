@@ -3,7 +3,7 @@ import sys
 
 from exprimo import DeviceGraph, Simulator, plot_event_trace, ComputationGraph
 from exprimo.optimizers import SimulatedAnnealingOptimizer, HillClimbingOptimizer, RandomHillClimbingOptimizer, \
-    GAOptimizer, LinearSearchOptimizer
+    GAOptimizer, LinearSearchOptimizer, MapElitesOptimizer
 from exprimo.benchmarking import create_benchmark_function
 from exprimo.optimizers.particle_swarm_optimizer import ParticleSwarmOptimizer
 
@@ -38,7 +38,9 @@ optimizers = {
     'genetic_algorithm': GAOptimizer,
     'ga': GAOptimizer,
     'pso': ParticleSwarmOptimizer,
-    'particle_swarm': ParticleSwarmOptimizer
+    'particle_swarm': ParticleSwarmOptimizer,
+    'map_elites': MapElitesOptimizer,
+    'map-elites': MapElitesOptimizer
 }
 
 optimizer = optimizers[config['optimizer']](**args)
