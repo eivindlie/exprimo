@@ -58,7 +58,7 @@ class MapElitesOptimizer(BaseOptimizer):
         else:
             self.worker_pool = None
 
-    def optimize(self, net_string, device_graph):
+    def optimize(self, net_string, device_graph, return_full_archive=False):
 
         n_devices = len(device_graph.devices)
         groups = self.create_colocation_groups(get_flattened_layer_names(net_string))
@@ -127,4 +127,9 @@ class MapElitesOptimizer(BaseOptimizer):
             if self.verbose and i % self.verbose == 0:
                 print(f'[{i}/{self.steps}] Best time: {1 / archive_scores.max():.4f}ms')
 
-        return archive_scores, archive_individuals
+        if return_full_archive:
+            return archive_scores, archive_individuals
+
+        best_index = np.argmax(archive_scores)
+        best_individual = archive_individuals.reshape((-1, len(groups)))[best_index]
+        return best_individual
