@@ -78,15 +78,19 @@ class MapElitesOptimizer(BaseOptimizer):
             return _evaluate(individual, net_string, groups, device_graph, self.dimension_sizes, self.pipeline_batches,
                              self.batches, self.simulator_comp_penalty, self.simulator_comm_penalty)
 
-        def mutate_single_gene(gene):
-            if self.allow_cpu:
-                return random.randint(0, n_devices - 1)
-            return random.randint(1, n_devices - 1)
-
         def mutate(individual):
-            placement = [mutate_single_gene(g) if random.random() < self.mutation_rate else g
-                         for g in individual]
-            return placement
+            new_individual = []
+            for i, gene in enumerate(individual):
+                if random.random() < 0.05 and i > 0:
+                    new_individual.append(individual[i - 1])
+                elif random.random() < self.mutation_rate:
+                    if self.allow_cpu:
+                        new_individual.append(random.randint(0, n_devices - 1))
+                    else:
+                        new_individual.append(random.randint(1, n_devices - 1))
+                else:
+                    new_individual.append(gene)
+            return new_individual
 
         def create_candidates(n, create_random=False, create_trivial=False):
             if n <= 0:
