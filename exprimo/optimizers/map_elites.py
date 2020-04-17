@@ -43,7 +43,8 @@ class MapElitesOptimizer(BaseOptimizer):
 
     def __init__(self, dimension_sizes=(-1, -1, 10), initial_size=50,
                  simulator_comp_penalty=1, simulator_comm_penalty=1,
-                 steps=1000, allow_cpu=True, mutation_rate=0.05, **kwargs):
+                 steps=1000, allow_cpu=True, mutation_rate=0.05,
+                 include_trivial_solutions=True, **kwargs):
         super().__init__(**kwargs)
         self.dimension_sizes = dimension_sizes
         self.initial_size = initial_size
@@ -52,6 +53,7 @@ class MapElitesOptimizer(BaseOptimizer):
         self.steps = steps
         self.allow_cpu = allow_cpu
         self.mutation_rate = mutation_rate
+        self.include_trivial_solutions = include_trivial_solutions
 
         if self.n_threads > 1:
             self.worker_pool = Pool(self.n_threads)
@@ -86,10 +88,20 @@ class MapElitesOptimizer(BaseOptimizer):
                          for g in individual]
             return placement
 
-        def create_candidates(n, create_random=False):
-            if n == 0:
+        def create_candidates(n, create_random=False, create_trivial=False):
+            if n <= 0:
                 return []
             candidates = []
+            if create_trivial:
+                candidates.extend([
+                    [i] * len(groups) for i in range(1, n_devices)
+                ])
+                n -= n_devices - 1
+
+                if self.allow_cpu:
+                    candidates.append([0] * len(groups))
+                    n -= 1
+
             if create_random:
                 while len(candidates) < n:
                     candidates.append(generate_random_placement(len(groups), n_devices, allow_device_0=self.allow_cpu))
@@ -105,7 +117,11 @@ class MapElitesOptimizer(BaseOptimizer):
 
         for i in tqdm(range(0, self.steps, self.n_threads)):
             init_number = min(max(0, self.initial_size - i), self.n_threads)
-            candidates = create_candidates(init_number, create_random=True)
+
+            if self.include_trivial_solutions and i == 0:
+                candidates = create_candidates(init_number, create_trivial=True, create_random=True)
+            else:
+                candidates = create_candidates(init_number, create_random=True)
             candidates += create_candidates(self.n_threads - init_number)
 
             if self.n_threads == 1:
@@ -132,4 +148,4 @@ class MapElitesOptimizer(BaseOptimizer):
 
         best_index = np.argmax(archive_scores)
         best_individual = archive_individuals.reshape((-1, len(groups)))[best_index]
-        return best_individual
+        return json.dumps(apply_placement(net_string, best_individual, groups))
