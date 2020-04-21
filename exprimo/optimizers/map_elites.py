@@ -1,5 +1,6 @@
 import json
 import random
+import os
 from collections import Counter
 from itertools import repeat
 from multiprocessing.pool import Pool
@@ -45,7 +46,8 @@ class MapElitesOptimizer(BaseOptimizer):
     def __init__(self, dimension_sizes=(-1, -1, 10), initial_size=50,
                  simulator_comp_penalty=1, simulator_comm_penalty=1,
                  steps=1000, allow_cpu=True, mutation_rate=0.05, copy_mutation_rate=0, crossover_rate=0.4,
-                 include_trivial_solutions=True, show_score_plot=False, plot_axes=(0, 2), **kwargs):
+                 include_trivial_solutions=True, show_score_plot=False, plot_axes=(0, 2),
+                 plot_save_path=None, **kwargs):
         super().__init__(**kwargs)
         self.dimension_sizes = dimension_sizes
         self.initial_size = initial_size
@@ -59,6 +61,7 @@ class MapElitesOptimizer(BaseOptimizer):
         self.include_trivial_solutions = include_trivial_solutions
         self.plot_axes = plot_axes
         self.show_score_plot = show_score_plot
+        self.plot_save_path = plot_save_path
 
         self.axis_names = ['Most common device', 'No. of used devices', 'No. of jumps']
 
@@ -82,6 +85,9 @@ class MapElitesOptimizer(BaseOptimizer):
 
         plt.xlabel(self.axis_names[axes[0]])
         plt.ylabel(self.axis_names[axes[1]])
+
+        if self.plot_save_path:
+            plt.savefig(os.path.expanduser(self.plot_save_path))
 
         plt.show()
 
