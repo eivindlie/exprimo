@@ -8,7 +8,7 @@
     "mutation_rate": 0.4,
     "copy_mutation_rate": 0.05,
     "crossover_rate": 0.4,
-    "steps": 250,
+    "steps": 25000,
 
     "simulator_comp_penalty": 0.9,
     "simulator_comm_penalty": 0.25,
