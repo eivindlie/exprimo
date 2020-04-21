@@ -7,6 +7,7 @@
     "initial_size": 3,
     "mutation_rate": 0.4,
     "copy_mutation_rate": 0.05,
+    "crossover_rate": 0.4,
     "steps": 25000,
 
     "simulator_comp_penalty": 0.9,
