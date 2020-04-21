@@ -7,7 +7,7 @@ from exprimo.optimizers import SimulatedAnnealingOptimizer, HillClimbingOptimize
 from exprimo.benchmarking import create_benchmark_function
 from exprimo.optimizers.particle_swarm_optimizer import ParticleSwarmOptimizer
 
-config_path = 'configs/malvik-resnet50-map-elites.json'
+config_path = 'configs/malvik-resnet50-pipeline-parallel.json'
 
 if len(sys.argv) > 1:
     config_path = sys.argv[1]
