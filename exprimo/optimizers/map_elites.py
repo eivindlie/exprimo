@@ -43,7 +43,7 @@ class MapElitesOptimizer(BaseOptimizer):
 
     def __init__(self, dimension_sizes=(-1, -1, 10), initial_size=50,
                  simulator_comp_penalty=1, simulator_comm_penalty=1,
-                 steps=1000, allow_cpu=True, mutation_rate=0.05, copy_mutation_rate=0,
+                 steps=1000, allow_cpu=True, mutation_rate=0.05, copy_mutation_rate=0, crossover_rate=0.4,
                  include_trivial_solutions=True, **kwargs):
         super().__init__(**kwargs)
         self.dimension_sizes = dimension_sizes
@@ -54,6 +54,7 @@ class MapElitesOptimizer(BaseOptimizer):
         self.allow_cpu = allow_cpu
         self.mutation_rate = mutation_rate
         self.copy_mutation_rate = copy_mutation_rate
+        self.crossover_rate = crossover_rate
         self.include_trivial_solutions = include_trivial_solutions
 
         if self.n_threads > 1:
@@ -93,6 +94,10 @@ class MapElitesOptimizer(BaseOptimizer):
                     new_individual.append(gene)
             return new_individual
 
+        def crossover(parent1, parent2):
+            crossover_point = random.randint(1, len(parent1) - 1)
+            return parent1[:crossover_point] + parent2[crossover_point:]
+
         def create_candidates(n, create_random=False, create_trivial=False, selectable_candidates=None):
             if n <= 0:
                 return []
@@ -113,11 +118,19 @@ class MapElitesOptimizer(BaseOptimizer):
             else:
                 selectable_indices = np.argwhere(archive_scores != -1)
                 while len(candidates) < n:
+                    c = []
                     if selectable_candidates:
-                        candidate = random.choice(selectable_candidates)
+                        for _ in range(1 + int(random.random() < self.crossover_rate)):
+                            c.append(random.choice(selectable_candidates))
                     else:
-                        idx = random.choice(selectable_indices)
-                        candidate = archive_individuals[idx[0], idx[1], idx[2], :].tolist()
+                        for _ in range(1 + int(random.random() < self.crossover_rate)):
+                            idx = random.choice(selectable_indices)
+                            c.append(archive_individuals[idx[0], idx[1], idx[2], :].tolist())
+
+                    if len(c) == 2:
+                        candidate = crossover(*c)
+                    else:
+                        candidate = c[0]
                     candidate = mutate(candidate)
                     candidates.append(candidate)
 
