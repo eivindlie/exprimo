@@ -11,8 +11,10 @@
     "simulator_comp_penalty": 0.9,
     "simulator_comm_penalty": 0.25,
     "allow_cpu": false,
-    "pipeline_batches": 1,
-    "batches": 1,
+    "pipeline_batches": 2,
+    "batches": 4,
+
+    "include_trivial_solutions": true,
 
     "verbose": 50,
     "n_threads": 1
