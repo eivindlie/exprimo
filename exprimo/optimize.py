@@ -18,8 +18,8 @@ with open(config_path) as f:
 device_graph_path = config['device_graph_path']
 net_path = config['net_path']
 
-batches = config.get('batches', 1)
-pipeline_batches = config.get('pipeline_batches', 1)
+batches = config['optimizer_args'].get('batches', 1)
+pipeline_batches = config['optimizer_args'].get('pipeline_batches', 1)
 
 args = config.get('optimizer_args', {})
 args['batches'] = batches
