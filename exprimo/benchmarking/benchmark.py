@@ -57,7 +57,7 @@ def benchmark_with_placement(model_type, placement='cuda:0', batches=50, drop_ba
         dataset = torchvision.datasets.FakeData(transform=preprocess, image_size=(3, 299, 299), size=500)
 
     train_loader = torch.utils.data.DataLoader(
-        dataset, batch_size=BATCH_SIZE, shuffle=True
+        dataset, batch_size=BATCH_SIZE, shuffle=True, drop_last=True
     )
 
     b = 0
