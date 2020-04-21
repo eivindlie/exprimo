@@ -6,6 +6,7 @@
     "dimension_sizes": [-1, -1, 10],
     "initial_size": 3,
     "mutation_rate": 0.4,
+    "copy_mutation_rate": 0.05,
     "steps": 25000,
 
     "simulator_comp_penalty": 0.9,

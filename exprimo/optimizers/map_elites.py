@@ -43,7 +43,7 @@ class MapElitesOptimizer(BaseOptimizer):
 
     def __init__(self, dimension_sizes=(-1, -1, 10), initial_size=50,
                  simulator_comp_penalty=1, simulator_comm_penalty=1,
-                 steps=1000, allow_cpu=True, mutation_rate=0.05,
+                 steps=1000, allow_cpu=True, mutation_rate=0.05, copy_mutation_rate=0,
                  include_trivial_solutions=True, **kwargs):
         super().__init__(**kwargs)
         self.dimension_sizes = dimension_sizes
@@ -53,6 +53,7 @@ class MapElitesOptimizer(BaseOptimizer):
         self.steps = steps
         self.allow_cpu = allow_cpu
         self.mutation_rate = mutation_rate
+        self.copy_mutation_rate = copy_mutation_rate
         self.include_trivial_solutions = include_trivial_solutions
 
         if self.n_threads > 1:
@@ -81,7 +82,7 @@ class MapElitesOptimizer(BaseOptimizer):
         def mutate(individual):
             new_individual = []
             for i, gene in enumerate(individual):
-                if random.random() < 0.05 and i > 0:
+                if random.random() < self.copy_mutation_rate and i > 0:
                     new_individual.append(individual[i - 1])
                 elif random.random() < self.mutation_rate:
                     if self.allow_cpu:
