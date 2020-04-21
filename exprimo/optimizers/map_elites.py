@@ -132,8 +132,11 @@ class MapElitesOptimizer(BaseOptimizer):
                 eval_results = [evaluate(candidates[0])]
             else:
                 fn_args = zip(candidates, repeat(net_string), repeat(groups), repeat(device_graph),
-                              repeat(self.pipeline_batches), repeat(self.batches), repeat(self.simulator_comp_penalty),
-                              repeat(self.simulator_comm_penalty))
+                              repeat(self.dimension_sizes), repeat(self.pipeline_batches), repeat(self.batches),
+                              repeat(self.simulator_comp_penalty), repeat(self.simulator_comm_penalty))
+
+                #  individual, net_string, groups, device_graph, dimension_sizes, pipeline_batches=1, batches=1,
+                #  simulator_comp_penalty=1, simulator_comm_penalty=1
                 eval_results = self.worker_pool.starmap(_evaluate, fn_args)
 
             for result in eval_results:

@@ -17,6 +17,6 @@
     "include_trivial_solutions": true,
 
     "verbose": 50,
-    "n_threads": 1
+    "n_threads": -1
   }
 }
