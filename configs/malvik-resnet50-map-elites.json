@@ -4,17 +4,17 @@
   "optimizer": "map_elites",
   "optimizer_args": {
     "dimension_sizes": [-1, -1, 10],
-    "initial_size": 50,
+    "initial_size": 3,
     "mutation_rate": 0.4,
     "steps": 25000,
 
     "simulator_comp_penalty": 0.9,
     "simulator_comm_penalty": 0.25,
     "allow_cpu": false,
-    "pipeline_batches": 2,
-    "batches": 4,
+    "pipeline_batches": 1,
+    "batches": 1,
 
-    "include_trivial_solutions": true,
+    "include_trivial_solutions": false,
 
     "verbose": 50,
     "n_threads": -1
