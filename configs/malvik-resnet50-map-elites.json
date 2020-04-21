@@ -18,6 +18,8 @@
 
     "include_trivial_solutions": false,
 
+    "show_score_plot": true,
+
     "verbose": 50,
     "n_threads": -1
   }

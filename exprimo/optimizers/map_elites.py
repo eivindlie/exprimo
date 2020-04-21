@@ -1,22 +1,23 @@
 import json
 import random
 from collections import Counter
-from typing import Sequence
-
 from itertools import repeat
 from multiprocessing.pool import Pool
-
-import numpy as np
-from tqdm import tqdm
 
 from exprimo.optimizers.base import BaseOptimizer
 from exprimo.optimizers.utils import evaluate_placement, apply_placement, generate_random_placement, flatten
 from exprimo.graph import get_flattened_layer_names, ComputationGraph
 
+import numpy as np
+from tqdm import tqdm
+import matplotlib.pyplot as plt
+from exprimo import PLOT_STYLE
+import seaborn as sns
+sns.set(style=PLOT_STYLE)
+
 
 def _evaluate(individual, net_string, groups, device_graph, dimension_sizes, pipeline_batches=1, batches=1,
               simulator_comp_penalty=1, simulator_comm_penalty=1):
-
     c = Counter(individual)
     device_mode = c.most_common(1)[0][0]
     device_mode = round((device_mode / len(device_graph.devices)) * dimension_sizes[0])
@@ -44,7 +45,7 @@ class MapElitesOptimizer(BaseOptimizer):
     def __init__(self, dimension_sizes=(-1, -1, 10), initial_size=50,
                  simulator_comp_penalty=1, simulator_comm_penalty=1,
                  steps=1000, allow_cpu=True, mutation_rate=0.05, copy_mutation_rate=0, crossover_rate=0.4,
-                 include_trivial_solutions=True, **kwargs):
+                 include_trivial_solutions=True, show_score_plot=False, plot_axes=(0, 2), **kwargs):
         super().__init__(**kwargs)
         self.dimension_sizes = dimension_sizes
         self.initial_size = initial_size
@@ -56,11 +57,33 @@ class MapElitesOptimizer(BaseOptimizer):
         self.copy_mutation_rate = copy_mutation_rate
         self.crossover_rate = crossover_rate
         self.include_trivial_solutions = include_trivial_solutions
+        self.plot_axes = plot_axes
+        self.show_score_plot = show_score_plot
+
+        self.axis_names = ['Most common device', 'No. of used devices', 'No. of jumps']
 
         if self.n_threads > 1:
             self.worker_pool = Pool(self.n_threads)
         else:
             self.worker_pool = None
+
+    def plot_scores(self, scores, axes=(1, 2)):
+        assert len(axes) == 2, 'Only two-dimensional plots are supported!'
+        assert min(axes) >= 0 and max(axes) < len(scores.shape), 'Axes out of range!'
+
+        avg_axes = [i for i in range(len(scores.shape)) if i not in axes]
+        avg_scores = 1 / np.nanmean(scores, axis=tuple(avg_axes))
+
+        plt.margins(50)
+        cmap = sns.cm.rocket_r
+        ax = sns.heatmap(avg_scores, mask=(np.isnan(avg_scores)), square=True, cmap=cmap)
+        ax.invert_yaxis()
+        axes = tuple(reversed(sorted(axes)))
+
+        plt.xlabel(self.axis_names[axes[0]])
+        plt.ylabel(self.axis_names[axes[1]])
+
+        plt.show()
 
     def optimize(self, net_string, device_graph, return_full_archive=False):
 
@@ -73,7 +96,8 @@ class MapElitesOptimizer(BaseOptimizer):
         if self.dimension_sizes[1] == -1:
             self.dimension_sizes[1] = n_devices
 
-        archive_scores = np.ones(self.dimension_sizes) * -1
+        archive_scores = np.empty(self.dimension_sizes)
+        archive_scores[:] = np.NaN
         archive_individuals = np.zeros(list(self.dimension_sizes) + [len(groups)], dtype=int)
 
         def evaluate(individual):
@@ -116,7 +140,7 @@ class MapElitesOptimizer(BaseOptimizer):
                 while len(candidates) < n:
                     candidates.append(generate_random_placement(len(groups), n_devices, allow_device_0=self.allow_cpu))
             else:
-                selectable_indices = np.argwhere(archive_scores != -1)
+                selectable_indices = np.argwhere(np.isfinite(archive_scores))
                 while len(candidates) < n:
                     c = []
                     if selectable_candidates:
@@ -161,12 +185,15 @@ class MapElitesOptimizer(BaseOptimizer):
                 score, description, individual = result
 
                 previous_elite_score = archive_scores[description[0], description[1], description[2]]
-                if previous_elite_score is -1 or previous_elite_score < score:
+                if np.isnan(previous_elite_score) or previous_elite_score < score:
                     archive_scores[description[0], description[1], description[2]] = score
                     archive_individuals[description[0], description[1], description[2], :] = individual
 
             if self.verbose and i % self.verbose == 0:
-                print(f'[{i}/{self.steps}] Best time: {1 / archive_scores.max():.4f}ms')
+                print(f'[{i}/{self.steps}] Best time: {1 / np.nanmax(archive_scores):.4f}ms')
+
+        if self.show_score_plot:
+            self.plot_scores(archive_scores, axes=self.plot_axes)
 
         if return_full_archive:
             return archive_scores, archive_individuals
