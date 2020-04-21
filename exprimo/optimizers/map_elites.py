@@ -92,7 +92,7 @@ class MapElitesOptimizer(BaseOptimizer):
                     new_individual.append(gene)
             return new_individual
 
-        def create_candidates(n, create_random=False, create_trivial=False):
+        def create_candidates(n, create_random=False, create_trivial=False, selectable_candidates=None):
             if n <= 0:
                 return []
             candidates = []
@@ -112,8 +112,11 @@ class MapElitesOptimizer(BaseOptimizer):
             else:
                 selectable_indices = np.argwhere(archive_scores != -1)
                 while len(candidates) < n:
-                    idx = random.choice(selectable_indices)
-                    candidate = archive_individuals[idx[0], idx[1], idx[2], :].tolist()
+                    if selectable_candidates:
+                        candidate = random.choice(selectable_candidates)
+                    else:
+                        idx = random.choice(selectable_indices)
+                        candidate = archive_individuals[idx[0], idx[1], idx[2], :].tolist()
                     candidate = mutate(candidate)
                     candidates.append(candidate)
 
@@ -126,7 +129,10 @@ class MapElitesOptimizer(BaseOptimizer):
                 candidates = create_candidates(init_number, create_trivial=True, create_random=True)
             else:
                 candidates = create_candidates(init_number, create_random=True)
-            candidates += create_candidates(self.n_threads - init_number)
+            if init_number > 0:
+                candidates += create_candidates(self.n_threads - init_number, selectable_candidates=candidates[:])
+            else:
+                candidates += create_candidates(self.n_threads - init_number)
 
             if self.n_threads == 1:
                 eval_results = [evaluate(candidates[0])]
@@ -135,8 +141,6 @@ class MapElitesOptimizer(BaseOptimizer):
                               repeat(self.dimension_sizes), repeat(self.pipeline_batches), repeat(self.batches),
                               repeat(self.simulator_comp_penalty), repeat(self.simulator_comm_penalty))
 
-                #  individual, net_string, groups, device_graph, dimension_sizes, pipeline_batches=1, batches=1,
-                #  simulator_comp_penalty=1, simulator_comm_penalty=1
                 eval_results = self.worker_pool.starmap(_evaluate, fn_args)
 
             for result in eval_results:
