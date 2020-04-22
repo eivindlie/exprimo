@@ -20,6 +20,7 @@
 
     "show_score_plot": true,
     "plot_save_path": "~/map-elites_score_plot.png",
+    "plot_axes": [0, 1, 2],
 
     "verbose": 50,
     "n_threads": -1

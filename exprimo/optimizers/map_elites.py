@@ -71,20 +71,31 @@ class MapElitesOptimizer(BaseOptimizer):
             self.worker_pool = None
 
     def plot_scores(self, scores, axes=(1, 2)):
-        assert len(axes) == 2, 'Only two-dimensional plots are supported!'
         assert min(axes) >= 0 and max(axes) < len(scores.shape), 'Axes out of range!'
 
-        avg_axes = [i for i in range(len(scores.shape)) if i not in axes]
-        avg_scores = 1 / np.nanmean(scores, axis=tuple(avg_axes))
+        if len(axes) < len(scores.shape):
+            avg_axes = [i for i in range(len(scores.shape)) if i not in axes]
+            avg_scores = 1 / np.nanmean(scores, axis=tuple(avg_axes))
+        else:
+            avg_scores = 1 / scores
 
-        plt.margins(50)
-        cmap = sns.cm.rocket_r
-        ax = sns.heatmap(avg_scores, mask=(np.isnan(avg_scores)), square=True, cmap=cmap)
-        ax.invert_yaxis()
-        axes = tuple(reversed(sorted(axes)))
+        mask = np.isnan(avg_scores)
 
-        plt.xlabel(self.axis_names[axes[0]])
-        plt.ylabel(self.axis_names[axes[1]])
+        n_plots = len(axes) == 2 or scores.shape[0]
+
+        plotted_axes = tuple(reversed(sorted(ax for ax in axes if len(axes) == 2 or ax != 0)))
+
+        figsize = (7 * min(3, n_plots), 4.8 * n_plots // 3)
+        fig, axs = plt.subplots(n_plots // 3, min(3, n_plots), figsize=figsize)
+        for i, ax in enumerate(axs):
+            cmap = sns.cm.rocket_r
+            plot = sns.heatmap(avg_scores[i, :, :], ax=ax, mask=mask[i, :, :], square=True, cmap=cmap)
+            plot.invert_yaxis()
+
+            ax.set_xlabel(self.axis_names[plotted_axes[0]])
+            ax.set_ylabel(self.axis_names[plotted_axes[1]])
+            if len(axes) > 2:
+                ax.set_title(f'{self.axis_names[0]} = {i}')
 
         if self.plot_save_path:
             plt.savefig(os.path.expanduser(self.plot_save_path))
