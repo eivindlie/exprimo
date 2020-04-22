@@ -3,7 +3,7 @@
   "net_path": "nets/resnet50.json",
   "optimizer": "map_elites",
   "optimizer_args": {
-    "dimension_sizes": [-1, -1, 20],
+    "dimension_sizes": [-1, -1, 40],
     "initial_size": 3,
     "mutation_rate": 0.4,
     "copy_mutation_rate": 0.05,
