@@ -46,7 +46,7 @@ class MapElitesOptimizer(BaseOptimizer):
     def __init__(self, dimension_sizes=(-1, -1, 10), initial_size=50,
                  simulator_comp_penalty=1, simulator_comm_penalty=1,
                  steps=1000, allow_cpu=True, mutation_rate=0.05, copy_mutation_rate=0, replace_mutation_rate=0,
-                 crossover_rate=0.4,
+                 zone_mutation_rate=0, crossover_rate=0.4,
                  include_trivial_solutions=True, show_score_plot=False, plot_axes=(0, 2),
                  plot_save_path=None, **kwargs):
         super().__init__(**kwargs)
@@ -59,6 +59,7 @@ class MapElitesOptimizer(BaseOptimizer):
         self.mutation_rate = mutation_rate
         self.copy_mutation_rate = copy_mutation_rate
         self.replace_mutation_rate = replace_mutation_rate
+        self.zone_mutation_rate = zone_mutation_rate
         self.crossover_rate = crossover_rate
         self.include_trivial_solutions = include_trivial_solutions
         self.plot_axes = plot_axes
@@ -147,6 +148,11 @@ class MapElitesOptimizer(BaseOptimizer):
                 i2 = random.choice(devices_present)
 
                 new_individual = [i2 if i == i1 else i for i in individual]
+            elif random.random() < self.zone_mutation_rate:
+                split1 = random.randint(0, len(individual) - 1)
+                split2 = split1 + min(np.random.geometric(0.2), len(individual) - split1)
+                dev = random.randint(0 if self.allow_cpu else 1, n_devices - 1)
+                new_individual = individual[:split1] + [dev] * (split2 - split1) + individual[split2:]
             else:
                 for i, gene in enumerate(individual):
                     if random.random() < self.copy_mutation_rate and i > 0:
