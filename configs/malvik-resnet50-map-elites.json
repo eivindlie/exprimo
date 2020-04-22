@@ -11,7 +11,7 @@
     "initial_size": 3,
     "mutation_rate": 0.4,
     "copy_mutation_rate": 0.4,
-    "replace_mutation_rate": 0.05,
+    "replace_mutation_rate": 0.001,
     "crossover_rate": 0.4,
     "steps": 25000,
 
