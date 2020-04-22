@@ -12,7 +12,7 @@ from exprimo.graph import get_flattened_layer_names, ComputationGraph
 import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
-from exprimo import PLOT_STYLE
+from exprimo import PLOT_STYLE, log
 import seaborn as sns
 sns.set(style=PLOT_STYLE)
 
@@ -223,7 +223,7 @@ class MapElitesOptimizer(BaseOptimizer):
                     archive_individuals[description[0], description[1], description[2], :] = individual
 
             if self.verbose and i % self.verbose == 0:
-                print(f'[{i}/{self.steps}] Best time: {1 / np.nanmax(archive_scores):.4f}ms')
+                log(f'[{i}/{self.steps}] Best time: {1 / np.nanmax(archive_scores):.4f}ms')
 
         if self.show_score_plot:
             graph = ComputationGraph()
@@ -238,6 +238,6 @@ class MapElitesOptimizer(BaseOptimizer):
         best_individual = archive_individuals.reshape((-1, len(groups)))[best_index]
 
         if self.verbose:
-            print(f'Best individual: {best_individual}')
+            log(f'Best individual: {best_individual}')
 
         return json.dumps(apply_placement(net_string, best_individual.tolist(), groups))
