@@ -1,2 +1,0 @@
-#!/bin/sh
-.venv/bin/python -m $@ 2>&1 | tee output.log
