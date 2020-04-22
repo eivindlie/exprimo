@@ -26,7 +26,7 @@ def log(*strings, end='\n', sep=''):
         if isinstance(stream, str):
             with open(stream, 'a') as f:
                 timestamp = time.strftime("[%Y-%m-%d %H:%M:%S]", time.localtime())
-                string = sep.join(strings)
+                string = sep.join(str(s) for s in strings)
                 f.write(f'{timestamp}  {string}{end}')
         else:
             stream(*strings, end=end, sep=sep)
