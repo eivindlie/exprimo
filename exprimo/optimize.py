@@ -1,11 +1,12 @@
 import json
 import sys
 
-from exprimo import DeviceGraph, Simulator, plot_event_trace, ComputationGraph
+from exprimo import DeviceGraph, Simulator, plot_event_trace, ComputationGraph, log
 from exprimo.optimizers import SimulatedAnnealingOptimizer, HillClimbingOptimizer, RandomHillClimbingOptimizer, \
     GAOptimizer, LinearSearchOptimizer, MapElitesOptimizer
 from exprimo.benchmarking import create_benchmark_function
 from exprimo.optimizers.particle_swarm_optimizer import ParticleSwarmOptimizer
+
 
 config_path = 'configs/malvik-resnet50-map-elites.json'
 
@@ -53,9 +54,9 @@ device_graph = DeviceGraph.load_from_file(device_graph_path)
 with open(net_path) as f:
     net_string = f.read()
 
-print(f'Optimizing {net_path} on {device_graph_path} using {optimizer}')
-print(args)
-print()
+log(f'Optimizing {net_path} on {device_graph_path} using {optimizer}')
+log(args)
+log()
 
 
 best_net = optimizer.optimize(net_string, device_graph)
@@ -73,7 +74,7 @@ execution_time, events = simulator.simulate(batch_size=128,
 if config.get('plot_event_trace', True):
     plot_event_trace(events, simulator)
 
-print('\n')
+log('\n')
 # print(f'Best discovered configuration: {[layer["device"] for layer in net_dict["layers"].values()]}')
-print(f'Execution time: {execution_time:.2f}ms')
+log(f'Execution time: {execution_time:.2f}ms')
 
