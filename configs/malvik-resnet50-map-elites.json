@@ -10,7 +10,8 @@
     "dimension_sizes": [-1, -1, 40],
     "initial_size": 3,
     "mutation_rate": 0.4,
-    "copy_mutation_rate": 0.05,
+    "copy_mutation_rate": 0.4,
+    "replace_mutation_rate": 0.05,
     "crossover_rate": 0.4,
     "steps": 25000,
 
@@ -20,7 +21,7 @@
     "pipeline_batches": 1,
     "batches": 1,
 
-    "include_trivial_solutions": true,
+    "include_trivial_solutions": false,
 
     "show_score_plot": true,
     "plot_save_path": "~/map-elites_score_plot.png",
