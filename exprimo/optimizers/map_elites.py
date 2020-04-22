@@ -141,23 +141,23 @@ class MapElitesOptimizer(BaseOptimizer):
 
         def mutate(individual):
             new_individual = []
-            for i, gene in enumerate(individual):
-                if random.random() < self.copy_mutation_rate and i > 0:
-                    new_individual.append(individual[i - 1])
-                elif random.random() < self.mutation_rate:
-                    if self.allow_cpu:
-                        new_individual.append(random.randint(0, n_devices - 1))
-                    else:
-                        new_individual.append(random.randint(1, n_devices - 1))
-                else:
-                    new_individual.append(gene)
-
             if random.random() < self.replace_mutation_rate:
                 devices_present = list(set(new_individual))
                 i1 = random.choice(devices_present)
                 i2 = random.choice(devices_present)
 
-                new_individual = [i2 if i == i1 else i for i in new_individual]
+                new_individual = [i2 if i == i1 else i for i in individual]
+            else:
+                for i, gene in enumerate(individual):
+                    if random.random() < self.copy_mutation_rate and i > 0:
+                        new_individual.append(individual[i - 1])
+                    elif random.random() < self.mutation_rate:
+                        if self.allow_cpu:
+                            new_individual.append(random.randint(0, n_devices - 1))
+                        else:
+                            new_individual.append(random.randint(1, n_devices - 1))
+                    else:
+                        new_individual.append(gene)
 
             return new_individual
 
