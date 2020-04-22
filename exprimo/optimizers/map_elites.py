@@ -153,8 +153,9 @@ class MapElitesOptimizer(BaseOptimizer):
                     new_individual.append(gene)
 
             if random.random() < self.replace_mutation_rate:
-                i1 = random.choice(list(set(new_individual)))
-                i2 = random.randint(0 if self.allow_cpu else 1, n_devices - 1)
+                devices_present = list(set(new_individual))
+                i1 = random.choice(devices_present)
+                i2 = random.randint(devices_present)
 
                 new_individual = [i2 if i == i1 else i for i in new_individual]
 
