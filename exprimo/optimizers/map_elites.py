@@ -236,4 +236,8 @@ class MapElitesOptimizer(BaseOptimizer):
 
         best_index = np.nanargmax(archive_scores)
         best_individual = archive_individuals.reshape((-1, len(groups)))[best_index]
+
+        if self.verbose:
+            print(f'Best individual: {best_individual}')
+
         return json.dumps(apply_placement(net_string, best_individual.tolist(), groups))
