@@ -18,15 +18,19 @@ with open(config_path) as f:
 device_graph_path = config['device_graph_path']
 net_path = config['net_path']
 
-batches = config['optimizer_args'].get('batches', 1)
-pipeline_batches = config['optimizer_args'].get('pipeline_batches', 1)
-
 args = config.get('optimizer_args', {})
+
+batches = args.get('batches', 1)
+pipeline_batches = args.get('pipeline_batches', 1)
+
 args['batches'] = batches
 args['pipeline_batches'] = pipeline_batches
 
 if 'benchmarking_function' in args:
     args['benchmarking_function'] = create_benchmark_function(**args['benchmarking_function'])
+
+comp_penalty = args.get('simulator_comp_penalty', 1.0)
+comm_penalty = args.get('simulator_comm_penalty', 1.0)
 
 
 optimizers = {
@@ -63,7 +67,8 @@ simulator = Simulator(graph, device_graph)
 execution_time, events = simulator.simulate(batch_size=128,
                                             print_memory_usage=config.get('print_memory_usage', False),
                                             print_event_trace=config.get('print_event_trace', False),
-                                            return_event_trace=True, batches=batches, pipeline_batches=pipeline_batches)
+                                            return_event_trace=True, batches=batches, pipeline_batches=pipeline_batches,
+                                            comm_penalization=comm_penalty, comp_penalization=comp_penalty)
 
 if config.get('plot_event_trace', True):
     plot_event_trace(events, simulator)
