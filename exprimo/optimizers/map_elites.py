@@ -155,7 +155,7 @@ class MapElitesOptimizer(BaseOptimizer):
             if random.random() < self.replace_mutation_rate:
                 devices_present = list(set(new_individual))
                 i1 = random.choice(devices_present)
-                i2 = random.randint(devices_present)
+                i2 = random.choice(devices_present)
 
                 new_individual = [i2 if i == i1 else i for i in new_individual]
 
