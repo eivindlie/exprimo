@@ -13,6 +13,8 @@ config_path = 'configs/malvik-resnet50-map-elites.json'
 if len(sys.argv) > 1:
     config_path = sys.argv[1]
 
+log(f'Using config path {config_path}')
+
 with open(config_path) as f:
     config = json.load(f)
 
