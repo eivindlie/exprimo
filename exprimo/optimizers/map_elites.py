@@ -45,7 +45,8 @@ class MapElitesOptimizer(BaseOptimizer):
 
     def __init__(self, dimension_sizes=(-1, -1, 10), initial_size=50,
                  simulator_comp_penalty=1, simulator_comm_penalty=1,
-                 steps=1000, allow_cpu=True, mutation_rate=0.05, copy_mutation_rate=0, crossover_rate=0.4,
+                 steps=1000, allow_cpu=True, mutation_rate=0.05, copy_mutation_rate=0, replace_mutation_rate=0,
+                 crossover_rate=0.4,
                  include_trivial_solutions=True, show_score_plot=False, plot_axes=(0, 2),
                  plot_save_path=None, **kwargs):
         super().__init__(**kwargs)
@@ -57,6 +58,7 @@ class MapElitesOptimizer(BaseOptimizer):
         self.allow_cpu = allow_cpu
         self.mutation_rate = mutation_rate
         self.copy_mutation_rate = copy_mutation_rate
+        self.replace_mutation_rate = replace_mutation_rate
         self.crossover_rate = crossover_rate
         self.include_trivial_solutions = include_trivial_solutions
         self.plot_axes = plot_axes
@@ -149,6 +151,13 @@ class MapElitesOptimizer(BaseOptimizer):
                         new_individual.append(random.randint(1, n_devices - 1))
                 else:
                     new_individual.append(gene)
+
+            if random.random() < self.replace_mutation_rate:
+                i1 = random.randint(0, n_devices - 1)
+                i2 = random.randint(0, n_devices - 1)
+
+                new_individual = [i2 if i == i1 else i for i in new_individual]
+
             return new_individual
 
         def crossover(parent1, parent2):
