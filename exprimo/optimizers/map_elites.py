@@ -30,7 +30,7 @@ def _evaluate(individual, net_string, groups, device_graph, dimension_sizes, pip
     comp_graph.load_from_string(json.dumps(comp_graph_dict))
 
     num_jumps, max_jumps = comp_graph.get_number_of_jumps(return_max_jumps=True)
-    num_jumps = round((num_jumps / max_jumps) * dimension_sizes[2])
+    num_jumps = round((num_jumps / max_jumps) * (dimension_sizes[2] - 1))
 
     description = (device_mode, used_devices, num_jumps)
 
