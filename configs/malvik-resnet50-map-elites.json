@@ -12,7 +12,7 @@
 
     "simulator_comp_penalty": 0.9,
     "simulator_comm_penalty": 0.25,
-    "allow_cpu": false,
+    "allow_cpu": true,
     "pipeline_batches": 1,
     "batches": 1,
 

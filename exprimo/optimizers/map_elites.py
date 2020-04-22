@@ -23,7 +23,7 @@ def _evaluate(individual, net_string, groups, device_graph, dimension_sizes, pip
     device_mode = c.most_common(1)[0][0]
     device_mode = round((device_mode / len(device_graph.devices)) * dimension_sizes[0])
 
-    used_devices = round(((len(set(individual)) - 1) / (len(device_graph.devices) - 1)) * dimension_sizes[1])
+    used_devices = round(((len(set(individual)) - 1) / (len(device_graph.devices))) * dimension_sizes[1])
 
     comp_graph_dict = apply_placement(net_string, individual, groups)
     comp_graph = ComputationGraph()
