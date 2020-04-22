@@ -2,6 +2,10 @@
   "device_graph_path": "device_graphs/malvik-4gpu.json",
   "net_path": "nets/resnet50.json",
   "optimizer": "map_elites",
+
+  "plot_event_trace": true,
+  "event_trace_save_path": "event_trace.png",
+
   "optimizer_args": {
     "dimension_sizes": [-1, -1, 40],
     "initial_size": 3,

@@ -72,7 +72,8 @@ execution_time, events = simulator.simulate(batch_size=128,
                                             comm_penalization=comm_penalty, comp_penalization=comp_penalty)
 
 if config.get('plot_event_trace', True):
-    plot_event_trace(events, simulator)
+    save_path = config.get('event_trace_save_path', None)
+    plot_event_trace(events, simulator, save_path=save_path)
 
 log('\n')
 # print(f'Best discovered configuration: {[layer["device"] for layer in net_dict["layers"].values()]}')

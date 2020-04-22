@@ -6,7 +6,7 @@ from matplotlib.colors import Normalize
 
 
 def plot_event_trace(events, simulator, show_transfer_lines=True, show_memory_usage=True, cmap='Paired',
-                     plot_op_time_distribution=False):
+                     plot_op_time_distribution=False, save_path=None):
     op_done_events = [e for e in events if e.type == 'op_done']
     transfer_done_events = [e for e in events if e.type == 'transfer_done']
     batches = max(events, key=lambda e: e.batch).batch + 1
@@ -54,6 +54,9 @@ def plot_event_trace(events, simulator, show_transfer_lines=True, show_memory_us
             to_device_index = devices.index(event.to_device)
             gnt.plot([event.start_time, event.end_time], [10 + 10 * from_device_index, 10 + 10 * to_device_index],
                      color='red', alpha=0.4)
+
+    if save_path:
+        plt.savefig(save_path)
 
     plt.show()
 
