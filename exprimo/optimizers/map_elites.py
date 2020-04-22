@@ -101,6 +101,9 @@ class MapElitesOptimizer(BaseOptimizer):
             cmap = sns.cm.rocket_r
             data = avg_batch_times[i, :, :] if len(axes) > 2 else avg_batch_times
             mask1 = mask[i, :, :] if len(axes) > 2 else mask
+            if np.all(mask1):
+                ax.axis('off')
+                continue
             plot = sns.heatmap(data, ax=ax, mask=mask1, square=True, cmap=cmap,
                                xticklabels=AXIS_TICKS[plotted_axes[0]], yticklabels=AXIS_TICKS[plotted_axes[1]])
             plot.invert_yaxis()
