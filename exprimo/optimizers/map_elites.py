@@ -63,15 +63,20 @@ class MapElitesOptimizer(BaseOptimizer):
         self.show_score_plot = show_score_plot
         self.plot_save_path = plot_save_path
 
-        self.axis_names = ['Most common device', 'No. of used devices', 'No. of jumps']
-
         if self.n_threads > 1:
             self.worker_pool = Pool(self.n_threads)
         else:
             self.worker_pool = None
 
-    def plot_scores(self, scores, axes=(1, 2)):
+    def plot_scores(self, scores, n_devices, max_jumps, axes=(1, 2)):
         assert min(axes) >= 0 and max(axes) < len(scores.shape), 'Axes out of range!'
+
+        AXIS_NAMES = ['Most common device', 'No. of used devices', 'No. of jumps']
+        AXIS_TICKS = [
+            [int(i * (n_devices / self.dimension_sizes[0])) for i in range(self.dimension_sizes[0])],
+            [int(i * (n_devices / self.dimension_sizes[1])) + 1 for i in range(self.dimension_sizes[1])],
+            [int(i * (max_jumps / self.dimension_sizes[2])) for i in range(self.dimension_sizes[2])]
+        ]
 
         if len(axes) < len(scores.shape):
             avg_axes = [i for i in range(len(scores.shape)) if i not in axes]
@@ -85,7 +90,7 @@ class MapElitesOptimizer(BaseOptimizer):
 
         plotted_axes = tuple(reversed(sorted(ax for ax in axes if len(axes) == 2 or ax != 0)))
 
-        figsize = (7 * min(3, n_plots), 4.8 * (n_plots // 3 + 1))
+        figsize = (10 * min(3, n_plots), 8 * (n_plots // 3 + 1))
         fig, axs = plt.subplots(n_plots // 3 + 1, min(3, n_plots), figsize=figsize)
         axs = np.reshape(axs, (-1,))
         for i, ax in enumerate(axs):
@@ -96,13 +101,14 @@ class MapElitesOptimizer(BaseOptimizer):
             cmap = sns.cm.rocket_r
             data = avg_batch_times[i, :, :] if len(axes) > 2 else avg_batch_times
             mask1 = mask[i, :, :] if len(axes) > 2 else mask
-            plot = sns.heatmap(data, ax=ax, mask=mask1, square=True, cmap=cmap)
+            plot = sns.heatmap(data, ax=ax, mask=mask1, square=True, cmap=cmap,
+                               xticklabels=AXIS_TICKS[plotted_axes[0]], yticklabels=AXIS_TICKS[plotted_axes[1]])
             plot.invert_yaxis()
 
-            ax.set_xlabel(self.axis_names[plotted_axes[0]])
-            ax.set_ylabel(self.axis_names[plotted_axes[1]])
+            ax.set_xlabel(AXIS_NAMES[plotted_axes[0]])
+            ax.set_ylabel(AXIS_NAMES[plotted_axes[1]])
             if len(axes) > 2:
-                ax.set_title(f'{self.axis_names[0]} = {i}')
+                ax.set_title(f'{AXIS_NAMES[0]} = {AXIS_TICKS[0][i]}')
 
         if self.plot_save_path:
             plt.savefig(os.path.expanduser(self.plot_save_path))
@@ -217,7 +223,10 @@ class MapElitesOptimizer(BaseOptimizer):
                 print(f'[{i}/{self.steps}] Best time: {1 / np.nanmax(archive_scores):.4f}ms')
 
         if self.show_score_plot:
-            self.plot_scores(archive_scores, axes=self.plot_axes)
+            graph = ComputationGraph()
+            graph.load_from_string(net_string)
+            _, max_jumps = graph.get_number_of_jumps(return_max_jumps=True)
+            self.plot_scores(archive_scores, n_devices, max_jumps, axes=self.plot_axes)
 
         if return_full_archive:
             return archive_scores, archive_individuals
