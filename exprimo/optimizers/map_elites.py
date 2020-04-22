@@ -111,7 +111,7 @@ class MapElitesOptimizer(BaseOptimizer):
             ax.set_xlabel(AXIS_NAMES[plotted_axes[0]])
             ax.set_ylabel(AXIS_NAMES[plotted_axes[1]])
             if len(axes) > 2:
-                ax.set_title(f'{AXIS_NAMES[0]} = {AXIS_TICKS[0][i]}')
+                ax.set_title(f'{AXIS_NAMES[0]} = {AXIS_TICKS[0][i]}', pad=80)
 
         if self.plot_save_path:
             plt.savefig(os.path.expanduser(self.plot_save_path))
