@@ -75,21 +75,28 @@ class MapElitesOptimizer(BaseOptimizer):
 
         if len(axes) < len(scores.shape):
             avg_axes = [i for i in range(len(scores.shape)) if i not in axes]
-            avg_scores = 1 / np.nanmean(scores, axis=tuple(avg_axes))
+            avg_batch_times = 1 / np.nanmean(scores, axis=tuple(avg_axes))
         else:
-            avg_scores = 1 / scores
+            avg_batch_times = 1 / scores
 
-        mask = np.isnan(avg_scores)
+        mask = np.isnan(avg_batch_times)
 
-        n_plots = len(axes) == 2 or scores.shape[0]
+        n_plots = int(len(axes) == 2 or scores.shape[0])
 
         plotted_axes = tuple(reversed(sorted(ax for ax in axes if len(axes) == 2 or ax != 0)))
 
-        figsize = (7 * min(3, n_plots), 4.8 * n_plots // 3)
-        fig, axs = plt.subplots(n_plots // 3, min(3, n_plots), figsize=figsize)
+        figsize = (7 * min(3, n_plots), 4.8 * (n_plots // 3 + 1))
+        fig, axs = plt.subplots(n_plots // 3 + 1, min(3, n_plots), figsize=figsize)
+        axs = np.reshape(axs, (-1,))
         for i, ax in enumerate(axs):
+            if i >= avg_batch_times.shape[0]:
+                ax.axis('off')
+                break
+
             cmap = sns.cm.rocket_r
-            plot = sns.heatmap(avg_scores[i, :, :], ax=ax, mask=mask[i, :, :], square=True, cmap=cmap)
+            data = avg_batch_times[i, :, :] if len(axes) > 2 else avg_batch_times
+            mask1 = mask[i, :, :] if len(axes) > 2 else mask
+            plot = sns.heatmap(data, ax=ax, mask=mask1, square=True, cmap=cmap)
             plot.invert_yaxis()
 
             ax.set_xlabel(self.axis_names[plotted_axes[0]])
