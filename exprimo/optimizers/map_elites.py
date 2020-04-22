@@ -46,7 +46,7 @@ class MapElitesOptimizer(BaseOptimizer):
     def __init__(self, dimension_sizes=(-1, -1, 10), initial_size=50,
                  simulator_comp_penalty=1, simulator_comm_penalty=1,
                  steps=1000, allow_cpu=True, mutation_rate=0.05, copy_mutation_rate=0, replace_mutation_rate=0,
-                 zone_mutation_rate=0, crossover_rate=0.4,
+                 zone_mutation_rate=0, zone_fail_rate=0.2, crossover_rate=0.4,
                  include_trivial_solutions=True, show_score_plot=False, plot_axes=(0, 2),
                  plot_save_path=None, **kwargs):
         super().__init__(**kwargs)
@@ -60,6 +60,7 @@ class MapElitesOptimizer(BaseOptimizer):
         self.copy_mutation_rate = copy_mutation_rate
         self.replace_mutation_rate = replace_mutation_rate
         self.zone_mutation_rate = zone_mutation_rate
+        self.zone_fail_rate = zone_fail_rate
         self.crossover_rate = crossover_rate
         self.include_trivial_solutions = include_trivial_solutions
         self.plot_axes = plot_axes
