@@ -9,6 +9,11 @@ import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
+from exprimo import PLOT_STYLE
+import seaborn as sns
+sns.set(style=PLOT_STYLE)
+
+
 from exprimo.optimizers.base import BaseOptimizer
 from exprimo.graph import get_flattened_layer_names
 from exprimo.optimizers.utils import evaluate_placement, apply_placement, generate_random_placement, \

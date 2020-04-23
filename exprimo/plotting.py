@@ -3,6 +3,9 @@ from collections import defaultdict
 import matplotlib.pyplot as plt
 import matplotlib
 from matplotlib.colors import Normalize
+import seaborn as sns
+from exprimo import PLOT_STYLE
+sns.set(style=PLOT_STYLE)
 
 
 def plot_event_trace(events, simulator, show_transfer_lines=True, show_memory_usage=True, cmap='Paired',

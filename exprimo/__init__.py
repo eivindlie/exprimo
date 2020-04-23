@@ -1,11 +1,7 @@
 import time
 
-from exprimo.simulator import Simulator
-from exprimo.plotting import plot_event_trace
-from exprimo.device import DeviceGraph
-from exprimo.graph import ComputationGraph
+PLOT_STYLE = 'darkgrid'
 
-PLOT_STYLE = 'whitegrid'
 LOG_CONFIG = {
     'clear_files': True,
     'streams': [
@@ -30,3 +26,8 @@ def log(*strings, end='\n', sep=''):
                 f.write(f'{timestamp}  {string}{end}')
         else:
             stream(*strings, end=end, sep=sep)
+
+from exprimo.simulator import Simulator
+from exprimo.plotting import plot_event_trace
+from exprimo.device import DeviceGraph
+from exprimo.graph import ComputationGraph
