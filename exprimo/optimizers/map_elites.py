@@ -282,7 +282,7 @@ class MapElitesOptimizer(BaseOptimizer):
 
                     f.write(f'{niche}, {time}, {placement}\n')
 
-        def run_optimization(steps, benchmarking_function=None, start_generation=0):
+        def run_optimization(steps, benchmarking_function=None, start_step=0):
             nonlocal archive_individuals, archive_scores
 
             step_size = 1 if benchmarking_function else self.n_threads
@@ -325,8 +325,8 @@ class MapElitesOptimizer(BaseOptimizer):
                     with open(os.path.join(get_log_dir(), 'time_history.csv'), 'a') as f:
                         f.write(f'{i + 1}, {best_time}\n')
 
-                if self.archive_log_period and (i + 1) % self.archive_log_period == 0:
-                    log_archive(f'step_{i + start_generation + 1:06}.csv')
+                if self.archive_log_period and (i + 1) % self.archive_log_period < step_size:
+                    log_archive(f'step_{i + start_step + 1:06}.csv')
 
         if self.verbose:
             with open(os.path.join(get_log_dir(), 'time_history.csv'), 'w') as f:
