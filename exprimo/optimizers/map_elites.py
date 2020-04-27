@@ -6,7 +6,8 @@ from itertools import repeat
 from multiprocessing.pool import Pool
 
 from exprimo.optimizers.base import BaseOptimizer
-from exprimo.optimizers.utils import evaluate_placement, apply_placement, generate_random_placement, flatten
+from exprimo.optimizers.utils import evaluate_placement, apply_placement, generate_random_placement, flatten, \
+    get_device_assignment
 from exprimo.graph import get_flattened_layer_names, ComputationGraph
 
 import numpy as np
@@ -47,8 +48,9 @@ class MapElitesOptimizer(BaseOptimizer):
                  simulator_comp_penalty=1, simulator_comm_penalty=1,
                  steps=1000, allow_cpu=True, mutation_rate=0.05, copy_mutation_rate=0, replace_mutation_rate=0,
                  zone_mutation_rate=0, zone_fail_rate=0.2, crossover_rate=0.4,
-                 include_trivial_solutions=True, show_score_plot=False, plot_axes=(0, 2),
-                 plot_save_path=None, **kwargs):
+                 benchmarking_function=None, benchmarking_steps=0, benchmark_before_selection=False,
+                 include_trivial_solutions=True,
+                 show_score_plot=False, plot_axes=(0, 2), plot_save_path=None, **kwargs):
         super().__init__(**kwargs)
         self.dimension_sizes = dimension_sizes
         self.initial_size = initial_size
@@ -63,6 +65,9 @@ class MapElitesOptimizer(BaseOptimizer):
         self.zone_fail_rate = zone_fail_rate
         self.crossover_rate = crossover_rate
         self.include_trivial_solutions = include_trivial_solutions
+        self.benchmarking_steps = benchmarking_steps
+        self.benchmark_before_selection = benchmark_before_selection
+        self.benchmarking_function = benchmarking_function
         self.plot_axes = plot_axes
         self.show_score_plot = show_score_plot
         self.plot_save_path = plot_save_path
@@ -214,37 +219,76 @@ class MapElitesOptimizer(BaseOptimizer):
 
             return candidates
 
-        for i in tqdm(range(0, self.steps, self.n_threads)):
-            init_number = min(max(0, self.initial_size - i), self.n_threads)
+        def benchmark(individual, benchmarking_function):
+            device_assignment = get_device_assignment(apply_placement(net_string, individual.placement, groups))
+            time, memory_overflow = benchmarking_function(device_assignment, return_memory_overflow=True)
 
-            if self.include_trivial_solutions and i == 0:
-                candidates = create_candidates(init_number, create_trivial=True, create_random=True)
-            else:
-                candidates = create_candidates(init_number, create_random=True)
-            if init_number > 0:
-                candidates += create_candidates(self.n_threads - init_number, selectable_candidates=candidates[:])
-            else:
-                candidates += create_candidates(self.n_threads - init_number)
+            # Time is set to -1 if memory overflows - but we check with memory_overflow instead
+            time = max(time, 0)
 
-            if self.n_threads == 1:
-                eval_results = [evaluate(candidates[0])]
-            else:
-                fn_args = zip(candidates, repeat(net_string), repeat(groups), repeat(device_graph),
-                              repeat(self.dimension_sizes), repeat(self.pipeline_batches), repeat(self.batches),
-                              repeat(self.simulator_comp_penalty), repeat(self.simulator_comm_penalty))
+            if memory_overflow == -1:
+                memory_overflow = 1
 
-                eval_results = self.worker_pool.starmap(_evaluate, fn_args)
+            if memory_overflow > 0:
+                time += memory_overflow * 10 ** 9 * 1
 
-            for result in eval_results:
-                score, description, individual = result
+            return 1 / time
 
-                previous_elite_score = archive_scores[description[0], description[1], description[2]]
-                if np.isnan(previous_elite_score) or previous_elite_score < score:
-                    archive_scores[description[0], description[1], description[2]] = score
-                    archive_individuals[description[0], description[1], description[2], :] = individual
+        def reevaluate_archive(benchmarking_function=None):
+            indices = np.argwhere(np.isfinite(archive_scores))
 
-            if self.verbose and i % self.verbose == 0:
-                log(f'[{i}/{self.steps}] Best time: {1 / np.nanmax(archive_scores):.4f}ms')
+            for i in indices:
+                individual = archive_individuals[i[0], i[1], i[2], :].tolist()
+                if benchmarking_function:
+                    archive_scores[i] = benchmark(individual, benchmarking_function)
+                else:
+                    archive_scores[i] = self.evaluate(individual)
+
+        def run_optimization(steps, benchmarking_function=None, start_generation=0):
+            nonlocal archive_individuals, archive_scores
+
+            step_size = 1 if benchmarking_function else self.n_threads
+
+            for i in tqdm(range(0, steps, step_size)):
+                init_number = min(max(0, self.initial_size - i), self.n_threads)
+
+                if self.include_trivial_solutions and i == 0:
+                    candidates = create_candidates(init_number, create_trivial=True, create_random=True)
+                else:
+                    candidates = create_candidates(init_number, create_random=True)
+                if init_number > 0:
+                    candidates += create_candidates(self.n_threads - init_number, selectable_candidates=candidates[:])
+                else:
+                    candidates += create_candidates(self.n_threads - init_number)
+
+                if benchmarking_function:
+                    eval_results = [benchmark(candidates[0], benchmarking_function)]
+                elif self.n_threads == 1:
+                    eval_results = [evaluate(candidates[0])]
+                else:
+                    fn_args = zip(candidates, repeat(net_string), repeat(groups), repeat(device_graph),
+                                  repeat(self.dimension_sizes), repeat(self.pipeline_batches), repeat(self.batches),
+                                  repeat(self.simulator_comp_penalty), repeat(self.simulator_comm_penalty))
+
+                    eval_results = self.worker_pool.starmap(_evaluate, fn_args)
+
+                for result in eval_results:
+                    score, description, individual = result
+
+                    previous_elite_score = archive_scores[description[0], description[1], description[2]]
+                    if np.isnan(previous_elite_score) or previous_elite_score < score:
+                        archive_scores[description[0], description[1], description[2]] = score
+                        archive_individuals[description[0], description[1], description[2], :] = individual
+
+                if self.verbose and i % self.verbose == 0:
+                    log(f'[{i}/{steps}] Best time: {1 / np.nanmax(archive_scores):.4f}ms')
+
+        run_optimization(self.steps)
+        if self.benchmarking_steps > 0 or self.benchmark_before_selection:
+            reevaluate_archive(self.benchmarking_function)
+
+        if self.benchmarking_steps > 0:
+            run_optimization(self.benchmarking_steps, self.benchmarking_function, self.steps)
 
         if self.show_score_plot:
             graph = ComputationGraph()
