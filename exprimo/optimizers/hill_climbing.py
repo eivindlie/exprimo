@@ -1,9 +1,10 @@
 import json
+import os
 from random import randint
 
 from tqdm import tqdm
 
-from exprimo import DeviceGraph, log
+from exprimo import DeviceGraph, log, get_log_dir
 from exprimo.optimizers.base import BaseOptimizer
 from exprimo.optimizers.utils import generate_random_placement, evaluate_placement, apply_placement
 from exprimo.graph import get_flattened_layer_names
@@ -64,6 +65,10 @@ class RandomHillClimbingOptimizer(BaseOptimizer):
         self.steps = steps
 
     def optimize(self, net_string, device_graph):
+        if self.verbose:
+            with open(os.path.join(get_log_dir(), 'time_history.csv'), 'w') as f:
+                f.write(f'step, time\n')
+
         n_devices = len(device_graph.devices)
         groups = self.create_colocation_groups(get_flattened_layer_names(net_string))
 
@@ -81,5 +86,8 @@ class RandomHillClimbingOptimizer(BaseOptimizer):
 
             if self.verbose and (i + 1) % self.verbose == 0:
                 log(f'[{i+1}/{self.steps}] Current time: {score:.2f}ms')
+
+                with open(os.path.join(get_log_dir(), 'time_history.csv'), 'a') as f:
+                    f.write(f'{i + 1}, {score}\n')
 
         return json.dumps(apply_placement(net_string, placement, groups))

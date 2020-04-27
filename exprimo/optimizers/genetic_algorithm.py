@@ -317,6 +317,10 @@ class GAOptimizer(BaseOptimizer):
             with open(os.path.join(get_log_dir(), 'checkpoints/scores.csv'), 'w') as f:
                 f.write('')
 
+        if self.verbose:
+            with open(os.path.join(get_log_dir(), 'time_history.csv'), 'w') as f:
+                f.write('generation, time\n')
+
         def run_optimization(generations, population_size=self.population_size, benchmarking_function=None,
                              start_generation=0):
             nonlocal pop
@@ -354,6 +358,9 @@ class GAOptimizer(BaseOptimizer):
                             f'Diversity: {diversity:.4f}')
                     else:
                         log(f'[{i + 1}/{generations}] Best current time: {best_time:.2f}ms')
+
+                    with open(os.path.join(get_log_dir(), 'time_history.csv'), 'a') as f:
+                        f.write(f'{i + 1}, {best_time}\n')
 
         log('Optimizing with simulator...')
         run_optimization(self.generations)

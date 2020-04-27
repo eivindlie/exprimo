@@ -300,7 +300,16 @@ class MapElitesOptimizer(BaseOptimizer):
                         archive_individuals[description[0], description[1], description[2], :] = individual
 
                 if self.verbose and i % self.verbose == 0:
-                    log(f'[{i}/{steps}] Best time: {1 / np.nanmax(archive_scores):.4f}ms')
+                    best_time = 1 / np.nanmax(archive_scores)
+                    log(f'[{i}/{steps}] Best time: {best_time:.4f}ms')
+
+                    with open(os.path.join(get_log_dir(), 'time_history.csv'), 'a') as f:
+                        f.write(f'{i + 1}, {best_time}\n')
+
+        if self.verbose:
+            with open(os.path.join(get_log_dir(), 'time_history.csv'), 'w') as f:
+                f.write('step, time\n')
+
 
         run_optimization(self.steps)
         if self.benchmarking_steps > 0 or self.benchmark_before_selection:

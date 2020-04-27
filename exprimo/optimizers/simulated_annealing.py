@@ -1,9 +1,10 @@
 import json
+import os
 from random import randint, random
 import numpy as np
 from tqdm import tqdm
 
-from exprimo import DeviceGraph, log
+from exprimo import DeviceGraph, log, get_log_dir
 from exprimo.optimizers.base import BaseOptimizer
 from exprimo.optimizers.utils import evaluate_placement, apply_placement
 from exprimo.graph import get_flattened_layer_names
@@ -36,6 +37,10 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
         score = evaluate_placement(apply_placement(net_string, placement, groups), device_graph,
                                    batches=self.batches, pipeline_batches=self.pipeline_batches)
 
+        if self.verbose:
+            with open(os.path.join(get_log_dir(), 'time_history.csv'), 'w') as f:
+                f.write('step, time\n')
+
         for i in tqdm(range(self.steps)):
             new_placement = placement[:]
             new_placement[randint(0, len(new_placement) - 1)] = randint(0, n_devices - 1)
@@ -44,6 +49,9 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
 
             if self.verbose and (i+1) % self.verbose == 0:
                 log(f'[{i+1}/{self.steps}] Best run time: {score:,.2f}ms')
+
+                with open(os.path.join(get_log_dir(), 'time_history.csv'), 'a') as f:
+                    f.write(f'{i + 1}, {score}\n')
 
             if new_score != -1:
                 if new_score < score or score == -1\
