@@ -15,7 +15,7 @@
     "zone_mutation_rate": 0.05,
     "zone_fail_rate": 0.2,
     "crossover_rate": 0.4,
-    "steps": 25000,
+    "steps": 12500,
 
     "simulator_comp_penalty": 0.9,
     "simulator_comm_penalty": 0.25,
