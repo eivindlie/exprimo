@@ -1,4 +1,5 @@
 import json
+import os
 import random
 import sys
 from multiprocessing import Pool
@@ -9,7 +10,7 @@ import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
-from exprimo import PLOT_STYLE
+from exprimo import PLOT_STYLE, get_log_dir
 import seaborn as sns
 sns.set(style=PLOT_STYLE)
 
@@ -375,11 +376,13 @@ class GAOptimizer(BaseOptimizer):
         if self.plot_fitness_history:
             plt.plot(fitness_history)
             plt.title('Fitness')
+            plt.savefig(os.path.join(get_log_dir(), 'fitness_history.png'))
             plt.show()
 
         if self.print_diversity:
             plt.plot(diversity_history)
             plt.title('Diversity')
+            plt.savefig(os.path.join(get_log_dir(), 'diversity_history.png'))
             plt.show()
 
 
