@@ -12,6 +12,8 @@ from exprimo.optimizers.particle_swarm_optimizer import ParticleSwarmOptimizer
 from exprimo.optimizers.utils import get_device_assignment
 from exprimo.optimizers.simulated_annealing import temp_schedules
 
+config_path = 'configs/me-malvik-resnet50.json'
+
 
 def optimize_with_config(config_path):
     with open(config_path) as f:
@@ -96,8 +98,6 @@ def optimize_with_config(config_path):
 
 
 if __name__ == '__main__':
-    config_path = 'configs/sa-malvik-resnet50.json'
-
     if len(sys.argv) > 1:
         config_path = sys.argv[1]
 
