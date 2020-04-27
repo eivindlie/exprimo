@@ -98,7 +98,8 @@ def benchmark_with_placement(model_type, placement='cuda:0', batches=50, drop_ba
                 else:
                     raise e
 
-            batch_times.append((end - start) * 1000)
+            if not memory_exceeded:
+                batch_times.append((end - start) * 1000)
 
             if verbose:
                 if memory_exceeded:
