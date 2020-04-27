@@ -187,6 +187,11 @@ def plot_archive_animation(paths, save_path, dimension_sizes, n_devices=None, ma
         fig.canvas.draw()
         image = np.frombuffer(fig.canvas.tostring_rgb(), dtype='uint8')
         image = image.reshape(fig.canvas.get_width_height()[::-1] + (3, ))
+        plt.close()
         images.append(image)
 
-    imageio.mimsave(save_path, images, fps=fps)
+    if isinstance(save_path, list) or isinstance(save_path, tuple):
+        for path in save_path:
+            imageio.mimsave(path, images, fps=fps)
+    else:
+        imageio.mimsave(save_path, images, fps=fps)
