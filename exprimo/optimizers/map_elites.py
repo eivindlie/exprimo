@@ -49,7 +49,7 @@ class MapElitesOptimizer(BaseOptimizer):
                  steps=1000, allow_cpu=True, mutation_rate=0.05, copy_mutation_rate=0, replace_mutation_rate=0,
                  zone_mutation_rate=0, zone_fail_rate=0.2, crossover_rate=0.4,
                  benchmarking_function=None, benchmarking_steps=0, benchmark_before_selection=False,
-                 benchmarking_n_keep=None, include_trivial_solutions=True,
+                 benchmarking_n_keep=None, benchmarking_time_threshold=None, include_trivial_solutions=True,
                  show_score_plot=False, plot_axes=(0, 2), plot_save_path=None, **kwargs):
         super().__init__(**kwargs)
         self.dimension_sizes = dimension_sizes
@@ -68,6 +68,7 @@ class MapElitesOptimizer(BaseOptimizer):
         self.benchmarking_steps = benchmarking_steps
         self.benchmark_before_selection = benchmark_before_selection
         self.benchmarking_n_keep = benchmarking_n_keep
+        self.benchmarking_time_threshold = benchmarking_time_threshold
         self.benchmarking_function = benchmarking_function
         self.plot_axes = plot_axes
         self.show_score_plot = show_score_plot
@@ -235,8 +236,11 @@ class MapElitesOptimizer(BaseOptimizer):
 
             return 1 / time
 
-        def reevaluate_archive(benchmarking_function=None, n_keep=None):
-            indices = np.argwhere(np.isfinite(archive_scores))
+        def reevaluate_archive(benchmarking_function=None, n_keep=None, time_threshold=None):
+            indices = list(np.argwhere(np.isfinite(archive_scores)))
+
+            if time_threshold:
+                indices = [i for i in indices if archive_scores[i[0], i[1], i[2]] >= 1 / time_threshold]
 
             if n_keep:
                 indices = sorted(indices, key=lambda i: -archive_scores[i[0], i[1], i[2]])
@@ -296,7 +300,8 @@ class MapElitesOptimizer(BaseOptimizer):
 
         run_optimization(self.steps)
         if self.benchmarking_steps > 0 or self.benchmark_before_selection:
-            reevaluate_archive(self.benchmarking_function, n_keep=self.benchmarking_n_keep)
+            reevaluate_archive(self.benchmarking_function, n_keep=self.benchmarking_n_keep,
+                               time_threshold=self.benchmarking_time_threshold)
 
         if self.benchmarking_steps > 0:
             run_optimization(self.benchmarking_steps, self.benchmarking_function, self.steps)
