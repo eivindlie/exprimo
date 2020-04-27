@@ -1,6 +1,7 @@
 import json
 import sys
 
+import exprimo
 from exprimo import DeviceGraph, Simulator, plot_event_trace, ComputationGraph, log
 from exprimo.optimizers import SimulatedAnnealingOptimizer, HillClimbingOptimizer, RandomHillClimbingOptimizer, \
     GAOptimizer, LinearSearchOptimizer, MapElitesOptimizer
@@ -20,6 +21,10 @@ with open(config_path) as f:
 
 device_graph_path = config['device_graph_path']
 net_path = config['net_path']
+
+log_dir = config.get('log_dir', '')
+if log_dir:
+    exprimo.set_log_dir(log_dir)
 
 args = config.get('optimizer_args', {})
 
