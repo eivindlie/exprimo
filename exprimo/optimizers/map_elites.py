@@ -16,6 +16,9 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 from exprimo import PLOT_STYLE, log
 import seaborn as sns
+
+from exprimo.plotting import plot_map_elites_archive
+
 sns.set(style=PLOT_STYLE)
 
 
@@ -85,59 +88,6 @@ class MapElitesOptimizer(BaseOptimizer):
             self.worker_pool = Pool(self.n_threads)
         else:
             self.worker_pool = None
-
-    def plot_scores(self, scores, n_devices, max_jumps, axes=(1, 2), file_name='map_elite_scores.png'):
-        assert min(axes) >= 0 and max(axes) < len(scores.shape), 'Axes out of range!'
-
-        AXIS_NAMES = ['Most common device', 'No. of used devices', 'No. of jumps']
-        AXIS_TICKS = [
-            [int(i * (n_devices / self.dimension_sizes[0])) for i in range(self.dimension_sizes[0])],
-            [int(i * (n_devices / self.dimension_sizes[1])) + 1 for i in range(self.dimension_sizes[1])],
-            [int(i * (max_jumps / self.dimension_sizes[2])) for i in range(self.dimension_sizes[2])]
-        ]
-
-        if len(axes) < len(scores.shape):
-            avg_axes = [i for i in range(len(scores.shape)) if i not in axes]
-            avg_batch_times = 1 / np.nanmean(scores, axis=tuple(avg_axes))
-        else:
-            avg_batch_times = 1 / scores
-
-        mask = np.isnan(avg_batch_times)
-
-        min_time = np.nanmin(avg_batch_times)
-        max_time = np.nanmax(avg_batch_times)
-
-        n_plots = int(len(axes) == 2 or scores.shape[0])
-
-        plotted_axes = tuple(reversed(sorted(ax for ax in axes if len(axes) == 2 or ax != 0)))
-
-        figsize = (10 * min(3, n_plots), 8 * (n_plots // 3 + 1))
-        fig, axs = plt.subplots(n_plots // 3 + 1, min(3, n_plots), figsize=figsize)
-        axs = np.reshape(axs, (-1,))
-        for i, ax in enumerate(axs):
-            if i >= avg_batch_times.shape[0]:
-                ax.axis('off')
-                break
-
-            cmap = sns.cm.rocket_r
-            data = avg_batch_times[i, :, :] if len(axes) > 2 else avg_batch_times
-            mask1 = mask[i, :, :] if len(axes) > 2 else mask
-            if np.all(mask1):
-                ax.axis('off')
-                continue
-            plot = sns.heatmap(data, ax=ax, mask=mask1, square=True, cmap=cmap,
-                               xticklabels=AXIS_TICKS[plotted_axes[0]], yticklabels=AXIS_TICKS[plotted_axes[1]],
-                               vmin=min_time, vmax=max_time)
-            plot.invert_yaxis()
-
-            ax.set_xlabel(AXIS_NAMES[plotted_axes[0]])
-            ax.set_ylabel(AXIS_NAMES[plotted_axes[1]])
-            if len(axes) > 2:
-                ax.set_title(f'{AXIS_NAMES[0]} = {AXIS_TICKS[0][i]}', pad=80)
-
-        plt.savefig(os.path.join(get_log_dir(), file_name))
-
-        plt.show()
 
     def optimize(self, net_string, device_graph, return_full_archive=False):
 
@@ -353,7 +303,8 @@ class MapElitesOptimizer(BaseOptimizer):
             graph = ComputationGraph()
             graph.load_from_string(net_string)
             _, max_jumps = graph.get_number_of_jumps(return_max_jumps=True)
-            self.plot_scores(archive_scores, n_devices, max_jumps, axes=self.plot_axes)
+            plot_map_elites_archive(archive_scores, n_devices, max_jumps, self.plot_axes,
+                                    save_path=os.path.join(get_log_dir(), 'archive_plot.png'))
 
         if return_full_archive:
             return archive_scores, archive_individuals
