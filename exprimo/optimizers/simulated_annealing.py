@@ -3,7 +3,7 @@ from random import randint, random
 import numpy as np
 from tqdm import tqdm
 
-from exprimo import DeviceGraph
+from exprimo import DeviceGraph, log
 from exprimo.optimizers.base import BaseOptimizer
 from exprimo.optimizers.utils import evaluate_placement, apply_placement
 from exprimo.graph import get_flattened_layer_names
@@ -38,7 +38,7 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
                                            batches=self.batches, pipeline_batches=self.pipeline_batches)
 
             if self.verbose and (i+1) % 50 == 0:
-                print(f'[{i+1}/{self.steps}] Best run time: {score:,.2f}ms \tCurrent placement: {placement}')
+                log(f'[{i+1}/{self.steps}] Best run time: {score:,.2f}ms \tCurrent placement: {placement}')
 
             if new_score != -1:
                 if new_score < score or score == -1\

@@ -3,7 +3,7 @@ from random import randint
 
 from tqdm import tqdm
 
-from exprimo import DeviceGraph
+from exprimo import DeviceGraph, log
 from exprimo.optimizers.base import BaseOptimizer
 from exprimo.optimizers.utils import generate_random_placement, evaluate_placement, apply_placement
 from exprimo.graph import get_flattened_layer_names
@@ -42,7 +42,7 @@ class HillClimbingOptimizer(BaseOptimizer):
         while True:
             i += 1
             if self.verbose:
-                print(f'Iteration {i}. Best running time: {score:.2f}ms')
+                log(f'Iteration {i}. Best running time: {score:.2f}ms')
 
             for n in generate_neighbours(placement):
                 new_score = evaluate_placement(apply_placement(net_string, n, groups), device_graph,
@@ -80,6 +80,6 @@ class RandomHillClimbingOptimizer(BaseOptimizer):
                 placement = new_placement
 
             if self.verbose and (i + 1) % 50 == 0:
-                print(f'[{i+1}/{self.steps}] Current time: {score:.2f}ms \t Current solution: {placement}')
+                log(f'[{i+1}/{self.steps}] Current time: {score:.2f}ms \t Current solution: {placement}')
 
         return json.dumps(apply_placement(net_string, placement, groups))
