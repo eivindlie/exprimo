@@ -2,6 +2,9 @@
   "device_graph_path": "device_graphs/malvik-reduced-resnet.json",
   "net_path": "nets/resnet50.json",
   "optimizer": "genetic_algorithm",
+
+  "log_dir": "~/resnet-ga-limit-memory",
+
   "optimizer_args": {
     "plot_fitness_history": true,
     "generations": 500,

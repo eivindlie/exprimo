@@ -2,6 +2,9 @@
   "device_graph_path": "device_graphs/malvik-4gpu.json",
   "net_path": "nets/resnet50.json",
   "optimizer": "map_elites",
+
+  "log_dir": "~/resnet-map-elites-pipeline-parallel",
+
   "optimizer_args": {
     "dimension_sizes": [-1, -1, 20],
     "initial_size": 3,
