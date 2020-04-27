@@ -2,6 +2,8 @@ import json
 import random
 import os
 from collections import Counter
+from glob import glob
+
 from itertools import repeat
 from multiprocessing.pool import Pool
 
@@ -17,7 +19,7 @@ import matplotlib.pyplot as plt
 from exprimo import PLOT_STYLE, log
 import seaborn as sns
 
-from exprimo.plotting import plot_map_elites_archive
+from exprimo.plotting import plot_map_elites_archive, plot_archive_animation
 
 sns.set(style=PLOT_STYLE)
 
@@ -54,7 +56,7 @@ class MapElitesOptimizer(BaseOptimizer):
                  zone_mutation_rate=0, zone_fail_rate=0.2, crossover_rate=0.4,
                  benchmarking_function=None, benchmarking_steps=0, benchmark_before_selection=False,
                  benchmarking_n_keep=None, benchmarking_time_threshold=None, include_trivial_solutions=True,
-                 show_score_plot=False, plot_axes=(0, 2), plot_save_path=None,
+                 show_score_plot=False, plot_axes=(0, 2), plot_save_path=None, plot_animation=False, animation_fps=1,
                  archive_log_period=None, **kwargs):
         super().__init__(**kwargs)
         self.dimension_sizes = dimension_sizes
@@ -78,6 +80,8 @@ class MapElitesOptimizer(BaseOptimizer):
         self.plot_axes = plot_axes
         self.show_score_plot = show_score_plot
         self.plot_save_path = plot_save_path
+        self.plot_animation = plot_animation
+        self.animation_fps = animation_fps
         self.archive_log_period = archive_log_period
 
         if self.archive_log_period is not None:
@@ -300,11 +304,27 @@ class MapElitesOptimizer(BaseOptimizer):
             log_archive('3_benchmarking_finished.csv')
 
         if self.show_score_plot:
+            log('Plotting archive scores...', end='')
             graph = ComputationGraph()
             graph.load_from_string(net_string)
             _, max_jumps = graph.get_number_of_jumps(return_max_jumps=True)
             plot_map_elites_archive(archive_scores, n_devices, max_jumps, self.plot_axes,
                                     save_path=os.path.join(get_log_dir(), 'archive_plot.png'))
+            log('Done')
+
+        if self.plot_animation:
+            if not self.archive_log_period:
+                log('self.plot_animation was set to True, but archive logging was not enabled. '
+                    'Skipping animation plot.')
+            else:
+                log('Plotting archive animation...', end='')
+                paths = glob(os.path.join(get_log_dir(), 'archive_logs', 'step_*.csv'))
+                plot_archive_animation(paths, (os.path.join(get_log_dir(), 'archive_animation.mp4'),
+                                               os.path.join(get_log_dir(), 'archive_animation.gif')),
+                                       self.dimension_sizes,
+                                       n_devices=n_devices, max_jumps=max_jumps, axes=self.plot_axes,
+                                       fps=self.animation_fps)
+                log('Done')
 
         if return_full_archive:
             return archive_scores, archive_individuals
