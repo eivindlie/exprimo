@@ -10,8 +10,9 @@ from exprimo.optimizers import SimulatedAnnealingOptimizer, HillClimbingOptimize
 from exprimo.benchmarking import create_benchmark_function
 from exprimo.optimizers.particle_swarm_optimizer import ParticleSwarmOptimizer
 from exprimo.optimizers.utils import get_device_assignment
+from optimizers.simulated_annealing import temp_schedules
 
-config_path = 'configs/hc-malvik-resnet50.json'
+config_path = 'configs/sa-malvik-resnet50.json'
 
 if len(sys.argv) > 1:
     config_path = sys.argv[1]
@@ -56,6 +57,10 @@ optimizers = {
     'map_elites': MapElitesOptimizer,
     'map-elites': MapElitesOptimizer
 }
+
+if config['optimizer'] in ['sa', 'simulated_annealing']:
+    tp = args['temp_schedule']
+    args['temp_schedule'] = temp_schedules[tp[0]](*tp[1:])
 
 optimizer = optimizers[config['optimizer']](**args)
 

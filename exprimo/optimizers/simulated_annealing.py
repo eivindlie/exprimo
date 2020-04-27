@@ -13,6 +13,11 @@ def exponential_multiplicative_decay(initial_value, decay):
     return lambda t: initial_value * decay**t
 
 
+temp_schedules = {
+    'exponential_multiplicative_decay': exponential_multiplicative_decay
+}
+
+
 class SimulatedAnnealingOptimizer(BaseOptimizer):
 
     def __init__(self, *args, temp_schedule=exponential_multiplicative_decay(40, 0.95), steps=500,
