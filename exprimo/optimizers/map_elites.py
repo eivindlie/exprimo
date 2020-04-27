@@ -224,13 +224,13 @@ class MapElitesOptimizer(BaseOptimizer):
             indices = sorted(indices, key=lambda i: -archive_scores[i[0], i[1], i[2]])
 
             with open(os.path.join(get_log_dir(), 'archive_logs', file_name), 'w') as f:
-                f.write('niche, time, placement\n')
+                f.write('niche; time; placement\n')
                 for i in indices:
                     niche = tuple(i)
                     time = 1 / archive_scores[i[0], i[1], i[2]]
                     placement = archive_individuals[i[0], i[1], i[2]]
 
-                    f.write(f'{niche}, {time}, {placement}\n')
+                    f.write(f'{niche}; {time}; {placement}\n')
 
         def run_optimization(steps, benchmarking_function=None, start_step=0):
             nonlocal archive_individuals, archive_scores
