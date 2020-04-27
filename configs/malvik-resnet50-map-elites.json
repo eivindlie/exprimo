@@ -25,6 +25,7 @@
 
     "benchmarking_steps": 0,
     "benchmark_before_selection": true,
+    "benchmarking_n_keep": 50,
     "benchmarking_function": {"model_type": "resnet", "batches": 5, "drop_batches": 1},
 
     "include_trivial_solutions": false,
