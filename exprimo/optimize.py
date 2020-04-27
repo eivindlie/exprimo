@@ -6,7 +6,7 @@ from exprimo.optimizers import SimulatedAnnealingOptimizer, HillClimbingOptimize
     GAOptimizer, LinearSearchOptimizer, MapElitesOptimizer
 from exprimo.benchmarking import create_benchmark_function
 from exprimo.optimizers.particle_swarm_optimizer import ParticleSwarmOptimizer
-
+from optimizers.utils import get_device_assignment
 
 config_path = 'configs/malvik-resnet50-map-elites.json'
 
@@ -67,11 +67,11 @@ net_dict = json.loads(best_net)
 graph = ComputationGraph()
 graph.load_from_string(best_net)
 simulator = Simulator(graph, device_graph)
-execution_time, events = simulator.simulate(batch_size=128,
-                                            print_memory_usage=config.get('print_memory_usage', False),
-                                            print_event_trace=config.get('print_event_trace', False),
-                                            return_event_trace=True, batches=batches, pipeline_batches=pipeline_batches,
-                                            comm_penalization=comm_penalty, comp_penalization=comp_penalty)
+simulated_execution_time, events = simulator.simulate(batch_size=128,
+                                                      print_memory_usage=config.get('print_memory_usage', False),
+                                                      print_event_trace=config.get('print_event_trace', False),
+                                                      return_event_trace=True, batches=batches, pipeline_batches=pipeline_batches,
+                                                      comm_penalization=comm_penalty, comp_penalization=comp_penalty)
 
 if config.get('plot_event_trace', True):
     save_path = config.get('event_trace_save_path', None)
@@ -79,5 +79,10 @@ if config.get('plot_event_trace', True):
 
 log('\n')
 # print(f'Best discovered configuration: {[layer["device"] for layer in net_dict["layers"].values()]}')
-log(f'Execution time: {execution_time:.2f}ms')
+log(f'Simulated execution time: {simulated_execution_time:.2f}ms')
+
+if config.get('benchmark_solution', False) and args['benchmarking_function']:
+    device_assignment = get_device_assignment(net_dict)
+    time = args['benchmarking_function'](device_assignment)
+    log(f'Benchmarked execution time: {time:.2f}ms')
 
