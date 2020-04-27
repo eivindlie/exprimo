@@ -10,7 +10,7 @@ from exprimo.optimizers import SimulatedAnnealingOptimizer, HillClimbingOptimize
 from exprimo.benchmarking import create_benchmark_function
 from exprimo.optimizers.particle_swarm_optimizer import ParticleSwarmOptimizer
 from exprimo.optimizers.utils import get_device_assignment
-from optimizers.simulated_annealing import temp_schedules
+from exprimo.optimizers.simulated_annealing import temp_schedules
 
 config_path = 'configs/sa-malvik-resnet50.json'
 
