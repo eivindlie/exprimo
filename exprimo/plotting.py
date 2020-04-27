@@ -1,3 +1,4 @@
+import os
 from collections import defaultdict
 
 import matplotlib.pyplot as plt
@@ -59,7 +60,7 @@ def plot_event_trace(events, simulator, show_transfer_lines=True, show_memory_us
                      color='red', alpha=0.4)
 
     if save_path:
-        plt.savefig(save_path)
+        plt.savefig(os.path.expanduser(save_path))
 
     plt.show()
 
