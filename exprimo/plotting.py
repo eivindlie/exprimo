@@ -1,6 +1,8 @@
 import os
 from collections import defaultdict
+from glob import glob
 
+import imageio as imageio
 import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
@@ -77,14 +79,15 @@ def plot_event_trace(events, simulator, show_transfer_lines=True, show_memory_us
         plt.show()
 
 
-def plot_map_elites_archive(archive_scores, n_devices=None, max_jumps=None, axes=(1, 2), save_path=None):
+def plot_map_elites_archive(archive_scores, n_devices=None, max_jumps=None, axes=(1, 2), save_path=None,
+                            return_fig=False, vmin=None, vmax=None, title=None):
     assert min(axes) >= 0 and max(axes) < len(archive_scores.shape), 'Axes out of range!'
 
     dimension_sizes = archive_scores.shape
-    if n_devices == 0:
+    if n_devices == None:
         n_devices = dimension_sizes[0]
 
-    if max_jumps == 0:
+    if max_jumps == None:
         max_jumps = dimension_sizes[2]
 
     AXIS_NAMES = ['Most common device', 'No. of used devices', 'No. of jumps']
@@ -125,7 +128,7 @@ def plot_map_elites_archive(archive_scores, n_devices=None, max_jumps=None, axes
             continue
         plot = sns.heatmap(data, ax=ax, mask=mask1, square=True, cmap=cmap,
                            xticklabels=AXIS_TICKS[plotted_axes[0]], yticklabels=AXIS_TICKS[plotted_axes[1]],
-                           vmin=min_time, vmax=max_time)
+                           vmin=vmin if vmin else min_time, vmax=vmax if vmax else max_time)
         plot.invert_yaxis()
 
         ax.set_xlabel(AXIS_NAMES[plotted_axes[0]])
@@ -133,8 +136,58 @@ def plot_map_elites_archive(archive_scores, n_devices=None, max_jumps=None, axes
         if len(axes) > 2:
             ax.set_title(f'{AXIS_NAMES[0]} = {AXIS_TICKS[0][i]}', pad=80)
 
+    if title:
+        plt.title(title)
+
     if save_path:
         plt.savefig(os.path.expanduser(save_path))
 
+    if return_fig:
+        return fig
+
     plt.show()
+
+
+def plot_archive_animation(paths, save_path, dimension_sizes, n_devices=None, max_jumps=None, axes=(1, 2), fps=1):
+    archives = []
+
+    max_time = -np.inf
+    min_time = np.inf
+
+    step_names = []
+
+    paths = sorted(paths)
+
+    for path in paths:
+        file_name = path.split('/')[-1]
+        step = file_name.replace('step_', '').replace('.csv', '')
+        step_names.append(step)
+        archive = np.empty(dimension_sizes)
+        archive[:] = np.NaN
+        with open(path) as f:
+            for l, line in enumerate(f):
+                if l == 0: # Skip header row
+                    continue
+                niche, time, _ = line.split(';')
+                niche = eval(niche)
+                time = float(time)
+
+                max_time = max(max_time, time)
+                min_time = min(min_time, time)
+
+                archive[niche[0], niche[1], niche[2]] = 1 / time
+
+        archives.append(archive)
+
+    images = []
+
+    for i, archive in enumerate(archives):
+        fig = plot_map_elites_archive(archive, n_devices, max_jumps, axes, vmin=min_time, vmax=max_time,
+                                      return_fig=True, title=f'Step {step_names[i]}')
+        fig.canvas.draw()
+        image = np.frombuffer(fig.canvas.tostring_rgb(), dtype='uint8')
+        image = image.reshape(fig.canvas.get_width_height()[::-1] + (3, ))
+        images.append(image)
+
+    imageio.mimsave(save_path, images, fps=fps)
 
