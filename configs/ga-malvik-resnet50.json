@@ -3,7 +3,7 @@
   "net_path": "nets/resnet50.json",
   "optimizer": "genetic_algorithm",
 
-  "log_dir": "~/resnet-ga",
+  "log_dir": "~/logs/resnet-ga",
 
   "benchmark_solution": true,
 

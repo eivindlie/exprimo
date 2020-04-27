@@ -3,7 +3,7 @@
   "net_path": "nets/resnet50.json",
   "optimizer": "map_elites",
 
-  "log_dir": "~/me-resnet-pipeline-parallel",
+  "log_dir": "~/logs/me-resnet-pipeline-parallel",
 
   "optimizer_args": {
     "dimension_sizes": [-1, -1, 20],

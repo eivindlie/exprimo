@@ -3,7 +3,7 @@
   "net_path": "nets/resnet50.json",
   "optimizer": "simulated_annealing",
 
-  "log_dir": "~/sa-resnet",
+  "log_dir": "~/logs/sa-resnet",
 
   "benchmark_solution": true,
 

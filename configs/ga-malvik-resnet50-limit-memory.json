@@ -3,7 +3,7 @@
   "net_path": "nets/resnet50.json",
   "optimizer": "genetic_algorithm",
 
-  "log_dir": "~/ga-resnet-limit-memory",
+  "log_dir": "~/logs/ga-resnet-limit-memory",
 
   "optimizer_args": {
     "plot_fitness_history": true,
