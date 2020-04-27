@@ -220,7 +220,7 @@ class MapElitesOptimizer(BaseOptimizer):
             return candidates
 
         def benchmark(individual, benchmarking_function):
-            device_assignment = get_device_assignment(apply_placement(net_string, individual.placement, groups))
+            device_assignment = get_device_assignment(apply_placement(net_string, individual, groups))
             time, memory_overflow = benchmarking_function(device_assignment, return_memory_overflow=True)
 
             # Time is set to -1 if memory overflows - but we check with memory_overflow instead
@@ -237,7 +237,8 @@ class MapElitesOptimizer(BaseOptimizer):
         def reevaluate_archive(benchmarking_function=None):
             indices = np.argwhere(np.isfinite(archive_scores))
 
-            for i in indices:
+            log('Reevaluating all individuals in archive')
+            for i in tqdm(indices):
                 individual = archive_individuals[i[0], i[1], i[2], :].tolist()
                 if benchmarking_function:
                     archive_scores[i] = benchmark(individual, benchmarking_function)
