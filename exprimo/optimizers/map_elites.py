@@ -90,6 +90,9 @@ class MapElitesOptimizer(BaseOptimizer):
 
         mask = np.isnan(avg_batch_times)
 
+        min_time = np.nanmin(avg_batch_times)
+        max_time = np.nanmax(avg_batch_times)
+
         n_plots = int(len(axes) == 2 or scores.shape[0])
 
         plotted_axes = tuple(reversed(sorted(ax for ax in axes if len(axes) == 2 or ax != 0)))
@@ -109,7 +112,8 @@ class MapElitesOptimizer(BaseOptimizer):
                 ax.axis('off')
                 continue
             plot = sns.heatmap(data, ax=ax, mask=mask1, square=True, cmap=cmap,
-                               xticklabels=AXIS_TICKS[plotted_axes[0]], yticklabels=AXIS_TICKS[plotted_axes[1]])
+                               xticklabels=AXIS_TICKS[plotted_axes[0]], yticklabels=AXIS_TICKS[plotted_axes[1]],
+                               vmin=min_time, vmax=max_time)
             plot.invert_yaxis()
 
             ax.set_xlabel(AXIS_NAMES[plotted_axes[0]])
