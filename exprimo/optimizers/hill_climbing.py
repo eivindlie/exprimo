@@ -79,7 +79,7 @@ class RandomHillClimbingOptimizer(BaseOptimizer):
                 score = new_score
                 placement = new_placement
 
-            if self.verbose and (i + 1) % 50 == 0:
-                log(f'[{i+1}/{self.steps}] Current time: {score:.2f}ms \t Current solution: {placement}')
+            if self.verbose and (i + 1) % self.verbose == 0:
+                log(f'[{i+1}/{self.steps}] Current time: {score:.2f}ms')
 
         return json.dumps(apply_placement(net_string, placement, groups))

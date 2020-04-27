@@ -1,0 +1,16 @@
+{
+  "device_graph_path": "device_graphs/malvik.json",
+  "net_path": "nets/resnet50.json",
+  "optimizer": "random_hill_climber",
+
+  "log_dir": "~/hc-resnet",
+
+  "optimizer_args": {
+    "steps": 5000,
+
+    "verbose": 5,
+    "pipeline_batches": 1,
+    "batches": 1,
+    "n_threads": -1
+  }
+}
