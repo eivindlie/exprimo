@@ -8,7 +8,7 @@
   "optimizer_args": {
     "steps": 5000,
 
-    "verbose": 5,
+    "verbose": 50,
     "pipeline_batches": 1,
     "batches": 1,
     "n_threads": -1
