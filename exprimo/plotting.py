@@ -137,7 +137,7 @@ def plot_map_elites_archive(archive_scores, n_devices=None, max_jumps=None, axes
             ax.set_title(f'{AXIS_NAMES[0]} = {AXIS_TICKS[0][i]}', pad=80)
 
     if title:
-        plt.title(title)
+        fig.suptitle(title)
 
     if save_path:
         plt.savefig(os.path.expanduser(save_path))
@@ -190,4 +190,3 @@ def plot_archive_animation(paths, save_path, dimension_sizes, n_devices=None, ma
         images.append(image)
 
     imageio.mimsave(save_path, images, fps=fps)
-
