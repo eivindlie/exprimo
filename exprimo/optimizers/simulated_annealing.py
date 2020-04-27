@@ -42,8 +42,8 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
             new_score = evaluate_placement(apply_placement(net_string, new_placement, groups), device_graph,
                                            batches=self.batches, pipeline_batches=self.pipeline_batches)
 
-            if self.verbose and (i+1) % 50 == 0:
-                log(f'[{i+1}/{self.steps}] Best run time: {score:,.2f}ms \tCurrent placement: {placement}')
+            if self.verbose and (i+1) % self.verbose == 0:
+                log(f'[{i+1}/{self.steps}] Best run time: {score:,.2f}ms')
 
             if new_score != -1:
                 if new_score < score or score == -1\
