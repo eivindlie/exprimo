@@ -246,6 +246,8 @@ class MapElitesOptimizer(BaseOptimizer):
                 indices = sorted(indices, key=lambda i: -archive_scores[i[0], i[1], i[2]])
                 indices = indices[:n_keep]
 
+            assert len(indices), 'No solutions fulfill the specified requirements'
+
             archive_scores[:] = np.NaN
 
             if n_keep:
