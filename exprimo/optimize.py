@@ -89,7 +89,7 @@ def optimize_with_config(config_path):
     # print(f'Best discovered configuration: {[layer["device"] for layer in net_dict["layers"].values()]}')
     log(f'Simulated execution time: {simulated_execution_time:.2f}ms')
 
-    if config.get('benchmark_solution', False) and args['benchmarking_function']:
+    if config.get('benchmark_solution', False) and args.get('benchmarking_function', None):
         device_assignment = get_device_assignment(net_dict)
         time = args['benchmarking_function'](device_assignment)
         log(f'Benchmarked execution time: {time:.2f}ms')
