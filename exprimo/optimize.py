@@ -16,8 +16,6 @@ config_path = 'configs/malvik-resnet50-map-elites.json'
 if len(sys.argv) > 1:
     config_path = sys.argv[1]
 
-log(f'Using config path {config_path}')
-
 with open(config_path) as f:
     config = json.load(f)
 
@@ -27,6 +25,8 @@ net_path = config['net_path']
 log_dir = config.get('log_dir', '')
 if log_dir:
     exprimo.set_log_dir(log_dir)
+
+log(f'Using config path {config_path}')
 
 args = config.get('optimizer_args', {})
 
