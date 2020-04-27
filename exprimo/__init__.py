@@ -12,12 +12,6 @@ LOG_CONFIG = {
     'log_dir': 'logs/'
 }
 
-if LOG_CONFIG['clear_files']:
-    for stream in LOG_CONFIG['streams']:
-        if isinstance(stream, str):
-            with open(stream, 'w') as f:
-                f.write('')
-
 
 def set_log_dir(path):
     expanded_path = os.path.expanduser(path)
@@ -32,6 +26,13 @@ def get_log_dir():
 
 
 set_log_dir(LOG_CONFIG['log_dir'])
+
+
+if LOG_CONFIG['clear_files']:
+    for stream in LOG_CONFIG['streams']:
+        if isinstance(stream, str):
+            with open(stream, 'w') as f:
+                f.write('')
 
 
 def log(*strings, end='\n', sep=''):
