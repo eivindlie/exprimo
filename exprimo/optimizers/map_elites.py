@@ -252,6 +252,8 @@ class MapElitesOptimizer(BaseOptimizer):
                 log(f'Reevaluating {n_keep} best individuals in archive (and throwing away the rest)')
             else:
                 log('Reevaluating all individuals in archive')
+            if time_threshold:
+                log(f'Time threshold: {time_threshold}ms')
             for i in tqdm(indices):
                 individual = archive_individuals[i[0], i[1], i[2], :].tolist()
                 if benchmarking_function:
