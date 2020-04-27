@@ -10,7 +10,7 @@ import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
-from exprimo import PLOT_STYLE, get_log_dir
+from exprimo import PLOT_STYLE, get_log_dir, log
 import seaborn as sns
 sns.set(style=PLOT_STYLE)
 
@@ -61,8 +61,7 @@ class GAOptimizer(BaseOptimizer):
                  benchmarking_population_size=100, benchmarking_generations=50,
                  benchmarking_function=None,
                  include_trivial_solutions_in_initialization=True,
-                 simulator_comp_penalty=1, simulator_comm_penalty=1,
-                 checkpoint_dir=None, checkpoint_period=-1,
+                 simulator_comp_penalty=1, simulator_comm_penalty=1, checkpoint_period=-1,
                  allow_cpu=True, **kwargs):
         """
         Initializes the GA optimizer, setting important hyperparameters.
@@ -117,7 +116,6 @@ class GAOptimizer(BaseOptimizer):
         else:
             self.worker_pool = None
 
-        self.checkpoint_dir = checkpoint_dir
         self.checkpoint_period = checkpoint_period
 
     def optimize(self, net_string, device_graph):
@@ -316,24 +314,25 @@ class GAOptimizer(BaseOptimizer):
             diversity_history = []
 
         if self.checkpoint_period != -1:
-            with open(f'{self.checkpoint_dir}/scores.csv', 'w') as f:
+            with open(os.path.join(get_log_dir(), 'checkpoints/scores.csv'), 'w') as f:
                 f.write('')
 
         def run_optimization(generations, population_size=self.population_size, benchmarking_function=None,
                              start_generation=0):
             nonlocal pop
 
-            for i in tqdm(range(generations), file=sys.stdout):
+            for i in tqdm(range(generations)):
                 ranked_pop, fitness_scores = rank(pop, return_scores=True, benchmarking_function=benchmarking_function)
 
                 if self.checkpoint_period != -1 and i % self.checkpoint_period == 0:
                     best_solution = apply_placement(net_string, ranked_pop[0].placement, groups)
                     best_solution['score'] = 1 / fitness_scores[0]
 
-                    with open(f'{self.checkpoint_dir}/scores.csv', 'a') as f:
+                    with open(os.path.join(get_log_dir(), 'checkpoints', 'scores.csv'), 'a') as f:
                         f.write(f'{i + start_generation}, {best_solution["score"]}\n')
 
-                    with open(f'{self.checkpoint_dir}/gen_{i + start_generation:04}.json', 'w') as f:
+                    with open(os.path.join(get_log_dir(), 'checkpoints', f'/gen_{i + start_generation:04}.json'), 'w') \
+                            as f:
                         json.dump(best_solution, f, indent=4)
 
                 if self.plot_fitness_history:
@@ -350,17 +349,17 @@ class GAOptimizer(BaseOptimizer):
                     if self.print_diversity:
                         diversity = _calculate_binary_difference_diversity(ranked_pop)
                         diversity_history.append(diversity)
-                        tqdm.write(
+                        log(
                             f'[{i + 1}/{generations}] Best current time: {best_time:.2f}ms '
                             f'Diversity: {diversity:.4f}')
                     else:
-                        tqdm.write(f'[{i + 1}/{generations}] Best current time: {best_time:.2f}ms')
+                        log(f'[{i + 1}/{generations}] Best current time: {best_time:.2f}ms')
 
-        print('Optimizing with simulator...')
+        log('Optimizing with simulator...')
         run_optimization(self.generations)
 
         if self.benchmarking_generations and self.benchmarking_function:
-            print('Optimizing with benchmarking...')
+            log('Optimizing with benchmarking...')
 
             if self.benchmarking_population_size < self.population_size:
                 ranked_pop = rank(pop)
