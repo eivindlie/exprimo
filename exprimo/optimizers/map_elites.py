@@ -51,7 +51,8 @@ class MapElitesOptimizer(BaseOptimizer):
                  zone_mutation_rate=0, zone_fail_rate=0.2, crossover_rate=0.4,
                  benchmarking_function=None, benchmarking_steps=0, benchmark_before_selection=False,
                  benchmarking_n_keep=None, benchmarking_time_threshold=None, include_trivial_solutions=True,
-                 show_score_plot=False, plot_axes=(0, 2), plot_save_path=None, **kwargs):
+                 show_score_plot=False, plot_axes=(0, 2), plot_save_path=None,
+                 archive_log_period=None, **kwargs):
         super().__init__(**kwargs)
         self.dimension_sizes = dimension_sizes
         self.initial_size = initial_size
@@ -74,6 +75,11 @@ class MapElitesOptimizer(BaseOptimizer):
         self.plot_axes = plot_axes
         self.show_score_plot = show_score_plot
         self.plot_save_path = plot_save_path
+        self.archive_log_period = archive_log_period
+
+        if self.archive_log_period is not None:
+            if not os.path.exists(os.path.join(get_log_dir(), 'archive_logs')):
+                os.makedirs(os.path.join(get_log_dir(), 'archive_logs'))
 
         if self.n_threads > 1:
             self.worker_pool = Pool(self.n_threads)
@@ -263,6 +269,19 @@ class MapElitesOptimizer(BaseOptimizer):
                 else:
                     archive_scores[i[0], i[1], i[2]] = evaluate(individual)[0]
 
+        def log_archive(file_name):
+            indices = list(np.argwhere(np.isfinite(archive_scores)))
+            indices = sorted(indices, key=lambda i: -archive_scores[i[0], i[1], i[2]])
+
+            with open(os.path.join(get_log_dir(), 'archive_logs', file_name), 'w') as f:
+                f.write('niche, time, placement')
+                for i in indices:
+                    niche = tuple(i)
+                    time = 1 / archive_scores[i[0], i[1], i[2]]
+                    placement = archive_individuals[i[0], i[1], i[2]]
+
+                    f.write(f'{niche}, {time}, {placement}')
+
         def run_optimization(steps, benchmarking_function=None, start_generation=0):
             nonlocal archive_individuals, archive_scores
 
@@ -299,12 +318,15 @@ class MapElitesOptimizer(BaseOptimizer):
                         archive_scores[description[0], description[1], description[2]] = score
                         archive_individuals[description[0], description[1], description[2], :] = individual
 
-                if self.verbose and i % self.verbose == 0:
+                if self.verbose and (i + 1) % self.verbose == 0:
                     best_time = 1 / np.nanmax(archive_scores)
-                    log(f'[{i}/{steps}] Best time: {best_time:.4f}ms')
+                    log(f'[{i + 1}/{steps}] Best time: {best_time:.4f}ms')
 
                     with open(os.path.join(get_log_dir(), 'time_history.csv'), 'a') as f:
                         f.write(f'{i + 1}, {best_time}\n')
+
+                if self.archive_log_period and (i + 1) % self.archive_log_period == 0:
+                    log_archive(f'step_{i + start_generation + 1:06}.csv')
 
         if self.verbose:
             with open(os.path.join(get_log_dir(), 'time_history.csv'), 'w') as f:
@@ -312,12 +334,20 @@ class MapElitesOptimizer(BaseOptimizer):
 
 
         run_optimization(self.steps)
+
+        if self.archive_log_period is not None:
+            log_archive('1_simulation_finished.csv')
+
         if self.benchmarking_steps > 0 or self.benchmark_before_selection:
             reevaluate_archive(self.benchmarking_function, n_keep=self.benchmarking_n_keep,
                                time_threshold=self.benchmarking_time_threshold)
 
+            if self.archive_log_period is not None:
+                log_archive('2_reevaluated.csv')
+
         if self.benchmarking_steps > 0:
             run_optimization(self.benchmarking_steps, self.benchmarking_function, self.steps)
+            log_archive('3_benchmarking_finished.csv')
 
         if self.show_score_plot:
             graph = ComputationGraph()
