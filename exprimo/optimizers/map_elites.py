@@ -241,9 +241,9 @@ class MapElitesOptimizer(BaseOptimizer):
             for i in tqdm(indices):
                 individual = archive_individuals[i[0], i[1], i[2], :].tolist()
                 if benchmarking_function:
-                    archive_scores[i] = benchmark(individual, benchmarking_function)
+                    archive_scores[i[0], i[1], i[2]] = benchmark(individual, benchmarking_function)
                 else:
-                    archive_scores[i] = self.evaluate(individual)
+                    archive_scores[i[0], i[1], i[2]] = evaluate(individual)[0]
 
         def run_optimization(steps, benchmarking_function=None, start_generation=0):
             nonlocal archive_individuals, archive_scores
