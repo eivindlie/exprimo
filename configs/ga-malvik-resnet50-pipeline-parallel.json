@@ -2,7 +2,7 @@
   "device_graph_path": "device_graphs/malvik.json",
   "net_path": "nets/resnet50.json",
   "optimizer": "genetic_algorithm",
-  "log_dir": "~/resnet-ga-pipeline-parallel",
+  "log_dir": "~/ga-resnet-pipeline-parallel",
 
   "optimizer_args": {
     "plot_fitness_history": true,

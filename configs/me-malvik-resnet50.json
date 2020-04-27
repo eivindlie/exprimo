@@ -6,7 +6,7 @@
   "plot_event_trace": true,
   "event_trace_save_path": "~/event_trace.png",
 
-  "log_dir": "~/logs/resnet-map-elites",
+  "log_dir": "~/logs/me-resnet",
 
   "benchmark_solution": true,
 
