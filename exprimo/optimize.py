@@ -11,7 +11,7 @@ from exprimo.benchmarking import create_benchmark_function
 from exprimo.optimizers.particle_swarm_optimizer import ParticleSwarmOptimizer
 from exprimo.optimizers.utils import get_device_assignment
 
-config_path = 'configs/malvik-resnet50-map-elites.json'
+config_path = 'configs/me-malvik-resnet50.json'
 
 if len(sys.argv) > 1:
     config_path = sys.argv[1]
