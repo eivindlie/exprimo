@@ -228,7 +228,7 @@ class MapElitesOptimizer(BaseOptimizer):
                 for i in indices:
                     niche = tuple(i)
                     time = 1 / archive_scores[i[0], i[1], i[2]]
-                    placement = archive_individuals[i[0], i[1], i[2]]
+                    placement = archive_individuals[i[0], i[1], i[2]].tolist()
 
                     f.write(f'{niche}; {time}; {placement}\n')
 
