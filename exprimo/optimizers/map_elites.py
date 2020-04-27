@@ -313,6 +313,6 @@ class MapElitesOptimizer(BaseOptimizer):
         best_individual = archive_individuals.reshape((-1, len(groups)))[best_index]
 
         if self.verbose:
-            log(f'Best individual: {best_individual}')
+            log(f'Best individual: {best_individual.tolist()}')
 
         return json.dumps(apply_placement(net_string, best_individual.tolist(), groups))
