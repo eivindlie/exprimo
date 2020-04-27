@@ -5,6 +5,8 @@
 
   "log_dir": "~/sa-resnet",
 
+  "benchmark_solution": true,
+
   "optimizer_args": {
     "steps": 25000,
 

@@ -5,6 +5,8 @@
 
   "log_dir": "~/resnet-ga",
 
+  "benchmark_solution": true,
+
   "optimizer_args": {
     "plot_fitness_history": true,
     "generations": 500,

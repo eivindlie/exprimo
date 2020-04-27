@@ -5,6 +5,8 @@
 
   "log_dir": "~/hc-resnet",
 
+  "benchmark_solution": true,
+
   "optimizer_args": {
     "steps": 5000,
 
