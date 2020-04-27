@@ -24,22 +24,11 @@ from exprimo.plotting import plot_map_elites_archive, plot_archive_animation
 sns.set(style=PLOT_STYLE)
 
 
-def _evaluate(individual, net_string, groups, device_graph, dimension_sizes, pipeline_batches=1, batches=1,
+def _evaluate(individual, net_string, groups, device_graph, pipeline_batches=1, batches=1,
               simulator_comp_penalty=1, simulator_comm_penalty=1):
-    c = Counter(individual)
-    device_mode = c.most_common(1)[0][0]
-    device_mode = round((device_mode / len(device_graph.devices)) * dimension_sizes[0])
-
-    used_devices = round(((len(set(individual)) - 1) / (len(device_graph.devices))) * dimension_sizes[1])
+    description, individual = individual
 
     comp_graph_dict = apply_placement(net_string, individual, groups)
-    comp_graph = ComputationGraph()
-    comp_graph.load_from_string(json.dumps(comp_graph_dict))
-
-    num_jumps, max_jumps = comp_graph.get_number_of_jumps(return_max_jumps=True)
-    num_jumps = round((num_jumps / max_jumps) * (dimension_sizes[2] - 1))
-
-    description = (device_mode, used_devices, num_jumps)
 
     score = 1 / evaluate_placement(comp_graph_dict, device_graph,
                                    pipeline_batches=pipeline_batches, batches=batches,
@@ -181,9 +170,27 @@ class MapElitesOptimizer(BaseOptimizer):
 
             return candidates
 
+        def create_description(individual):
+            c = Counter(individual)
+            device_mode = c.most_common(1)[0][0]
+            device_mode = round((device_mode / len(device_graph.devices)) * self.dimension_sizes[0])
+
+            used_devices = round(((len(set(individual)) - 1) / (len(device_graph.devices))) * self.dimension_sizes[1])
+
+            comp_graph_dict = apply_placement(net_string, individual, groups)
+            comp_graph = ComputationGraph()
+            comp_graph.load_from_string(json.dumps(comp_graph_dict))
+
+            num_jumps, max_jumps = comp_graph.get_number_of_jumps(return_max_jumps=True)
+            num_jumps = round((num_jumps / max_jumps) * (self.dimension_sizes[2] - 1))
+
+            return (device_mode, used_devices, num_jumps)
+
         def benchmark(individual, benchmarking_function):
             device_assignment = get_device_assignment(apply_placement(net_string, individual, groups))
             time, memory_overflow = benchmarking_function(device_assignment, return_memory_overflow=True)
+
+            description = create_description(individual)
 
             # Time is set to -1 if memory overflows - but we check with memory_overflow instead
             time = max(time, 0)
@@ -194,7 +201,7 @@ class MapElitesOptimizer(BaseOptimizer):
             if memory_overflow > 0:
                 time += memory_overflow * 10 ** 9 * 1
 
-            return 1 / time
+            return 1 / time, description, individual
 
         def reevaluate_archive(benchmarking_function=None, n_keep=None, time_threshold=None):
             indices = list(np.argwhere(np.isfinite(archive_scores)))
@@ -219,7 +226,7 @@ class MapElitesOptimizer(BaseOptimizer):
             for i in tqdm(indices):
                 individual = archive_individuals[i[0], i[1], i[2], :].tolist()
                 if benchmarking_function:
-                    archive_scores[i[0], i[1], i[2]] = benchmark(individual, benchmarking_function)
+                    archive_scores[i[0], i[1], i[2]] = benchmark(individual, benchmarking_function)[0]
                 else:
                     archive_scores[i[0], i[1], i[2]] = evaluate(individual)[0]
 
@@ -263,8 +270,8 @@ class MapElitesOptimizer(BaseOptimizer):
                 elif self.n_threads == 1:
                     eval_results = [evaluate(candidates[0])]
                 else:
-                    fn_args = zip(candidates, repeat(net_string), repeat(groups), repeat(device_graph),
-                                  repeat(self.dimension_sizes), repeat(self.pipeline_batches), repeat(self.batches),
+                    fn_args = zip(((create_description(c), c) for c in candidates), repeat(net_string), repeat(groups),
+                                  repeat(device_graph), repeat(self.pipeline_batches), repeat(self.batches),
                                   repeat(self.simulator_comp_penalty), repeat(self.simulator_comm_penalty))
 
                     eval_results = self.worker_pool.starmap(_evaluate, fn_args)
