@@ -239,6 +239,11 @@ class MapElitesOptimizer(BaseOptimizer):
         def run_optimization(steps, benchmarking_function=None, start_step=0):
             nonlocal archive_individuals, archive_scores
 
+            if benchmarking_function:
+                log('Optimizing with benchmarking...')
+            else:
+                log('Optimizing with simulator...')
+
             step_size = 1 if benchmarking_function else self.n_threads
 
             for i in tqdm(range(0, steps, step_size)):
