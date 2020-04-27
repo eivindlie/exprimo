@@ -27,6 +27,10 @@ def set_log_dir(path):
     LOG_CONFIG['log_dir'] = path
 
 
+def get_log_dir():
+    return os.path.expanduser(LOG_CONFIG['log_dir'])
+
+
 set_log_dir(LOG_CONFIG['log_dir'])
 
 

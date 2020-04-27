@@ -1,4 +1,6 @@
 import json
+import os
+
 import sys
 
 import exprimo
@@ -79,7 +81,7 @@ simulated_execution_time, events = simulator.simulate(batch_size=128,
                                                       comm_penalization=comm_penalty, comp_penalization=comp_penalty)
 
 if config.get('plot_event_trace', True):
-    save_path = config.get('event_trace_save_path', None)
+    save_path = os.path.join(exprimo.get_log_dir(), 'event_trace.png')
     plot_event_trace(events, simulator, save_path=save_path)
 
 log('\n')

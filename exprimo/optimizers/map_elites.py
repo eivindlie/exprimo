@@ -5,6 +5,7 @@ from collections import Counter
 from itertools import repeat
 from multiprocessing.pool import Pool
 
+from exprimo import get_log_dir
 from exprimo.optimizers.base import BaseOptimizer
 from exprimo.optimizers.utils import evaluate_placement, apply_placement, generate_random_placement, flatten, \
     get_device_assignment
@@ -79,7 +80,7 @@ class MapElitesOptimizer(BaseOptimizer):
         else:
             self.worker_pool = None
 
-    def plot_scores(self, scores, n_devices, max_jumps, axes=(1, 2)):
+    def plot_scores(self, scores, n_devices, max_jumps, axes=(1, 2), file_name='map_elite_scores.png'):
         assert min(axes) >= 0 and max(axes) < len(scores.shape), 'Axes out of range!'
 
         AXIS_NAMES = ['Most common device', 'No. of used devices', 'No. of jumps']
@@ -128,8 +129,7 @@ class MapElitesOptimizer(BaseOptimizer):
             if len(axes) > 2:
                 ax.set_title(f'{AXIS_NAMES[0]} = {AXIS_TICKS[0][i]}', pad=80)
 
-        if self.plot_save_path:
-            plt.savefig(os.path.expanduser(self.plot_save_path))
+        plt.savefig(os.path.join(get_log_dir(), file_name))
 
         plt.show()
 
