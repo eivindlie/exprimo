@@ -23,7 +23,7 @@
     "pipeline_batches": 1,
     "batches": 1,
 
-    "benchmarking_generations": 0,
+    "benchmarking_steps": 0,
     "benchmark_before_selection": false,
     "benchmarking_function": {"model_type": "resnet", "batches": 5, "drop_batches": 1},
 
