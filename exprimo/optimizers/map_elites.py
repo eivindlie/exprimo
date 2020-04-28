@@ -320,7 +320,7 @@ class MapElitesOptimizer(BaseOptimizer):
             graph.load_from_string(net_string)
             _, max_jumps = graph.get_number_of_jumps(return_max_jumps=True)
             plot_map_elites_archive(archive_scores, n_devices, max_jumps, self.plot_axes,
-                                    save_path=os.path.join(get_log_dir(), 'archive_plot.png'))
+                                    save_path=os.path.join(get_log_dir(), 'archive_plot.svg'))
             log('Done')
 
         if self.plot_animation:

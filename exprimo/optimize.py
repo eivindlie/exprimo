@@ -84,7 +84,7 @@ def optimize_with_config(config_path):
                                                           comm_penalization=comm_penalty, comp_penalization=comp_penalty)
 
     if config.get('plot_event_trace', True):
-        save_path = os.path.join(exprimo.get_log_dir(), 'event_trace.png')
+        save_path = os.path.join(exprimo.get_log_dir(), 'event_trace.svg')
         plot_event_trace(events, simulator, save_path=save_path)
 
     log('\n')
