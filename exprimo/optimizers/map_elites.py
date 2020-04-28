@@ -45,7 +45,7 @@ class MapElitesOptimizer(BaseOptimizer):
                  zone_mutation_rate=0, zone_fail_rate=0.2, crossover_rate=0.4,
                  benchmarking_function=None, benchmarking_steps=0, benchmark_before_selection=False,
                  benchmarking_n_keep=None, benchmarking_time_threshold=None, include_trivial_solutions=True,
-                 show_score_plot=False, plot_axes=(0, 2), plot_save_path=None, plot_animation=False, animation_fps=1,
+                 show_score_plot=False, plot_axes=(0, 2), plot_animation=False, animation_fps=1,
                  archive_log_period=None, **kwargs):
         super().__init__(**kwargs)
         self.dimension_sizes = dimension_sizes
@@ -68,7 +68,6 @@ class MapElitesOptimizer(BaseOptimizer):
         self.benchmarking_function = benchmarking_function
         self.plot_axes = plot_axes
         self.show_score_plot = show_score_plot
-        self.plot_save_path = plot_save_path
         self.plot_animation = plot_animation
         self.animation_fps = animation_fps
         self.archive_log_period = archive_log_period

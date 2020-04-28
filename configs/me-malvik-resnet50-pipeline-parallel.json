@@ -25,7 +25,6 @@
     "include_trivial_solutions": true,
 
     "show_score_plot": true,
-    "plot_save_path": "~/map-elites_score_plot.png",
     "plot_axes": [0, 1, 2],
 
     "archive_log_period": 500,
