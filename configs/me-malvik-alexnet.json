@@ -1,6 +1,6 @@
 {
   "device_graph_path": "device_graphs/malvik.json",
-  "net_path": "nets/resnet50.json",
+  "net_path": "nets/alex_v2.json",
   "optimizer": "map_elites",
 
   "plot_event_trace": true,
@@ -10,7 +10,7 @@
   "benchmark_solution": true,
 
   "optimizer_args": {
-    "dimension_sizes": [-1, -1, 40],
+    "dimension_sizes": [-1, -1, 10],
     "initial_size": 3,
     "mutation_rate": 0.4,
     "copy_mutation_rate": 0.4,
@@ -30,7 +30,7 @@
     "benchmark_before_selection": true,
     "benchmarking_n_keep": 50,
     "benchmarking_time_threshold": 500,
-    "benchmarking_function": {"model_type": "resnet", "batches": 5, "drop_batches": 1},
+    "benchmarking_function": {"model_type": "alexnet", "batches": 5, "drop_batches": 1},
 
     "include_trivial_solutions": false,
 
