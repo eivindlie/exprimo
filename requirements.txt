@@ -5,5 +5,5 @@ numpy==1.18.3
 torch==1.5.0
 torchvision==0.6.0
 seaborn=0.10.1
-imageio
-imageio-ffmpeg
+imageio==2.8.0
+imageio-ffmpeg==0.4.1
