@@ -338,7 +338,7 @@ class GAOptimizer(BaseOptimizer):
                     with open(os.path.join(get_log_dir(), 'checkpoints', 'scores.csv'), 'a') as f:
                         f.write(f'{i + start_generation}, {best_solution["score"]}\n')
 
-                    with open(os.path.join(get_log_dir(), 'checkpoints', f'/gen_{i + start_generation:04}.json'), 'w') \
+                    with open(os.path.join(get_log_dir(), 'checkpoints', f'gen_{i + start_generation:04}.json'), 'w') \
                             as f:
                         json.dump(best_solution, f, indent=4)
 
