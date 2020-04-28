@@ -30,6 +30,9 @@ def load_model_with_placement(model_type, placement, lr=0.01, classes=1000, devi
         first_layer = 'Conv2d_1a_3x3'
         last_layer = 'softmax'
         model = inception_v3(pretrained=False, placement=placement, num_classes=classes, init_weights=False)
+    elif model_type == 'alexnet':
+        first_layer = 'conv1'
+        last_layer = 'fc8'
 
     if isinstance(placement, str):
         input_device = output_device = torch.device(placement)

@@ -39,6 +39,8 @@ def benchmark_with_placement(model_type, placement='cuda:0', batches=50, drop_ba
         model_type = 'resnet50'
     elif model_type.lower() in ['inception', 'inception_v3', 'inceptionv3']:
         model_type = 'inception'
+    elif model_type.lower() in ['alexnet', 'alex', 'alex_v2']:
+        model_type = 'alexnet'
 
     model, criterion, optimizer, input_device, output_device = load_model_with_placement(model_type, placement, lr=lr,
                                                                                          device_map=device_map)
@@ -51,7 +53,7 @@ def benchmark_with_placement(model_type, placement='cuda:0', batches=50, drop_ba
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
 
-    if model_type == 'resnet50':
+    if model_type in ['resnet50', 'alexnet']:
         dataset = torchvision.datasets.FakeData(transform=preprocess, size=500)
     elif model_type == 'inception':
         dataset = torchvision.datasets.FakeData(transform=preprocess, image_size=(3, 299, 299), size=500)
