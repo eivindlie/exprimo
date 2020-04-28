@@ -117,6 +117,9 @@ class GAOptimizer(BaseOptimizer):
             self.worker_pool = None
 
         self.checkpoint_period = checkpoint_period
+        if self.checkpoint_period and not os.path.exists(os.path.join(get_log_dir(), 'checkpoints')):
+            os.makedirs(os.path.join(get_log_dir(), 'checkpoints'))
+
 
     def optimize(self, net_string, device_graph):
         n_devices = len(device_graph.devices)
