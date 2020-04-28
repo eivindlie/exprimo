@@ -26,6 +26,12 @@ def optimize_with_config(config_path):
     if log_dir:
         exprimo.set_log_dir(log_dir)
 
+    log('\n\n\n')
+    log('='*100)
+    log('EXPRIMO OPTIMIZATION'.rjust(60))
+    log('='*100)
+    log()
+
     log(f'Using config path {config_path}')
 
     args = config.get('optimizer_args', {})
