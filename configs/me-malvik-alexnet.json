@@ -40,7 +40,7 @@
     "archive_log_period": 500,
     "plot_animation": false,
     "animation_fps": 1,
-    "verbose": 50,
+    "verbose": 500,
     "n_threads": -1
   }
 }
