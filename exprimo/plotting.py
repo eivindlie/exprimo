@@ -63,7 +63,7 @@ def plot_event_trace(events, simulator, show_transfer_lines=True, show_memory_us
                      color='red', alpha=0.4)
 
     if save_path:
-        plt.savefig(os.path.expanduser(save_path))
+        plt.savefig(os.path.expanduser(save_path), bb_inches='tight')
 
     plt.show()
 
@@ -140,7 +140,7 @@ def plot_map_elites_archive(archive_scores, n_devices=None, max_jumps=None, axes
         fig.suptitle(title)
 
     if save_path:
-        plt.savefig(os.path.expanduser(save_path))
+        plt.savefig(os.path.expanduser(save_path), bb_inches='tight')
 
     if return_fig:
         return fig
