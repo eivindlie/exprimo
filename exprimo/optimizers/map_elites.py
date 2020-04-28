@@ -283,7 +283,7 @@ class MapElitesOptimizer(BaseOptimizer):
                         archive_scores[description[0], description[1], description[2]] = score
                         archive_individuals[description[0], description[1], description[2], :] = individual
 
-                if self.verbose and (i + 1) % self.verbose == 0:
+                if self.verbose and (i + 1) % self.verbose < step_size:
                     best_time = 1 / np.nanmax(archive_scores)
                     log(f'[{i + 1}/{steps}] Best time: {best_time:.4f}ms')
 
