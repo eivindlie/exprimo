@@ -5,7 +5,7 @@
 
   "plot_event_trace": true,
 
-  "log_dir": "~/logs/me-resnet",
+  "log_dir": "~/logs/me-alexnet",
 
   "benchmark_solution": true,
 
