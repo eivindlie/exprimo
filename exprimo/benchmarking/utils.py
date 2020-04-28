@@ -1,14 +1,15 @@
+from collections import defaultdict
+
 import torch
 
 from exprimo.benchmarking.alexnet import alexnet
 from exprimo.benchmarking.resnet import resnet50
 from exprimo.benchmarking.inception import inception_v3
 
-DEVICE_MAP = {
-    0: 'cpu',
-    1: 'cuda:0',
-    2: 'cuda:1'
-}
+DEVICE_MAP = defaultdict(lambda: 'cuda:0', {
+    (d + 1):f'cuda:{d}' for d in range(torch.cuda.device_count())
+})
+DEVICE_MAP[0] = 'cpu'
 
 
 def load_model_with_placement(model_type, placement, lr=0.01, classes=1000, device_map=None):
