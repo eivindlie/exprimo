@@ -109,6 +109,7 @@ class AlexNet(nn.Module):
         x = self.conv5(x)
         x = x.to(torch.device(self.placement['pool5']))
         x = self.pool5(x)
+        x = torch.flatten(x)
         x = x.to(torch.device(self.placement['fc6']))
         x = self.fc6(x)
         x = x.to(torch.device(self.placement['dropout6']))
