@@ -28,6 +28,8 @@
     "plot_axes": [0, 1, 2],
 
     "archive_log_period": 500,
+    "plot_animation": false,
+    "animation_fps": 1,
     "verbose": 50,
     "n_threads": -1
   }
