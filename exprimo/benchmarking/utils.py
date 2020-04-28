@@ -1,5 +1,6 @@
 import torch
 
+from exprimo.benchmarking.alexnet import alexnet
 from exprimo.benchmarking.resnet import resnet50
 from exprimo.benchmarking.inception import inception_v3
 
@@ -33,6 +34,7 @@ def load_model_with_placement(model_type, placement, lr=0.01, classes=1000, devi
     elif model_type == 'alexnet':
         first_layer = 'conv1'
         last_layer = 'fc8'
+        model = alexnet(pretrained=False, placement=placement)
 
     if isinstance(placement, str):
         input_device = output_device = torch.device(placement)
