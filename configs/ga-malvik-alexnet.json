@@ -1,9 +1,9 @@
 {
   "device_graph_path": "device_graphs/malvik.json",
-  "net_path": "nets/resnet50.json",
+  "net_path": "nets/alex_v2.json",
   "optimizer": "genetic_algorithm",
 
-  "log_dir": "~/logs/ga-resnet",
+  "log_dir": "~/logs/ga-alexnet",
 
   "benchmark_solution": true,
 
@@ -34,6 +34,6 @@
 
     "benchmarking_population_size": 30,
     "benchmarking_generations": 0,
-    "benchmarking_function": {"model_type": "resnet", "batches": 5, "drop_batches": 1}
+    "benchmarking_function": {"model_type": "alexnet", "batches": 5, "drop_batches": 1}
   }
 }
