@@ -1,3 +1,5 @@
+import os
+
 import torch
 import time
 import pandas as pd
@@ -26,7 +28,7 @@ def benchmark_bandwidth(tensor_size, source_device, target_device):
     return bandwidth
 
 
-def plot_results_from_file(file_path, source_device, target_device, server_name):
+def plot_results_from_file(file_path, source_device, target_device, server_name, save_path=None):
     results = pd.read_csv(file_path, skiprows=1, names=['tensor_size', 'bandwidth'])
 
     sns.lineplot(x='tensor_size', y='bandwidth', data=results)
@@ -34,6 +36,8 @@ def plot_results_from_file(file_path, source_device, target_device, server_name)
     plt.xlabel('Tensor size (Bytes)')
     plt.ylabel('Bandwidth (Mbit/s)')
     plt.title(f'Transfer from {source_device} to {target_device} ({server_name})')
+    if save_path:
+        plt.savefig(save_path, bb_inches='tight')
 
     plt.show()
 
@@ -55,14 +59,17 @@ def benchmark_multiple_tensor_sizes(tensor_sizes, source_device='cpu', target_de
 
 
 if __name__ == '__main__':
-    result_file = '~/logs/e1-1_bandwidth-malvik.csv'
+    result_file = os.path.join('~', 'logs', 'e1_bandwidth', 'e1-1_bandwidth-malvik.csv')
+    plot_file = os.path.join('~', 'logs', 'e1_bandwidth', 'e1-1_bandwidth-malvik.pdf')
     source_device = 'cpu'
     target_device = 'cuda:0'
     server_name = 'Malvik'
     transfer_repeats = 100
     tensor_sizes = [10**i for i in range(3, 10)]
 
-    benchmark_multiple_tensor_sizes(tensor_sizes, source_device, target_device, transfer_repeats, result_file)
+    benchmark_multiple_tensor_sizes(tensor_sizes, source_device, target_device, transfer_repeats,
+                                    os.path.expanduser(result_file))
 
-    plot_results_from_file(result_file, source_device, target_device, server_name)
+    plot_results_from_file(os.path.expanduser(result_file), source_device, target_device, server_name,
+                           save_path=os.path.expanduser(plot_file))
 
