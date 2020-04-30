@@ -3,12 +3,15 @@ import json
 
 from exprimo import ComputationGraph, DeviceGraph, Simulator
 
-directory = 'experiment_results/sim_real_comp/resnet/nets'
-output_file = 'experiment_results/sim_real_comp/resnet/scores-half-bandwidth.csv'
+directory = '~/logs/experiment_results/sim_real_comp/resnet/nets'
+output_file = '~/logs/experiment_results/sim_real_comp/resnet/2020-04-30_scores.csv'
 
 device_graph_path = 'device_graphs/malvik.json'
 
 device_assignment = {}
+
+directory = os.path.expanduser(directory)
+output_file = os.path.expanduser(output_file)
 
 with open(output_file, 'w') as f:
     f.write('')
@@ -19,6 +22,12 @@ for file in os.listdir(directory):
         with open(os.path.join(directory, file)) as f:
             # net_dict = json.load(f)
             net_string = f.read()
+
+        # net_dict = json.loads(net_string)
+        # for layer_name, layer in net_dict['layers'].items():
+        #     if layer['device'] != 0:
+        #         layer['device'] -= 1
+        # net_string = json.dumps(net_dict)
 
         graph = ComputationGraph()
         graph.load_from_string(net_string)
