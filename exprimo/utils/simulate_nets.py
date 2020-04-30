@@ -8,6 +8,9 @@ output_file = '~/logs/experiment_results/sim_real_comp/resnet/2020-04-30_scores.
 
 device_graph_path = 'device_graphs/malvik.json'
 
+comp_penalization = 0.9
+comm_penalization = 0.25
+
 device_assignment = {}
 
 directory = os.path.expanduser(directory)
@@ -35,7 +38,8 @@ for file in os.listdir(directory):
 
         simulator = Simulator(graph, device_graph)
         run_time = simulator.simulate(batch_size=128, batches=1, pipeline_batches=1, print_event_trace=False,
-                                      print_memory_usage=False, comp_penalization=0.4, comm_penalization=0.25)
+                                      print_memory_usage=False, comp_penalization=comp_penalization,
+                                      comm_penalization=comm_penalization)
 
         with open(output_file, 'a') as f:
             f.write(f'{file.replace("gen_", "").replace(".json", "")}, {run_time}\n')
