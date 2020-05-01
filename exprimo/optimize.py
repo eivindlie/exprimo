@@ -18,7 +18,7 @@ config_path = 'configs/me-malvik-resnet50.json'
 def optimize_with_config(config_path=None, config=None):
     assert config_path or config, 'Either a config path or a config dictionary must be provided'
     assert config is None or isinstance(config, dict), 'config must be a dictionary'
-    
+
     if config_path:
         with open(config_path) as f:
             config = json.load(f)
@@ -36,7 +36,10 @@ def optimize_with_config(config_path=None, config=None):
     log('='*100)
     log()
 
-    log(f'Using config path {config_path}')
+    if config_path:
+        log(f'Using config path {config_path}')
+    else:
+        log('Using config provided as dictionary')
 
     args = config.get('optimizer_args', {})
 
