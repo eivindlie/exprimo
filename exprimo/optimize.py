@@ -15,9 +15,13 @@ from exprimo.optimizers.simulated_annealing import temp_schedules
 config_path = 'configs/me-malvik-resnet50.json'
 
 
-def optimize_with_config(config_path):
-    with open(config_path) as f:
-        config = json.load(f)
+def optimize_with_config(config_path=None, config=None):
+    assert config_path or config, 'Either a config path or a config dictionary must be provided'
+    assert config is None or isinstance(config, dict), 'config must be a dictionary'
+    
+    if config_path:
+        with open(config_path) as f:
+            config = json.load(f)
 
     device_graph_path = config['device_graph_path']
     net_path = config['net_path']
