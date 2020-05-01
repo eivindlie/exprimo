@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 
-from benchmarking.benchmark import benchmark_all_placements
-from optimize import optimize_with_config
-from utils.convert_nets_to_placements import convert_to_placement
+from exprimo.benchmarking.benchmark import benchmark_all_placements
+from exprimo.optimize import optimize_with_config
+from exprimo.utils.convert_nets_to_placements import convert_to_placement
 from exprimo import PLOT_STYLE
 
 sns.set(style=PLOT_STYLE)
