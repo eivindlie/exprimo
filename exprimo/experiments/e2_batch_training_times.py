@@ -13,7 +13,7 @@ from exprimo import PLOT_STYLE
 sns.set(style=PLOT_STYLE)
 
 
-config_path = 'configs/experiments/e2_batch_training_times.json'
+config_path = 'configs/experiments/e2_ga-malvik-resnet50.json'
 model_type = 'resnet'
 batches = 50
 NORMALIZE_PLOT = True
@@ -21,7 +21,8 @@ PLOT_INDIVIDUAL = False
 
 
 # Force checkpointing to occur every 5th generation
-config = json.loads(config_path)
+with open(config_path) as f:
+    config = json.load(f)
 config['optimizer_args']['checkpoint_period'] = 5
 
 log_dir = os.path.expanduser(config['log_dir'])
