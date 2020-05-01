@@ -163,7 +163,7 @@ def benchmark_all_placements(placement_directory, results_file, model_type, gene
         batch_times = benchmark_with_placement(model_type, placement, batches=batches, drop_batches=drop_batches,
                                                device_map=device_map, gpu_memory_limit=gpu_memory_limit)
 
-        with open(results_file):
+        with open(results_file) as f:
             f.write(f'{generation:04}, {",".join(map(lambda x: str(x), batch_times))}\n')
 
         if verbose:
