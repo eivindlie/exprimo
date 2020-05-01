@@ -1,10 +1,15 @@
+import json
+import os
+
 import time
 
 from torchvision import transforms
 import torchvision
 import torch.utils.data
 import torch
+from tqdm import tqdm
 
+from exprimo import log
 from exprimo.benchmarking.utils import load_model_with_placement
 
 BATCH_SIZE = 128
@@ -105,9 +110,9 @@ def benchmark_with_placement(model_type, placement='cuda:0', batches=50, drop_ba
 
             if verbose:
                 if memory_exceeded:
-                    print('Memory exceeded')
+                    log('Memory exceeded')
                 else:
-                    print(f' {batch_times[-1]}ms')
+                    log(f' {batch_times[-1]}ms')
 
             if memory_exceeded:
                 if return_memory_overflow:
@@ -123,3 +128,43 @@ def benchmark_with_placement(model_type, placement='cuda:0', batches=50, drop_ba
     if return_memory_overflow:
         return batch_times[drop_batches:], memory_overflow
     return batch_times[drop_batches:]
+
+
+def benchmark_all_placements(placement_directory, results_file, model_type, generation_divisible_by=None, last_gen=None,
+                             verbose=False, batches=50, drop_batches=0, device_map=None, gpu_memory_limit=None):
+    with open(results_file, 'w') as f:
+        f.write('')
+
+    def generation_filter(file):
+        if not file.endswith('.json') or not file.startswith('gen_'):
+            return False
+
+        generation = int(file.replace('gen_', '').replace('.json', ''))
+
+        divisible_by = generation_divisible_by or 1
+
+        if last_gen:
+            return generation % divisible_by == 0 and generation <= last_gen
+
+        return generation % divisible_by == 0
+
+    dir_list = os.listdir(placement_directory)
+    dir_list = list(filter(generation_filter, dir_list))
+
+    for i, file in enumerate(tqdm(dir_list)):
+        with open(os.path.join(placement_directory, file)) as f:
+            placement = json.load(f)
+
+        generation = int(file.replace('gen_', '').replace('.json', ''))
+
+        if verbose:
+            log(f'Benchmarking placement {i+1}/{len(dir_list)}: {file}... ', end='')
+
+        batch_times = benchmark_with_placement(model_type, placement, batches=batches, drop_batches=drop_batches,
+                                               device_map=device_map, gpu_memory_limit=gpu_memory_limit)
+
+        with open(results_file):
+            f.write(f'{generation:04}, {",".join(map(lambda x: str(x), batch_times))}\n')
+
+        if verbose:
+            log(f'{sum(batch_times)/len(batch_times):.2f}ms')
