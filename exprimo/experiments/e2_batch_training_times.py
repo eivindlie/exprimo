@@ -57,17 +57,17 @@ if __name__ == '__main__':
     batch_times = pd.read_csv(os.path.join(log_dir, 'batch_times.csv'), header=None, index_col=0)
     if NORMALIZE_PLOT:
         means = batch_times.mean(axis=1)
-        batch_times = batch_times.sub(means, axis=0).divid(means, axis=0)
+        batch_times = batch_times.sub(means, axis=0).divide(means, axis=0)
 
-        if PLOT_INDIVIDUAL:
-            for i in range(batch_times.shape[0]):
-                generation = batch_times.index[0].replace('gen_', '').replace('.json', '')
-                times = batch_times.iloc[i, 1:]
+    if PLOT_INDIVIDUAL:
+        for i in range(batch_times.shape[0]):
+            generation = batch_times.index[0].replace('gen_', '').replace('.json', '')
+            times = batch_times.iloc[i, 1:]
 
-                output_file = os.path.join(log_dir, 'batch_training_time', f'gen_{generation}.pdf')
+            output_file = os.path.join(log_dir, 'batch_training_time', f'gen_{generation}.pdf')
 
-                plot_times(times, f'Generation {generation}', output_file)
-        else:
-            avg_batch_times = batch_times.mean(axis=0)
-            plot_times(avg_batch_times, 'Average batch time residuals (with last batch in dataset)',
-                       output_file=os.path.join(log_dir, 'batch_times.pdf'))
+            plot_times(times, f'Generation {generation}', output_file)
+    else:
+        avg_batch_times = batch_times.mean(axis=0)
+        plot_times(avg_batch_times, 'Average batch time residuals (with last batch in dataset)',
+                   output_file=os.path.join(log_dir, 'batch_times.pdf'))
