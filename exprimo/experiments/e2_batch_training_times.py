@@ -18,6 +18,7 @@ model_type = 'resnet'
 batches = 50
 NORMALIZE_PLOT = True
 PLOT_INDIVIDUAL = False
+DROP_LAST_DATASET_BATCH = True
 
 if __name__ == '__main__':
     # Force checkpointing to occur every 5th generation
@@ -35,8 +36,7 @@ if __name__ == '__main__':
 
     # Benchmark all the placements that were created above
     benchmark_all_placements(os.path.join(log_dir, 'checkpoints', 'placements'), os.path.join(log_dir, 'batch_times.csv'),
-                             model_type, batches=batches, drop_batches=0)
-
+                             model_type, batches=batches, drop_batches=0, drop_last=DROP_LAST_DATASET_BATCH)
 
     # Load and plot benchmark results
     def plot_times(data, title, output_file=None):

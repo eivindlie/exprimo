@@ -36,7 +36,8 @@ def train_single_batch_inception(model, data, criterion, optimizer):
 
 
 def benchmark_with_placement(model_type, placement='cuda:0', batches=50, drop_batches=1, lr=0.01, verbose=False,
-                             device_map=None, gpu_memory_limit=None, return_memory_overflow=False):
+                             device_map=None, gpu_memory_limit=None, return_memory_overflow=False,
+                             drop_last=True):
     if verbose:
         print('Starting benchmark...')
 
@@ -64,7 +65,7 @@ def benchmark_with_placement(model_type, placement='cuda:0', batches=50, drop_ba
         dataset = torchvision.datasets.FakeData(transform=preprocess, image_size=(3, 299, 299), size=500)
 
     train_loader = torch.utils.data.DataLoader(
-        dataset, batch_size=BATCH_SIZE, shuffle=True, drop_last=True
+        dataset, batch_size=BATCH_SIZE, shuffle=True, drop_last=drop_last
     )
 
     b = 0
@@ -131,7 +132,8 @@ def benchmark_with_placement(model_type, placement='cuda:0', batches=50, drop_ba
 
 
 def benchmark_all_placements(placement_directory, results_file, model_type, generation_divisible_by=None, last_gen=None,
-                             verbose=False, batches=50, drop_batches=0, device_map=None, gpu_memory_limit=None):
+                             verbose=False, batches=50, drop_batches=0, device_map=None, gpu_memory_limit=None,
+                             drop_last=True):
     with open(results_file, 'w') as f:
         f.write('')
 
@@ -161,7 +163,8 @@ def benchmark_all_placements(placement_directory, results_file, model_type, gene
             log(f'Benchmarking placement {i+1}/{len(dir_list)}: {file}... ', end='')
 
         batch_times = benchmark_with_placement(model_type, placement, batches=batches, drop_batches=drop_batches,
-                                               device_map=device_map, gpu_memory_limit=gpu_memory_limit)
+                                               device_map=device_map, gpu_memory_limit=gpu_memory_limit,
+                                               drop_last=drop_last)
 
         with open(results_file, 'a') as f:
             f.write(f'{generation:04}, {",".join(map(lambda x: str(x), batch_times))}\n')
