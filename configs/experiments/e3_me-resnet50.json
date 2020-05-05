@@ -3,7 +3,7 @@
   "net_path": "nets/resnet50.json",
   "optimizer": "map_elites",
 
-  "plot_event_trace": true,
+  "plot_event_trace": false,
 
   "log_dir": "~/logs/e3_optimizer-comparison/me-resnet50",
 
@@ -27,7 +27,7 @@
     "batches": 1,
 
     "benchmarking_steps": 0,
-    "benchmark_before_selection": true,
+    "benchmark_before_selection": false,
     "benchmarking_n_keep": 50,
     "benchmarking_time_threshold": 500,
     "benchmarking_function": {"model_type": "resnet", "batches": 5, "drop_batches": 1},

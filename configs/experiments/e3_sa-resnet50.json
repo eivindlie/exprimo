@@ -4,6 +4,7 @@
   "optimizer": "simulated_annealing",
 
   "log_dir": "~/logs/e3_optimizer-comparison/sa-resnet50",
+  "plot_event_trace": false,
 
   "benchmark_solution": true,
 

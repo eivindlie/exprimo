@@ -4,6 +4,7 @@
   "optimizer": "random_hill_climber",
 
   "log_dir": "~/logs/e3_optimizer-comparison/hc-resnet50",
+  "plot_event_trace": false,
 
   "benchmark_solution": true,
 
