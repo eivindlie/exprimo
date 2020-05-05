@@ -83,7 +83,7 @@ if __name__ == '__main__':
     sa_grid = {
         'ts_function': ['exponential_multiplicative_decay'],
         'ts_param1': [i for i in range(20, 70, 10)],
-        'ts_param2': [0.70, 0.80, 0.90, 0.95, 0.975],
+        'ts_param2': [0.9, 0.925, 0.95, 0.97, 0.98, 0.985, 0.99],
     }
 
     grid = (
