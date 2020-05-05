@@ -147,6 +147,7 @@ def plot_map_elites_archive(archive_scores, n_devices=None, max_jumps=None, axes
         return fig
 
     plt.show()
+    plt.close(fig)
 
 
 def plot_archive_animation(paths, save_path, dimension_sizes, n_devices=None, max_jumps=None, axes=(1, 2), fps=1):
