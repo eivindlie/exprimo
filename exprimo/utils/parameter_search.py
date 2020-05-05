@@ -50,7 +50,7 @@ def do_parameter_search(config_path, parameter_grid, repeats=10, verbose=False):
             del combo_dict['ts_param1']
             del combo_dict['ts_param2']
 
-        args = dict(args.items() + combo_dict.items())
+        args = dict(tuple(args.items()) + tuple(combo_dict.items()))
 
         if 'generations' in args:
             args['generations'] = int(args['generations'] * (original_pop / args['population_size']))
