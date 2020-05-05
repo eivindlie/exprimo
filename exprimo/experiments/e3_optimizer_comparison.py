@@ -47,7 +47,7 @@ def run_optimizer_test():
         config['optimizer_args']['verbose'] = False
 
         for r in tqdm(range(REPEATS)):
-            _, time = optimize_with_config(config=config, verbose=False)
+            _, time = optimize_with_config(config=config, verbose=False, set_log_dir=True)
             with open(score_path, 'a') as f:
                 f.write(f'{r},{time}\n')
         set_log_dir(LOG_DIR)
