@@ -116,4 +116,5 @@ if __name__ == '__main__':
         'configs/ga-malvik-resnet50.json',
     )[0]
 
-    do_parameter_search(config_path, grid, verbose=VERBOSE)
+    best_params = do_parameter_search(config_path, grid, verbose=VERBOSE)
+    print(f'Best parameters: \n{best_params}')
