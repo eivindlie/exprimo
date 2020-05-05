@@ -37,12 +37,20 @@ def do_parameter_search(config_path, parameter_grid, repeats=10, verbose=False):
         if verbose:
             print(f'Testing combination {i}: {combination}...')
 
+        combo_dict = dict(combination)
+
         args = args_blueprint.copy()
 
         if 'generations' in args:
             original_pop = args['population_size']
 
-        args = dict(tuple(args.items()) + combination)
+        if config['optimizer'] in ('sa', 'simulated_annealing'):
+            args['temp_schedule'] = [combo_dict['ts_function'], combo_dict['ts_param1'], combo_dict['ts_param2']]
+            del combo_dict['ts_function']
+            del combo_dict['ts_param1']
+            del combo_dict['ts_param2']
+
+        args = dict(args.items() + combo_dict.items())
 
         if 'generations' in args:
             args['generations'] = int(args['generations'] * (original_pop / args['population_size']))
@@ -72,12 +80,20 @@ if __name__ == '__main__':
         'crossover_rate': [0.2, 0.4, 0.6, 0.8],
     }
 
+    sa_grid = {
+        'ts_function': ['exponential_multiplicative_decay'],
+        'ts_param1': [i for i in range(20, 70, 10)],
+        'ts_param2': [0.70, 0.80, 0.90, 0.95, 0.975],
+    }
+
     grid = (
         ga_grid,
-    )[0]
+        sa_grid
+    )[1]
 
     config_path = (
         'configs/ga-malvik-resnet50.json',
+        'configs/sa-malvik-resnet50.json',
     )[0]
 
     best_params = do_parameter_search(config_path, grid, verbose=VERBOSE)
