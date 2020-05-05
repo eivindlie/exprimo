@@ -51,7 +51,7 @@ def optimize_with_config(config_path=None, config=None, verbose=True):
     args['batches'] = batches
     args['pipeline_batches'] = pipeline_batches
 
-    if 'benchmarking_function' in args:
+    if 'benchmarking_function' in args and isinstance(args['benchmarking_function'], dict):
         args['benchmarking_function'] = create_benchmark_function(**args['benchmarking_function'])
 
     comp_penalty = args.get('simulator_comp_penalty', 1.0)
