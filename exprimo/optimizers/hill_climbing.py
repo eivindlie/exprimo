@@ -65,7 +65,7 @@ class RandomHillClimbingOptimizer(BaseOptimizer):
         self.steps = steps
 
     def optimize(self, net_string, device_graph):
-        if self.verbose:
+        if self.score_save_period:
             with open(os.path.join(get_log_dir(), 'time_history.csv'), 'w') as f:
                 f.write(f'step, time\n')
 
@@ -88,7 +88,7 @@ class RandomHillClimbingOptimizer(BaseOptimizer):
                 log(f'[{i+1}/{self.steps}] Current time: {score:.2f}ms')
 
             if self.score_save_period and i % self.score_save_period == 0:
-                with open(os.path.join(get_log_dir(), 'hc_time_history.csv'), 'a') as f:
+                with open(os.path.join(get_log_dir(), 'time_history.csv'), 'a') as f:
                     f.write(f'{i + 1}, {score}\n')
 
         return json.dumps(apply_placement(net_string, placement, groups))
