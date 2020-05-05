@@ -14,7 +14,7 @@ from exprimo import PLOT_STYLE
 sns.set(style=PLOT_STYLE)
 
 config_path = 'configs/experiments/e2_ga-malvik-alexnet.json'
-model_type = 'resnet'
+model_type = 'alexnet'
 batches = 50
 NORMALIZE_PLOT = True
 PLOT_INDIVIDUAL = False
