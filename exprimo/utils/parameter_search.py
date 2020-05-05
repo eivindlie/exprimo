@@ -3,12 +3,7 @@ import json
 import itertools
 from tqdm import tqdm
 
-from exprimo import DeviceGraph, Simulator, ComputationGraph
-from exprimo.optimizers import HillClimbingOptimizer, LinearSearchOptimizer, SimulatedAnnealingOptimizer, GAOptimizer, \
-    MapElitesOptimizer, RandomHillClimbingOptimizer
-from exprimo.optimizers.particle_swarm_optimizer import ParticleSwarmOptimizer
-from exprimo.optimizers.simulated_annealing import temp_schedules
-from optimize import optimize_with_config
+from exprimo.optimize import optimize_with_config
 
 
 def do_parameter_search(config_path, parameter_grid, repeats=10, verbose=False):
