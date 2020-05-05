@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -12,7 +13,6 @@ from exprimo import PLOT_STYLE
 
 sns.set(style=PLOT_STYLE)
 
-
 config_path = 'configs/experiments/e2_ga-malvik-resnet50.json'
 model_type = 'resnet'
 batches = 50
@@ -20,11 +20,16 @@ NORMALIZE_PLOT = True
 PLOT_INDIVIDUAL = False
 DROP_LAST_DATASET_BATCH = True
 
+if len(sys.argv) > 1:
+    config_path = sys.argv[1]
+
 if __name__ == '__main__':
     # Force checkpointing to occur every 5th generation
     with open(config_path) as f:
         config = json.load(f)
     config['optimizer_args']['checkpoint_period'] = 5
+
+    DROP_LAST_DATASET_BATCH = config.get('drop_last_dataset_batch', DROP_LAST_DATASET_BATCH)
 
     log_dir = os.path.expanduser(config['log_dir'])
 
