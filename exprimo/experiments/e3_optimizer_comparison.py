@@ -1,14 +1,13 @@
 import json
 import os
 
-import numpy as np
 import pandas as pd
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 import seaborn as sns
 
 from exprimo import set_log_dir, log, PLOT_STYLE
-from optimize import optimize_with_config
+from exprimo.optimize import optimize_with_config
 
 sns.set(style=PLOT_STYLE)
 
