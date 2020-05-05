@@ -349,7 +349,7 @@ class GAOptimizer(BaseOptimizer):
                 candidates = mutate_population(children)
                 pop = select_offspring(ranked_pop, candidates, population_size=population_size)
 
-                if self.verbose and (i + 1) % int(self.verbose) == 0 or i == 0:
+                if self.verbose and ((i + 1) % int(self.verbose) == 0 or i == 0):
                     best_score = fitness_scores[0]
                     best_time = 1 / best_score
                     if self.print_diversity:
