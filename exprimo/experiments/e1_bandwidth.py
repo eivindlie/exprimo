@@ -5,7 +5,10 @@ import time
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-sns.set()
+
+from exprimo import PLOT_STYLE
+
+sns.set(style=PLOT_STYLE)
 
 
 def benchmark_bandwidth(tensor_size, source_device, target_device):
