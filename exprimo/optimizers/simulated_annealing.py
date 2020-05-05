@@ -29,7 +29,6 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
 
     def optimize(self, net_string, device_graph):
         n_devices = len(device_graph.devices)
-        net = json.loads(net_string)
 
         groups = self.create_colocation_groups(get_flattened_layer_names(net_string))
 
@@ -54,7 +53,7 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
 
             if new_score != -1:
                 if new_score < score or score == -1 \
-                        or random() < 1 - np.exp((new_score - score) / self.temp(i)):
+                        or random() < 1 / (1 + np.exp((new_score - score) / self.temp(i))):
                     score = new_score
                     placement = new_placement
 
