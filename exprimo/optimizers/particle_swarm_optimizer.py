@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 from exprimo.optimizers.base import BaseOptimizer
 from exprimo.graph import get_flattened_layer_names
-from exprimo.optimizers.utils import generate_random_placement, evaluate_placement, apply_placement
+from exprimo.optimizers.utils import generate_random_placement, apply_placement
 
 
 class Particle:
@@ -67,7 +67,7 @@ class ParticleSwarmOptimizer(BaseOptimizer):
 
         def evaluate(position):
             placement = position_to_placement(position)
-            return evaluate_placement(apply_placement(net_string, placement, groups), device_graph)
+            return self.evaluate_placement(apply_placement(net_string, placement, groups), device_graph)
 
         swarm = initialize_swarm()
         global_best_position = find_global_best(swarm)

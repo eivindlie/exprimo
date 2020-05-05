@@ -61,7 +61,7 @@ class GAOptimizer(BaseOptimizer):
                  benchmarking_population_size=100, benchmarking_generations=50,
                  benchmarking_function=None,
                  include_trivial_solutions_in_initialization=True,
-                 simulator_comp_penalty=1, simulator_comm_penalty=1, checkpoint_period=-1,
+                 checkpoint_period=-1,
                  allow_cpu=True, **kwargs):
         """
         Initializes the GA optimizer, setting important hyperparameters.
@@ -81,9 +81,6 @@ class GAOptimizer(BaseOptimizer):
         self.benchmarking_population_size = benchmarking_population_size
         self.benchmarking_generations = benchmarking_generations
         self.benchmarking_function = benchmarking_function
-
-        self.simulator_comp_penalty = simulator_comp_penalty
-        self.simulator_comm_penalty = simulator_comm_penalty
 
         self.mutation_sharding_rate = mutation_sharding_rate
 

@@ -2,10 +2,9 @@ import json
 from itertools import product
 from tqdm import tqdm
 
-from exprimo.device import DeviceGraph
 from exprimo.optimizers.base import BaseOptimizer
 
-from exprimo.optimizers.utils import prefix_heuristic, apply_placement, evaluate_placement
+from exprimo.optimizers.utils import apply_placement
 from exprimo.graph import get_flattened_layer_names
 
 
@@ -33,7 +32,7 @@ class LinearSearchOptimizer(BaseOptimizer):
 
             net = apply_placement(net_string, comb, groups)
 
-            score = evaluate_placement(net, device_graph, batch_size=128, batches=1)
+            score = self.evaluate_placement(net, device_graph)
 
             if score < best_score or best_net is None:
                 best_net = net

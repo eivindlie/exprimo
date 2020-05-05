@@ -40,7 +40,6 @@ def _evaluate(individual, net_string, groups, device_graph, pipeline_batches=1, 
 class MapElitesOptimizer(BaseOptimizer):
 
     def __init__(self, dimension_sizes=(-1, -1, 10), initial_size=50,
-                 simulator_comp_penalty=1, simulator_comm_penalty=1,
                  steps=1000, allow_cpu=True, mutation_rate=0.05, copy_mutation_rate=0, replace_mutation_rate=0,
                  zone_mutation_rate=0, zone_fail_rate=0.2, crossover_rate=0.4,
                  benchmarking_function=None, benchmarking_steps=0, benchmark_before_selection=False,
@@ -50,8 +49,6 @@ class MapElitesOptimizer(BaseOptimizer):
         super().__init__(**kwargs)
         self.dimension_sizes = dimension_sizes
         self.initial_size = initial_size
-        self.simulator_comp_penalty = simulator_comp_penalty
-        self.simulator_comm_penalty = simulator_comm_penalty
         self.steps = steps
         self.allow_cpu = allow_cpu
         self.mutation_rate = mutation_rate
