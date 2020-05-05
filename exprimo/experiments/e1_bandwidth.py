@@ -31,7 +31,7 @@ def benchmark_bandwidth(tensor_size, source_device, target_device):
     return bandwidth
 
 
-def plot_results_from_file(file_path, source_device, target_device, server_name, save_path=None):
+def plot_results_from_file(file_path, source_device, target_device, server_name, save_path=None, limit=None):
     results = pd.read_csv(file_path, skiprows=1, names=['tensor_size', 'bandwidth'])
 
     sns.lineplot(x='tensor_size', y='bandwidth', data=results)
@@ -39,8 +39,11 @@ def plot_results_from_file(file_path, source_device, target_device, server_name,
     plt.xlabel('Tensor size (Bytes)')
     plt.ylabel('Bandwidth (Mbit/s)')
     plt.title(f'Transfer from {source_device} to {target_device} ({server_name})')
+    if limit:
+        plt.axhline(y=limit, ls='--', c='gray')
     if save_path:
         plt.savefig(save_path, bb_inches='tight')
+
 
     plt.show()
     plt.close()
@@ -75,5 +78,5 @@ if __name__ == '__main__':
                                     os.path.expanduser(result_file))
 
     plot_results_from_file(os.path.expanduser(result_file), source_device, target_device, server_name,
-                           save_path=os.path.expanduser(plot_file))
+                           save_path=os.path.expanduser(plot_file), limit=128*10**3)
 
