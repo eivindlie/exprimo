@@ -9,7 +9,7 @@
   "benchmark_solution": true,
 
   "optimizer_args": {
-    "steps": 25000,
+    "steps": 20000,
 
     "temp_schedule": ["exponential_multiplicative_decay", 50, 0.98],
 

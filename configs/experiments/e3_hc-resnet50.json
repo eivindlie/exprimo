@@ -9,7 +9,7 @@
   "benchmark_solution": true,
 
   "optimizer_args": {
-    "steps": 5000,
+    "steps": 20000,
 
     "verbose": 50,
     "pipeline_batches": 1,
