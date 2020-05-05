@@ -12,7 +12,7 @@ from optimize import optimize_with_config
 
 sns.set(style=PLOT_STYLE)
 
-LOG_DIR = os.path.expanduser('~/e3_optimizer-comparison')
+LOG_DIR = os.path.expanduser('~/logs/e3_optimizer-comparison')
 set_log_dir(LOG_DIR)
 
 run_config = (0, 0, 0)
@@ -50,7 +50,7 @@ def run_optimizer_test():
         for r in tqdm(range(REPEATS)):
             _, time = optimize_with_config(config=config, verbose=False, set_log_dir=False)
             with open(score_path, 'a') as f:
-                f.write(f'{r},{time}')
+                f.write(f'{r},{time}\n')
 
 
 def plot_results():
