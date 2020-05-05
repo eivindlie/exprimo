@@ -359,6 +359,8 @@ class GAOptimizer(BaseOptimizer):
                         log(f'[{i + 1}/{generations}] Best current time: {best_time:.2f}ms')
 
                 if self.score_save_period and i % self.score_save_period == 0:
+                    best_score = fitness_scores[0]
+                    best_time = 1 / best_score
                     with open(os.path.join(get_log_dir(), 'time_history.csv'), 'a') as f:
                         f.write(f'{i + 1}, {best_time}\n')
 
