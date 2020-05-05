@@ -1,0 +1,39 @@
+{
+  "device_graph_path": "device_graphs/malvik.json",
+  "net_path": "nets/alex_v2.json",
+  "optimizer": "genetic_algorithm",
+
+  "log_dir": "~/logs/e2_ga-malvik-alexnet_keep-last",
+  "drop_last_dataset_batch": false,
+
+  "benchmark_solution": true,
+
+  "optimizer_args": {
+    "plot_fitness_history": true,
+    "generations": 500,
+    "population_size": 50,
+    "mutation_rate": 0.5,
+    "mutation_sharding_rate": 0,
+    "crossover_rate": 0.8,
+    "crossover_type": "1-point",
+    "parent_selection_mechanism": "rank",
+    "evolve_mutation_rate": true,
+    "verbose": 5,
+    "elite_size": 5,
+    "max_mutation_rate": 0.9,
+    "min_mutation_rate": 0.05,
+    "print_diversity": true,
+    "include_trivial_solutions_in_initialization": false,
+    "allow_cpu": false,
+    "pipeline_batches": 1,
+    "batches": 1,
+    "n_threads": -1,
+    "checkpoint_period": 5,
+    "simulator_comp_penalty": 0.9,
+    "simulator_comm_penalty": 0.25,
+
+    "benchmarking_population_size": 30,
+    "benchmarking_generations": 100,
+    "benchmarking_function": {"model_type": "alexnet", "batches": 5, "drop_batches": 1}
+  }
+}

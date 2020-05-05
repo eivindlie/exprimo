@@ -13,7 +13,7 @@ from exprimo import PLOT_STYLE
 
 sns.set(style=PLOT_STYLE)
 
-config_path = 'configs/experiments/e2_ga-malvik-resnet50.json'
+config_path = 'configs/experiments/e2_ga-malvik-alexnet.json'
 model_type = 'resnet'
 batches = 50
 NORMALIZE_PLOT = True
