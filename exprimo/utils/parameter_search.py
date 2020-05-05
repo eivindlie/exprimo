@@ -10,6 +10,8 @@ def do_parameter_search(config_path, parameter_grid, repeats=10, verbose=False):
     with open(config_path) as f:
         config = json.load(f)
 
+    config['plot_event_trace'] = False
+
     args_blueprint = config.get('optimizer_args', {})
 
     if 'benchmarking_generations' in args_blueprint:
