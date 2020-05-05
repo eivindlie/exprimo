@@ -71,7 +71,7 @@ def optimize_with_config(config_path=None, config=None, verbose=True, set_log_di
         'map-elites': MapElitesOptimizer
     }
 
-    if config['optimizer'] in ['sa', 'simulated_annealing']:
+    if config['optimizer'] in ['sa', 'simulated_annealing'] and isinstance(args['temp_schedule'], list):
         tp = args['temp_schedule']
         args['temp_schedule'] = temp_schedules[tp[0]](*tp[1:])
 
