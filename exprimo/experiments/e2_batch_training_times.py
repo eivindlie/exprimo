@@ -75,5 +75,5 @@ if __name__ == '__main__':
             plot_times(times, f'Generation {generation}', output_file)
     else:
         avg_batch_times = batch_times.mean(axis=0)
-        plot_times(avg_batch_times, 'Average batch time residuals (with last batch in dataset)',
+        plot_times(avg_batch_times, 'Average batch time residuals',
                    output_file=os.path.join(log_dir, 'batch_times.pdf'))
