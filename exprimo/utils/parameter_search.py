@@ -52,7 +52,9 @@ def do_parameter_search(config_path, parameter_grid, repeats=10, verbose=False):
     }
 
     grid_rows = []
+    grid_size = 1
     for key, value in parameter_grid.items():
+        grid_size *= len(value)
         row = []
         for v in value:
             row.append((key, v))
@@ -60,7 +62,7 @@ def do_parameter_search(config_path, parameter_grid, repeats=10, verbose=False):
 
     best_time = None
     best_params = None
-    for i, combination in tqdm(enumerate(itertools.product(*grid_rows))):
+    for i, combination in tqdm(enumerate(itertools.product(*grid_rows)), total=grid_size):
         if verbose:
             print(f'Testing combination {i}: {combination}...')
 
@@ -74,7 +76,7 @@ def do_parameter_search(config_path, parameter_grid, repeats=10, verbose=False):
         optimizer = optimizers[config['optimizer']](**args)
 
         best_nets = [
-            optimizer.optimize(net_string, device_graph) for _ in range(repeats)
+            optimizer.optimize(net_string, device_graph) for _ in tqdm(range(repeats))
         ]
 
         best_times = []
