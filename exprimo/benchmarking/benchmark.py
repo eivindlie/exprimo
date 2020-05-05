@@ -1,3 +1,4 @@
+import itertools
 import json
 import os
 
@@ -167,6 +168,8 @@ def benchmark_all_placements(placement_directory, results_file, model_type, gene
                                                drop_last=drop_last)
 
         with open(results_file, 'a') as f:
+            if batch_times == -1:
+                batch_times = itertools.repeat(batch_times, batches)
             f.write(f'{generation:04}, {",".join(map(lambda x: str(x), batch_times))}\n')
 
         if verbose:
