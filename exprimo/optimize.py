@@ -15,7 +15,7 @@ from exprimo.optimizers.simulated_annealing import temp_schedules
 config_path = 'configs/me-malvik-resnet50.json'
 
 
-def optimize_with_config(config_path=None, config=None, verbose=True):
+def optimize_with_config(config_path=None, config=None, verbose=True, set_log_dir=False):
     assert config_path or config, 'Either a config path or a config dictionary must be provided'
     assert config is None or isinstance(config, dict), 'config must be a dictionary'
 
@@ -27,7 +27,7 @@ def optimize_with_config(config_path=None, config=None, verbose=True):
     net_path = config['net_path']
 
     log_dir = config.get('log_dir', '')
-    if log_dir:
+    if log_dir and set_log_dir:
         exprimo.set_log_dir(log_dir)
 
     if verbose:
@@ -120,4 +120,4 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         config_path = sys.argv[1]
 
-    optimize_with_config(config_path)
+    optimize_with_config(config_path, set_log_dir=True)
