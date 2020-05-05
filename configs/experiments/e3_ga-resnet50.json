@@ -24,7 +24,7 @@
     "min_mutation_rate": 0.05,
     "print_diversity": false,
     "include_trivial_solutions_in_initialization": false,
-    "allow_cpu": false,
+    "allow_cpu": true,
     "pipeline_batches": 1,
     "batches": 1,
     "n_threads": -1,
