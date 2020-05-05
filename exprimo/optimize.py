@@ -15,7 +15,7 @@ from exprimo.optimizers.simulated_annealing import temp_schedules
 config_path = 'configs/me-malvik-resnet50.json'
 
 
-def optimize_with_config(config_path=None, config=None):
+def optimize_with_config(config_path=None, config=None, verbose=True):
     assert config_path or config, 'Either a config path or a config dictionary must be provided'
     assert config is None or isinstance(config, dict), 'config must be a dictionary'
 
@@ -30,16 +30,18 @@ def optimize_with_config(config_path=None, config=None):
     if log_dir:
         exprimo.set_log_dir(log_dir)
 
-    log('\n\n\n')
-    log('='*100)
-    log('EXPRIMO OPTIMIZATION'.rjust(60))
-    log('='*100)
-    log()
+    if verbose:
+        log('\n\n\n')
+        log('='*100)
+        log('EXPRIMO OPTIMIZATION'.rjust(60))
+        log('='*100)
+        log()
 
-    if config_path:
-        log(f'Using config path {config_path}')
-    else:
-        log('Using config provided as dictionary')
+    if verbose:
+        if config_path:
+            log(f'Using config path {config_path}')
+        else:
+            log('Using config provided as dictionary')
 
     args = config.get('optimizer_args', {})
 
@@ -79,9 +81,10 @@ def optimize_with_config(config_path=None, config=None):
     with open(net_path) as f:
         net_string = f.read()
 
-    log(f'Optimizing {net_path} on {device_graph_path} using {optimizer}')
-    log(args)
-    log()
+    if verbose:
+        log(f'Optimizing {net_path} on {device_graph_path} using {optimizer}')
+        log(args)
+        log()
 
 
     best_net = optimizer.optimize(net_string, device_graph)
@@ -100,14 +103,17 @@ def optimize_with_config(config_path=None, config=None):
         save_path = os.path.join(exprimo.get_log_dir(), 'event_trace.pdf')
         plot_event_trace(events, simulator, save_path=save_path)
 
-    log('\n')
-    # print(f'Best discovered configuration: {[layer["device"] for layer in net_dict["layers"].values()]}')
-    log(f'Simulated execution time: {simulated_execution_time:.2f}ms')
+    if verbose:
+        log('\n')
+        # print(f'Best discovered configuration: {[layer["device"] for layer in net_dict["layers"].values()]}')
+        log(f'Simulated execution time: {simulated_execution_time:.2f}ms')
 
-    if config.get('benchmark_solution', False) and args.get('benchmarking_function', None):
-        device_assignment = get_device_assignment(net_dict)
-        time = args['benchmarking_function'](device_assignment)
-        log(f'Benchmarked execution time: {time:.2f}ms')
+        if config.get('benchmark_solution', False) and args.get('benchmarking_function', None):
+            device_assignment = get_device_assignment(net_dict)
+            time = args['benchmarking_function'](device_assignment)
+            log(f'Benchmarked execution time: {time:.2f}ms')
+
+    return best_net, simulated_execution_time
 
 
 if __name__ == '__main__':
