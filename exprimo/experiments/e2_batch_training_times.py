@@ -34,7 +34,7 @@ if __name__ == '__main__':
     log_dir = os.path.expanduser(config['log_dir'])
 
     # Create a set of configurations by running an optimization process with checkpointing
-    optimize_with_config(config=config)
+    optimize_with_config(config=config, set_log_dir=True)
 
     # Convert all configurations to placements for benchmarking
     convert_to_placement(os.path.join(log_dir, 'checkpoints'), os.path.join(log_dir, 'checkpoints', 'placements'))
