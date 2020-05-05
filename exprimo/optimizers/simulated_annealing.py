@@ -41,7 +41,7 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
             with open(os.path.join(get_log_dir(), 'time_history.csv'), 'w') as f:
                 f.write('step, time\n')
 
-        for i in tqdm(range(self.steps)):
+        for i in tqdm(range(self.steps), disable=not self.verbose):
             new_placement = placement[:]
             new_placement[randint(0, len(new_placement) - 1)] = randint(0, n_devices - 1)
             new_score = evaluate_placement(apply_placement(net_string, new_placement, groups), device_graph,

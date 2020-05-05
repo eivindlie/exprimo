@@ -120,7 +120,6 @@ class GAOptimizer(BaseOptimizer):
         if self.checkpoint_period and not os.path.exists(os.path.join(get_log_dir(), 'checkpoints')):
             os.makedirs(os.path.join(get_log_dir(), 'checkpoints'))
 
-
     def optimize(self, net_string, device_graph):
         n_devices = len(device_graph.devices)
         groups = self.create_colocation_groups(get_flattened_layer_names(net_string))
@@ -328,7 +327,7 @@ class GAOptimizer(BaseOptimizer):
                              start_generation=0):
             nonlocal pop
 
-            for i in tqdm(range(generations)):
+            for i in tqdm(range(generations), disable=not self.verbose):
                 ranked_pop, fitness_scores = rank(pop, return_scores=True, benchmarking_function=benchmarking_function)
 
                 if self.checkpoint_period != -1 and i % self.checkpoint_period == 0:
@@ -365,11 +364,13 @@ class GAOptimizer(BaseOptimizer):
                     with open(os.path.join(get_log_dir(), 'time_history.csv'), 'a') as f:
                         f.write(f'{i + 1}, {best_time}\n')
 
-        log('Optimizing with simulator...')
+        if self.verbose:
+            log('Optimizing with simulator...')
         run_optimization(self.generations)
 
         if self.benchmarking_generations and self.benchmarking_function:
-            log('Optimizing with benchmarking...')
+            if self.verbose:
+                log('Optimizing with benchmarking...')
 
             if self.benchmarking_population_size < self.population_size:
                 ranked_pop = rank(pop)
