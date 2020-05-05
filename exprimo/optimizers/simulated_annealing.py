@@ -1,7 +1,7 @@
 import json
 import os
 from random import randint, random
-import numpy as np
+from scipy.special import expit
 from tqdm import tqdm
 
 from exprimo import log, get_log_dir
@@ -53,7 +53,7 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
 
             if new_score != -1:
                 if new_score < score or score == -1 \
-                        or random() < 1 / (1 + np.exp((new_score - score) / self.temp(i))):
+                        or random() < expit((score - new_score) / self.temp(i)):
                     score = new_score
                     placement = new_placement
 
