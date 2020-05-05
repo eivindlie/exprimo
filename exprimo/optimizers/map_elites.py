@@ -76,12 +76,12 @@ class MapElitesOptimizer(BaseOptimizer):
             if not os.path.exists(os.path.join(get_log_dir(), 'archive_logs')):
                 os.makedirs(os.path.join(get_log_dir(), 'archive_logs'))
 
-        if self.n_threads > 1:
-            self.worker_pool = Pool(self.n_threads)
-        else:
-            self.worker_pool = None
+        self.worker_pool = None
 
     def optimize(self, net_string, device_graph, return_full_archive=False):
+
+        if self.n_threads > 1:
+            self.worker_pool = Pool(self.n_threads)
 
         n_devices = len(device_graph.devices)
         groups = self.create_colocation_groups(get_flattened_layer_names(net_string))
@@ -350,5 +350,8 @@ class MapElitesOptimizer(BaseOptimizer):
 
         if self.verbose:
             log(f'Best individual: {best_individual.tolist()}')
+
+        if self.worker_pool:
+            self.worker_pool.close()
 
         return json.dumps(apply_placement(net_string, best_individual.tolist(), groups))

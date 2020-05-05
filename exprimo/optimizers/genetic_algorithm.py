@@ -111,16 +111,16 @@ class GAOptimizer(BaseOptimizer):
         self.include_trivial_solutions_in_initialization = include_trivial_solutions_in_initialization
         self.allow_cpu = allow_cpu
 
-        if self.n_threads > 1:
-            self.worker_pool = Pool(self.n_threads)
-        else:
-            self.worker_pool = None
+        self.worker_pool = None
 
         self.checkpoint_period = checkpoint_period
         if self.checkpoint_period and not os.path.exists(os.path.join(get_log_dir(), 'checkpoints')):
             os.makedirs(os.path.join(get_log_dir(), 'checkpoints'))
 
     def optimize(self, net_string, device_graph):
+        if self.n_threads > 1:
+            self.worker_pool = Pool(self.n_threads)
+
         n_devices = len(device_graph.devices)
         groups = self.create_colocation_groups(get_flattened_layer_names(net_string))
 
@@ -398,6 +398,10 @@ class GAOptimizer(BaseOptimizer):
 
         ranked_pop = rank(pop)
         best_solution = ranked_pop[0]
+
+        if self.worker_pool:
+            self.worker_pool.close()
+
         return json.dumps(apply_placement(net_string, best_solution.placement, groups))
 
 
