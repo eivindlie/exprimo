@@ -66,7 +66,7 @@ def plot_event_trace(events, simulator, show_transfer_lines=True, show_memory_us
         plt.savefig(os.path.expanduser(save_path), bb_inches='tight')
 
     plt.show()
-    fig.close(fig)
+    plt.close(fig)
 
     if plot_op_time_distribution:
         op_times = defaultdict(lambda: 0)
