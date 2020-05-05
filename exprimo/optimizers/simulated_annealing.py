@@ -34,8 +34,7 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
         groups = self.create_colocation_groups(get_flattened_layer_names(net_string))
 
         placement = [randint(0, n_devices - 1) for n in range(len(groups))]  # [0] * len(groups)
-        score = self.evaluate_placement(apply_placement(net_string, placement, groups), device_graph,
-                                        batches=self.batches, pipeline_batches=self.pipeline_batches)
+        score = self.evaluate_placement(apply_placement(net_string, placement, groups), device_graph)
 
         if self.score_save_period:
             with open(os.path.join(get_log_dir(), 'time_history.csv'), 'w') as f:
@@ -44,8 +43,7 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
         for i in tqdm(range(self.steps), disable=not self.verbose):
             new_placement = placement[:]
             new_placement[randint(0, len(new_placement) - 1)] = randint(0, n_devices - 1)
-            new_score = self.evaluate_placement(apply_placement(net_string, new_placement, groups), device_graph,
-                                                batches=self.batches, pipeline_batches=self.pipeline_batches)
+            new_score = self.evaluate_placement(apply_placement(net_string, new_placement, groups), device_graph)
 
             if self.verbose and (i + 1) % self.verbose == 0:
                 log(f'[{i + 1}/{self.steps}] Best run time: {score:,.2f}ms')
