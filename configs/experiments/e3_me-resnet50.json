@@ -41,6 +41,7 @@
     "plot_animation": false,
     "animation_fps": 1,
     "verbose": 500,
+    "score_save_period": 50,
     "n_threads": -1
   }
 }

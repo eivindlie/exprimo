@@ -11,7 +11,9 @@
   "optimizer_args": {
     "steps": 20000,
 
+
     "verbose": 50,
+    "score_save_period": 50,
     "pipeline_batches": 1,
     "batches": 1,
     "n_threads": -1

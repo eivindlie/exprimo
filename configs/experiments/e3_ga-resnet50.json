@@ -29,6 +29,7 @@
     "batches": 1,
     "n_threads": -1,
     "checkpoint_period": 5,
+    "score_save_period": 1,
     "simulator_comp_penalty": 0.9,
     "simulator_comm_penalty": 0.25,
 
