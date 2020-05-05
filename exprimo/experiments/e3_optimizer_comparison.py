@@ -45,8 +45,10 @@ def run_optimizer_test():
             config = json.load(f)
 
         config['optimizer_args']['verbose'] = False
+        log_dir = config['log_dir']
 
         for r in tqdm(range(REPEATS)):
+            config['log_dir'] = log_dir +  f'/{r:03}'
             _, time = optimize_with_config(config=config, verbose=False, set_log_dir=True)
             with open(score_path, 'a') as f:
                 f.write(f'{r},{time}\n')
