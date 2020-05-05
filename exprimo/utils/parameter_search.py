@@ -8,27 +8,14 @@ from exprimo.optimizers import HillClimbingOptimizer, LinearSearchOptimizer, Sim
     MapElitesOptimizer, RandomHillClimbingOptimizer
 from exprimo.optimizers.particle_swarm_optimizer import ParticleSwarmOptimizer
 from exprimo.optimizers.simulated_annealing import temp_schedules
+from optimize import optimize_with_config
 
 
 def do_parameter_search(config_path, parameter_grid, repeats=10, verbose=False):
     with open(config_path) as f:
         config = json.load(f)
 
-    device_graph_path = config['device_graph_path']
-    net_path = config['net_path']
-    device_graph = DeviceGraph.load_from_file(device_graph_path)
-    with open(net_path) as f:
-        net_string = f.read()
-
     args_blueprint = config.get('optimizer_args', {})
-    batches = args_blueprint.get('batches', 1)
-    pipeline_batches = args_blueprint.get('pipeline_batches', 1)
-    args_blueprint['batches'] = batches
-    args_blueprint['pipeline_batches'] = pipeline_batches
-    args_blueprint['verbose'] = False
-
-    comp_penalty = args_blueprint.get('simulator_comp_penalty', 1.0)
-    comm_penalty = args_blueprint.get('simulator_comm_penalty', 1.0)
 
     if 'benchmarking_generations' in args_blueprint:
         args_blueprint['benchmarking_generations'] = 0
@@ -36,20 +23,7 @@ def do_parameter_search(config_path, parameter_grid, repeats=10, verbose=False):
         args_blueprint['benchmarking_steps'] = 0
     if 'benchmark_before_selection' in args_blueprint:
         args_blueprint['benchmark_before_selection'] = False
-
-    optimizers = {
-        'random_hill_climber': RandomHillClimbingOptimizer,
-        'hill_climber': HillClimbingOptimizer,
-        'linear_search': LinearSearchOptimizer,
-        'simulated_annealing': SimulatedAnnealingOptimizer,
-        'sa': SimulatedAnnealingOptimizer,
-        'genetic_algorithm': GAOptimizer,
-        'ga': GAOptimizer,
-        'pso': ParticleSwarmOptimizer,
-        'particle_swarm': ParticleSwarmOptimizer,
-        'map_elites': MapElitesOptimizer,
-        'map-elites': MapElitesOptimizer
-    }
+    args_blueprint['verbose'] = False
 
     grid_rows = []
     grid_size = 1
@@ -69,26 +43,10 @@ def do_parameter_search(config_path, parameter_grid, repeats=10, verbose=False):
         args = args_blueprint.copy()
         args = dict(tuple(args.items()) + combination)
 
-        if config['optimizer'] in ['sa', 'simulated_annealing']:
-            tp = args['temp_schedule']
-            args['temp_schedule'] = temp_schedules[tp[0]](*tp[1:])
+        current_config = config.copy()
+        current_config['optimizer_args'] = args
 
-        optimizer = optimizers[config['optimizer']](**args)
-
-        best_nets = [
-            optimizer.optimize(net_string, device_graph) for _ in tqdm(range(repeats))
-        ]
-
-        best_times = []
-        for net in best_nets:
-            graph = ComputationGraph()
-            graph.load_from_string(net)
-            simulator = Simulator(graph, device_graph)
-            execution_time = simulator.simulate(batch_size=128, batches=batches,
-                                                pipeline_batches=pipeline_batches,
-                                                comm_penalization=comm_penalty,
-                                                comp_penalization=comp_penalty)
-            best_times.append(execution_time)
+        best_times = [optimize_with_config(config=current_config, verbose=False)[1] for _ in tqdm(range(repeats))]
 
         mean_time = sum(best_times) / len(best_times)
 
