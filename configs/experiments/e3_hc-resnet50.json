@@ -3,7 +3,7 @@
   "net_path": "nets/resnet50.json",
   "optimizer": "random_hill_climber",
 
-  "log_dir": "~/logs/hc-resnet",
+  "log_dir": "~/logs/e3_optimizer-comparison/hc-resnet50",
 
   "benchmark_solution": true,
 
