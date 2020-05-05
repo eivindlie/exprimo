@@ -63,7 +63,7 @@ def plot_results():
         all_results[OPTIMIZER_NAMES[optimizer]] = scores
 
     sns.barplot(data=all_results)
-
+    plt.savefig(os.path.join(LOG_DIR, 'score_comparison.pdf'))
     plt.show()
 
 
