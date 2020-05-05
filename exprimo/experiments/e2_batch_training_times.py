@@ -27,7 +27,7 @@ if __name__ == '__main__':
     # Force checkpointing to occur every 5th generation
     with open(config_path) as f:
         config = json.load(f)
-    config['optimizer_args']['checkpoint_period'] = 10
+    config['optimizer_args']['checkpoint_period'] = 2
 
     DROP_LAST_DATASET_BATCH = config.get('drop_last_dataset_batch', DROP_LAST_DATASET_BATCH)
 
