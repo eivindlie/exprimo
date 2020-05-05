@@ -67,6 +67,7 @@ def plot_results():
     sns.barplot(data=all_results)
     plt.savefig(os.path.join(LOG_DIR, 'score_comparison.pdf'))
     plt.show()
+    plt.close()
 
 
 if __name__ == '__main__':

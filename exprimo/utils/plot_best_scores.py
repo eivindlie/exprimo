@@ -28,4 +28,5 @@ plt.ylabel('Batch training time (ms)')
 plt.savefig(os.path.expanduser(plot_file), bb_inches='tight')
 
 plt.show()
+plt.close()
 

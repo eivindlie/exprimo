@@ -57,6 +57,7 @@ if __name__ == '__main__':
             plt.savefig(output_file, bbox_inches='tight')
 
         plt.show()
+        plt.close()
 
 
     batch_times = pd.read_csv(os.path.join(log_dir, 'batch_times.csv'), header=None, index_col=0)

@@ -78,6 +78,7 @@ def plot_event_trace(events, simulator, show_transfer_lines=True, show_memory_us
         plt.xticks(rotation='vertical')
         plt.bar(op_times.keys(), op_times.values())
         plt.show()
+        plt.close()
 
 
 def plot_map_elites_archive(archive_scores, n_devices=None, max_jumps=None, axes=(1, 2), save_path=None,

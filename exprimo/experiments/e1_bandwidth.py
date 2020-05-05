@@ -40,6 +40,7 @@ def plot_results_from_file(file_path, source_device, target_device, server_name,
         plt.savefig(save_path, bb_inches='tight')
 
     plt.show()
+    plt.close()
 
 
 def benchmark_multiple_tensor_sizes(tensor_sizes, source_device='cpu', target_device='cuda:0', transfer_repeats=10,

@@ -388,12 +388,14 @@ class GAOptimizer(BaseOptimizer):
             plt.title('Fitness')
             plt.savefig(os.path.join(get_log_dir(), 'fitness_history.pdf'), bb_inches='tight')
             plt.show()
+            plt.close()
 
         if self.print_diversity:
             plt.plot(diversity_history)
             plt.title('Diversity')
             plt.savefig(os.path.join(get_log_dir(), 'diversity_history.pdf'), bb_inches='tight')
             plt.show()
+            plt.close()
 
 
         ranked_pop = rank(pop)
