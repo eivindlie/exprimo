@@ -37,10 +37,11 @@ def do_parameter_search(config_path, parameter_grid, repeats=10, verbose=False):
         if verbose:
             print(f'Testing combination {i}: {combination}...')
 
+        args = args_blueprint.copy()
+
         if 'generations' in args:
             original_pop = args['population_size']
 
-        args = args_blueprint.copy()
         args = dict(tuple(args.items()) + combination)
 
         if 'generations' in args:
