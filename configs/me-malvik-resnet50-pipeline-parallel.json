@@ -12,7 +12,6 @@
     "copy_mutation_rate": 0.05,
     "replace_mutation_rate": 0.01,
     "zone_mutation_rate": 0.05,
-    "zone_fail_rate": 0.2,
     "crossover_rate": 0.4,
     "steps": 25000,
 
