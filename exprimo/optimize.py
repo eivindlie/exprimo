@@ -12,7 +12,7 @@ from exprimo.optimizers.particle_swarm_optimizer import ParticleSwarmOptimizer
 from exprimo.optimizers.utils import get_device_assignment
 from exprimo.optimizers.simulated_annealing import temp_schedules
 
-config_path = 'configs/me-malvik-resnet50.json'
+config_path = 'configs/ga-malvik-resnet50.json'
 
 
 def optimize_with_config(config_path=None, config=None, verbose=True, set_log_dir=False):
