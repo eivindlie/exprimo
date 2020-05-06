@@ -33,6 +33,6 @@
 
     "benchmarking_population_size": 30,
     "benchmarking_generations": 300,
-    "benchmarking_function": {"model_type": "resnet", "batches": 5, "drop_batches": 0, "gpu_memory_limit": 8}
+    "benchmarking_function": {"model_type": "resnet", "batches": 5, "drop_batches": 1, "gpu_memory_limit": 8}
   }
 }
