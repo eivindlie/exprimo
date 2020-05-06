@@ -296,8 +296,10 @@ class MapElitesOptimizer(BaseOptimizer):
             with open(os.path.join(get_log_dir(), 'time_history.csv'), 'w') as f:
                 f.write('step, time\n')
 
-
         run_optimization(self.steps)
+
+        if self.worker_pool:
+            self.worker_pool.close()
 
         if self.archive_log_period is not None:
             log_archive('1_simulation_finished.csv')
@@ -348,8 +350,5 @@ class MapElitesOptimizer(BaseOptimizer):
 
         if self.verbose:
             log(f'Best individual: {best_individual.tolist()}')
-
-        if self.worker_pool:
-            self.worker_pool.close()
 
         return json.dumps(apply_placement(net_string, best_individual.tolist(), groups))
