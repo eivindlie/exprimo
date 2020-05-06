@@ -290,8 +290,8 @@ class GAOptimizer(BaseOptimizer):
                 placement = individual.placement
 
                 if random.random() < self.zone_mutation_rate:
-                    split1 = random.randint(0, len(individual) - 1)
-                    split2 = split1 + min(np.random.geometric(0.2), len(individual) - split1)
+                    split1 = random.randint(0, len(placement) - 1)
+                    split2 = split1 + min(np.random.geometric(0.2), len(placement) - split1)
                     dev = random.randint(0 if self.allow_cpu else 1, n_devices - 1)
                     placement = placement[:split1] + [dev] * (split2 - split1) + placement[split2:]
                 else:
