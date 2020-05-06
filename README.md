@@ -28,6 +28,13 @@ Note that this project was mainly written as support for a Master's Thesis. The 
 of artifacts that are mainly useful in such a context, and the configuration files may contain a lot of options that are
 not directly relevant for producing the end result.
 
+## Running the experiments
+The source code for all experiments from my Master's thesis are included in the `exprimo.experiments` directory. Each
+experiment can be run by executing the corresponding module with `python -m <MODULE_PATH>` from the
+root directory. For example, `python -m exprimo.experiments.e1_bandwidth` will run the bandwidth benchmarking 
+experiment. Note that you may have to make changes to configuration files in order to make the experiments fit your
+system.
+
 ## References
 * Addanki,  R.,  Venkatakrishnan,  S.  B.,  Gupta,  S.,  Mao,  H.,  and  Alizadeh,  M.
 (2019).  Placeto:  Learning generalizable device placement algorithms for distributed machine learning.
