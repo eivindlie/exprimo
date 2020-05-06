@@ -58,6 +58,7 @@ class GAOptimizer(BaseOptimizer):
                  population_size=100, generations=100, plot_fitness_history=False,
                  evolve_mutation_rate=False, elite_size=1, print_diversity=False,
                  min_mutation_rate=0.05, max_mutation_rate=0.9,
+                 copy_mutation_rate=0, zone_mutation_rate=0,
                  benchmarking_population_size=100, benchmarking_generations=50,
                  benchmarking_function=None,
                  include_trivial_solutions_in_initialization=True,
@@ -74,6 +75,8 @@ class GAOptimizer(BaseOptimizer):
         super().__init__(**kwargs)
 
         self.mutation_rate = mutation_rate
+        self.copy_mutation_rate = copy_mutation_rate
+        self.zone_mutation_rate = zone_mutation_rate
         self.crossover_rate = crossover_rate
         self.population_size = population_size
         self.elite_size = elite_size
@@ -285,8 +288,15 @@ class GAOptimizer(BaseOptimizer):
                 new_mutation_rate = max(min(mutation_rate + random.normalvariate(0, 0.05), self.max_mutation_rate),
                                         self.min_mutation_rate)
                 placement = individual.placement
-                placement = [mutate_single_gene(g) if random.random() < new_mutation_rate else g
-                             for g in placement]
+
+                if random.random() < self.zone_mutation_rate:
+                    split1 = random.randint(0, len(individual) - 1)
+                    split2 = split1 + min(np.random.geometric(0.2), len(individual) - split1)
+                    dev = random.randint(0 if self.allow_cpu else 1, n_devices - 1)
+                    placement = placement[:split1] + [dev] * (split2 - split1) + placement[split2:]
+                else:
+                    placement = [mutate_single_gene(g) if random.random() < new_mutation_rate else g
+                                 for g in placement]
 
                 return Candidate(placement, new_mutation_rate)
             else:
