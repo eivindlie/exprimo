@@ -29,7 +29,7 @@ of artifacts that are mainly useful in such a context, and the configuration fil
 not directly relevant for producing the end result.
 
 ## Running the experiments
-The source code for all experiments from my Master's thesis are included in the `exprimo.experiments` directory. Each
+The source code for all experiments from my Master's thesis are included in the `exprimo/experiments` directory. Each
 experiment can be run by executing the corresponding module with `python -m <MODULE_PATH>` from the
 root directory. For example, `python -m exprimo.experiments.e1_bandwidth` will run the bandwidth benchmarking 
 experiment. Note that you may have to make changes to configuration files in order to make the experiments fit your
