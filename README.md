@@ -7,6 +7,16 @@ instead relying on FLOP calculations carried out by Paleo to simulate any networ
 
 Also included are a number of optimization techniques for finding the best configuration for a given network to run on a given device graph.
 
+## Installation
+The project can be installed by running the following steps. It is recommended to do this in a virtual environment in
+order to separate it from your global Python installation.
+
+1. Clone this repository by running `git clone --recurse-submodules <URL>`, which ensures that the Paleo submodule is
+also cloned.
+2. Install requirements with `pip install -r requirements.txt`.
+3. Install Paleo by navigating to the `paleo` subdirectory and running `pip install . `.
+4. You are now ready to use `exprimo`!
+
 ## Optimizing a network
 The script `optimize.py` handles optimization of a network. It takes a configuration file as an argument, which contains
 information about the network itself, the hardware that it should be optimized for, and the optimizer algorithm to be
