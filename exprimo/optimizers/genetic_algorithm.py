@@ -389,7 +389,7 @@ class GAOptimizer(BaseOptimizer):
                     best_score = fitness_scores[0]
                     best_time = 1 / best_score
                     with open(os.path.join(get_log_dir(), 'time_history.csv'), 'a') as f:
-                        f.write(f'{i + 1}, {best_time}\n')
+                        f.write(f'{i + start_generation + 1}, {best_time}\n')
 
         if self.verbose:
             log('Optimizing with simulator...')
