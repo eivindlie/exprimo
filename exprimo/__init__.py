@@ -1,6 +1,8 @@
 import time
 import os
 
+__version__ = '0.1'
+
 PLOT_STYLE = 'darkgrid'
 
 LOG_CONFIG = {
@@ -49,3 +51,4 @@ from exprimo.simulator import Simulator
 from exprimo.plotting import plot_event_trace
 from exprimo.device import DeviceGraph
 from exprimo.graph import ComputationGraph
+from exprimo.optimize import optimize_with_config
