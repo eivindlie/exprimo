@@ -14,19 +14,20 @@ plot_title = f'ResNet on Malvik - 200 simulated, 100 benchmarked generations\nLi
 
 benchmark_limit = 200
 
-data = pd.read_csv(os.path.expanduser(results_file), index_col=0, skiprows=0, names=['generation', 'batch_time'])
+if __name__ == '__main__':
+    data = pd.read_csv(os.path.expanduser(results_file), index_col=0, skiprows=0, names=['generation', 'batch_time'])
 
-data.plot(legend=None)
+    data.plot(legend=None)
 
-if benchmark_limit:
-    plt.axvline(x=benchmark_limit, c='grey', ls='--')
+    if benchmark_limit:
+        plt.axvline(x=benchmark_limit, c='grey', ls='--')
 
-plt.title(plot_title)
-plt.xlabel('Generation')
-plt.ylabel('Batch training time (ms)')
+    plt.title(plot_title)
+    plt.xlabel('Generation')
+    plt.ylabel('Batch training time (ms)')
 
-plt.savefig(os.path.expanduser(plot_file), bb_inches='tight')
+    plt.savefig(os.path.expanduser(plot_file), bb_inches='tight')
 
-plt.show()
-plt.close()
+    plt.show()
+    plt.close()
 
