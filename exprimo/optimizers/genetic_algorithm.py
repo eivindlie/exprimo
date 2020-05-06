@@ -12,8 +12,8 @@ import matplotlib.pyplot as plt
 
 from exprimo import PLOT_STYLE, get_log_dir, log
 import seaborn as sns
-sns.set(style=PLOT_STYLE)
 
+sns.set(style=PLOT_STYLE)
 
 from exprimo.optimizers.base import BaseOptimizer
 from exprimo.graph import get_flattened_layer_names
@@ -135,8 +135,12 @@ class GAOptimizer(BaseOptimizer):
                 placements.append(generate_random_placement(len(groups), n_devices, allow_device_0=self.allow_cpu))
 
             if self.evolve_mutation_rate:
-                return [Candidate(p, min(max(random.normalvariate(self.mutation_rate, 0.1), self.min_mutation_rate),
-                                    self.max_mutation_rate))
+                return [Candidate(p,
+                                  min(max(random.normalvariate(self.mutation_rate, 0.1), self.min_mutation_rate),
+                                      self.max_mutation_rate),
+                                  min(max(random.normalvariate(self.zone_mutation_rate, 0.05), self.min_mutation_rate),
+                                      self.max_mutation_rate)
+                                  )
                         for p in placements]
 
             return [Candidate(p) for p in placements]
@@ -160,7 +164,7 @@ class GAOptimizer(BaseOptimizer):
                         memory_overflow = 1
 
                     if memory_overflow > 0:
-                        time += memory_overflow * 10**9 * 1
+                        time += memory_overflow * 10 ** 9 * 1
 
                     return 1 / time
 
@@ -214,6 +218,7 @@ class GAOptimizer(BaseOptimizer):
                 return parent1, parent2
 
             mutation_rate1, mutation_rate2 = parent1.mutation_rate, parent2.mutation_rate
+            zone_mutation_rate1, zone_mutation_rate2 = parent1.zone_mutation_rate, parent2.zone_mutation_rate
             parent1, parent2 = parent1.placement, parent2.placement
 
             if self.crossover == 'uniform' or self.crossover >= len(parent1) - 1:
@@ -248,7 +253,9 @@ class GAOptimizer(BaseOptimizer):
                 mix_rate = random.normalvariate(0.5, 0.1)
                 mr1 = mutation_rate1 * mix_rate + mutation_rate2 * (1 - mix_rate)
                 mr2 = mutation_rate2 * mix_rate + mutation_rate1 * (1 - mix_rate)
-                children = Candidate(children[0], mr1), Candidate(children[1], mr2)
+                zmr1 = zone_mutation_rate1 * mix_rate + zone_mutation_rate2 * (1 - mix_rate)
+                zmr2 = zone_mutation_rate2 * mix_rate + zone_mutation_rate1 * (1 - mix_rate)
+                children = Candidate(children[0], mr1, zmr1), Candidate(children[1], mr2, zmr2)
             else:
                 children = Candidate(children[0]), Candidate(children[1])
             return children
@@ -285,8 +292,18 @@ class GAOptimizer(BaseOptimizer):
         def mutate(individual):
             if self.evolve_mutation_rate:
                 mutation_rate = individual.mutation_rate
-                new_mutation_rate = max(min(mutation_rate + random.normalvariate(0, 0.05), self.max_mutation_rate),
-                                        self.min_mutation_rate)
+                zone_mutation_rate = individual.zone_mutation_rate
+                if mutation_rate == 0:
+                    new_mutation_rate = 0
+                else:
+                    new_mutation_rate = max(min(mutation_rate + random.normalvariate(0, 0.05), self.max_mutation_rate),
+                                            self.min_mutation_rate)
+                if zone_mutation_rate == 0:
+                    new_zone_mutation_rate = 0
+                else:
+                    new_zone_mutation_rate = max(min(zone_mutation_rate + random.normalvariate(0, 0.02),
+                                                     self.max_mutation_rate),
+                                                 self.min_mutation_rate)
                 placement = individual.placement
 
                 if random.random() < self.zone_mutation_rate:
@@ -298,7 +315,7 @@ class GAOptimizer(BaseOptimizer):
                     placement = [mutate_single_gene(g) if random.random() < new_mutation_rate else g
                                  for g in placement]
 
-                return Candidate(placement, new_mutation_rate)
+                return Candidate(placement, new_mutation_rate, new_zone_mutation_rate)
             else:
                 placement = [mutate_single_gene(g) if random.random() < self.mutation_rate else g
                              for g in individual.placement]
@@ -407,7 +424,6 @@ class GAOptimizer(BaseOptimizer):
             plt.show()
             plt.close()
 
-
         ranked_pop = rank(pop)
         best_solution = ranked_pop[0]
 
@@ -418,9 +434,11 @@ class GAOptimizer(BaseOptimizer):
 
 
 class Candidate:
-    def __init__(self, placement, mutation_rate=0):
+    def __init__(self, placement, mutation_rate=0, zone_mutation_rate=0):
         self.placement = placement
         self.mutation_rate = mutation_rate
+        self.zone_mutation_rate = zone_mutation_rate
 
     def __str__(self):
-        return f'Placement: {self.placement}\t Mutation rate: {self.mutation_rate}'
+        return f'Placement: {self.placement}\t Mutation rate: {self.mutation_rate}\t ' \
+               f'Zone mutation rate: {self.zone_mutation_rate}'
