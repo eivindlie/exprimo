@@ -72,6 +72,9 @@ def do_parameter_search(config_path, parameter_grid, repeats=10, verbose=False, 
                                                                        itertools.repeat(current_config),
                                                                        itertools.repeat(False)))
 
+        if n_threads > 1:
+            worker_pool.close()
+
         mean_time = sum(best_times) / len(best_times)
 
         if verbose:
