@@ -38,6 +38,7 @@ def test_optimizer(c, r, log_dir):
     _, t = optimize_with_config(config=c, verbose=False, set_log_dir=True)
     return t
 
+
 def run_optimizer_test(n_threads=-1):
     if n_threads == -1:
         n_threads = multiprocessing.cpu_count()
@@ -64,7 +65,7 @@ def run_optimizer_test(n_threads=-1):
 
         if n_threads == 1 or threaded_optimizer:
             for r in tqdm(range(REPEATS)):
-                time = test_optimizer(config, r)
+                time = test_optimizer(config, r, log_dir)
                 with open(score_path, 'a') as f:
                     f.write(f'{r},{time}\n')
         else:
