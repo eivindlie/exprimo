@@ -90,4 +90,4 @@ class ScipySimulatedAnnealingOptimizer(BaseOptimizer):
 
         placement = [int(round(g)) for g in result.x]
 
-        return placement
+        return json.dumps(apply_placement(net_string, placement, groups))
