@@ -1,0 +1,41 @@
+{
+  "device_graph_path": "device_graphs/malvik-4gpu-reduced-resnet.json",
+  "net_path": "nets/resnet50.json",
+  "optimizer": "genetic_algorithm",
+
+  "log_dir": "~/logs/e3_optimizer-comparison/ga-resnet50-limited",
+  "plot_event_trace": false,
+
+  "benchmark_solution": true,
+
+  "optimizer_args": {
+    "plot_fitness_history": false,
+    "generations": 400,
+    "population_size": 50,
+    "mutation_rate": 0.5,
+    "zone_mutation_rate": 0.2,
+    "mutation_sharding_rate": 0,
+    "crossover_rate": 0.2,
+    "crossover_type": "1-point",
+    "parent_selection_mechanism": "rank",
+    "evolve_mutation_rate": true,
+    "verbose": 5,
+    "elite_size": 5,
+    "max_mutation_rate": 0.9,
+    "min_mutation_rate": 0.05,
+    "print_diversity": false,
+    "include_trivial_solutions_in_initialization": false,
+    "allow_cpu": true,
+    "pipeline_batches": 1,
+    "batches": 1,
+    "n_threads": -1,
+    "checkpoint_period": 0,
+    "score_save_period": 1,
+    "simulator_comp_penalty": 0.9,
+    "simulator_comm_penalty": 0.25,
+
+    "benchmarking_population_size": 30,
+    "benchmarking_generations": 0,
+    "benchmarking_function": {"model_type": "resnet", "batches": 5, "drop_batches": 1}
+  }
+}
