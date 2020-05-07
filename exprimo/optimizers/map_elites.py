@@ -40,9 +40,8 @@ def _evaluate(individual, net_string, groups, device_graph, pipeline_batches=1, 
 class MapElitesOptimizer(BaseOptimizer):
 
     def __init__(self, dimension_sizes=(-1, -1, 10), initial_size=50,
-                 simulator_comp_penalty=1, simulator_comm_penalty=1,
                  steps=1000, allow_cpu=True, mutation_rate=0.05, copy_mutation_rate=0, replace_mutation_rate=0,
-                 zone_mutation_rate=0, zone_fail_rate=0.2, crossover_rate=0.4,
+                 zone_mutation_rate=0, crossover_rate=0.4,
                  benchmarking_function=None, benchmarking_steps=0, benchmark_before_selection=False,
                  benchmarking_n_keep=None, benchmarking_time_threshold=None, include_trivial_solutions=True,
                  show_score_plot=False, plot_axes=(0, 2), plot_animation=False, animation_fps=1,
@@ -50,15 +49,12 @@ class MapElitesOptimizer(BaseOptimizer):
         super().__init__(**kwargs)
         self.dimension_sizes = dimension_sizes
         self.initial_size = initial_size
-        self.simulator_comp_penalty = simulator_comp_penalty
-        self.simulator_comm_penalty = simulator_comm_penalty
         self.steps = steps
         self.allow_cpu = allow_cpu
         self.mutation_rate = mutation_rate
         self.copy_mutation_rate = copy_mutation_rate
         self.replace_mutation_rate = replace_mutation_rate
         self.zone_mutation_rate = zone_mutation_rate
-        self.zone_fail_rate = zone_fail_rate
         self.crossover_rate = crossover_rate
         self.include_trivial_solutions = include_trivial_solutions
         self.benchmarking_steps = benchmarking_steps
@@ -76,12 +72,12 @@ class MapElitesOptimizer(BaseOptimizer):
             if not os.path.exists(os.path.join(get_log_dir(), 'archive_logs')):
                 os.makedirs(os.path.join(get_log_dir(), 'archive_logs'))
 
-        if self.n_threads > 1:
-            self.worker_pool = Pool(self.n_threads)
-        else:
-            self.worker_pool = None
+        self.worker_pool = None
 
     def optimize(self, net_string, device_graph, return_full_archive=False):
+
+        if self.n_threads > 1:
+            self.worker_pool = Pool(self.n_threads)
 
         n_devices = len(device_graph.devices)
         groups = self.create_colocation_groups(get_flattened_layer_names(net_string))
@@ -215,14 +211,14 @@ class MapElitesOptimizer(BaseOptimizer):
             assert len(indices), 'No solutions fulfill the specified requirements'
 
             archive_scores[:] = np.NaN
-
-            if n_keep:
-                log(f'Reevaluating {n_keep} best individuals in archive (and throwing away the rest)')
-            else:
-                log('Reevaluating all individuals in archive')
-            if time_threshold:
-                log(f'Time threshold: {time_threshold}ms')
-            for i in tqdm(indices):
+            if self.verbose:
+                if n_keep:
+                    log(f'Reevaluating {n_keep} best individuals in archive (and throwing away the rest)')
+                else:
+                    log('Reevaluating all individuals in archive')
+                if time_threshold:
+                    log(f'Time threshold: {time_threshold}ms')
+            for i in tqdm(indices, disable=not self.verbose):
                 individual = archive_individuals[i[0], i[1], i[2], :].tolist()
                 if benchmarking_function:
                     archive_scores[i[0], i[1], i[2]] = benchmark(individual, benchmarking_function)[0]
@@ -245,14 +241,15 @@ class MapElitesOptimizer(BaseOptimizer):
         def run_optimization(steps, benchmarking_function=None, start_step=0):
             nonlocal archive_individuals, archive_scores
 
-            if benchmarking_function:
-                log('Optimizing with benchmarking...')
-            else:
-                log('Optimizing with simulator...')
+            if self.verbose:
+                if benchmarking_function:
+                    log('Optimizing with benchmarking...')
+                else:
+                    log('Optimizing with simulator...')
 
             step_size = 1 if benchmarking_function else self.n_threads
 
-            for i in tqdm(range(0, steps, step_size)):
+            for i in tqdm(range(0, steps, step_size), disable=not self.verbose):
                 init_number = min(max(0, self.initial_size - i), self.n_threads)
 
                 if self.include_trivial_solutions and i == 0:
@@ -283,22 +280,26 @@ class MapElitesOptimizer(BaseOptimizer):
                         archive_scores[description[0], description[1], description[2]] = score
                         archive_individuals[description[0], description[1], description[2], :] = individual
 
-                if self.verbose and (i + 1) % self.verbose == 0:
+                if self.verbose and (i + 1) % self.verbose < step_size:
                     best_time = 1 / np.nanmax(archive_scores)
                     log(f'[{i + 1}/{steps}] Best time: {best_time:.4f}ms')
 
+                if self.score_save_period and i % self.score_save_period == 0:
+                    best_time = 1 / np.nanmax(archive_scores)
                     with open(os.path.join(get_log_dir(), 'time_history.csv'), 'a') as f:
-                        f.write(f'{i + 1}, {best_time}\n')
+                        f.write(f'{i + start_step + 1}, {best_time}\n')
 
                 if self.archive_log_period and (i + 1) % self.archive_log_period < step_size:
                     log_archive(f'step_{i + start_step + 1:06}.csv')
 
-        if self.verbose:
+        if self.score_save_period:
             with open(os.path.join(get_log_dir(), 'time_history.csv'), 'w') as f:
                 f.write('step, time\n')
 
-
         run_optimization(self.steps)
+
+        if self.worker_pool:
+            self.worker_pool.close()
 
         if self.archive_log_period is not None:
             log_archive('1_simulation_finished.csv')
@@ -315,27 +316,31 @@ class MapElitesOptimizer(BaseOptimizer):
             log_archive('3_benchmarking_finished.csv')
 
         if self.show_score_plot:
-            log('Plotting archive scores...', end='')
+            if self.verbose:
+                log('Plotting archive scores...', end='')
             graph = ComputationGraph()
             graph.load_from_string(net_string)
             _, max_jumps = graph.get_number_of_jumps(return_max_jumps=True)
             plot_map_elites_archive(archive_scores, n_devices, max_jumps, self.plot_axes,
                                     save_path=os.path.join(get_log_dir(), 'archive_plot.pdf'))
-            log('Done')
+            if self.verbose:
+                log('Done')
 
         if self.plot_animation:
-            if not self.archive_log_period:
+            if not self.archive_log_period and self.verbose:
                 log('self.plot_animation was set to True, but archive logging was not enabled. '
                     'Skipping animation plot.')
             else:
-                log('Plotting archive animation...', end='')
+                if self.verbose:
+                    log('Plotting archive animation...', end='')
                 paths = glob(os.path.join(get_log_dir(), 'archive_logs', 'step_*.csv'))
                 plot_archive_animation(paths, (os.path.join(get_log_dir(), 'archive_animation.mp4'),
                                                os.path.join(get_log_dir(), 'archive_animation.gif')),
                                        self.dimension_sizes,
                                        n_devices=n_devices, max_jumps=max_jumps, axes=self.plot_axes,
                                        fps=self.animation_fps)
-                log('Done')
+                if self.verbose:
+                    log('Done')
 
         if return_full_archive:
             return archive_scores, archive_individuals

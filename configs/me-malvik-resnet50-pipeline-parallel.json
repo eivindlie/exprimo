@@ -12,7 +12,6 @@
     "copy_mutation_rate": 0.05,
     "replace_mutation_rate": 0.01,
     "zone_mutation_rate": 0.05,
-    "zone_fail_rate": 0.2,
     "crossover_rate": 0.4,
     "steps": 25000,
 
@@ -30,7 +29,7 @@
     "archive_log_period": 500,
     "plot_animation": false,
     "animation_fps": 1,
-    "verbose": 50,
+    "verbose": 500,
     "n_threads": -1
   }
 }

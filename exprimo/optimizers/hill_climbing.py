@@ -4,9 +4,9 @@ from random import randint
 
 from tqdm import tqdm
 
-from exprimo import DeviceGraph, log, get_log_dir
+from exprimo import log, get_log_dir
 from exprimo.optimizers.base import BaseOptimizer
-from exprimo.optimizers.utils import generate_random_placement, evaluate_placement, apply_placement
+from exprimo.optimizers.utils import generate_random_placement, apply_placement
 from exprimo.graph import get_flattened_layer_names
 
 
@@ -36,8 +36,7 @@ class HillClimbingOptimizer(BaseOptimizer):
         groups = self.create_colocation_groups(get_flattened_layer_names(net_string))
 
         placement = generate_random_placement(len(groups), n_devices)
-        score = evaluate_placement(apply_placement(net_string, placement, groups), device_graph,
-                                   batches=self.batches, pipeline_batches=self.pipeline_batches)
+        score = self.evaluate_placement(apply_placement(net_string, placement, groups), device_graph)
 
         i = 0
         while True:
@@ -46,8 +45,7 @@ class HillClimbingOptimizer(BaseOptimizer):
                 log(f'Iteration {i}. Best running time: {score:.2f}ms')
 
             for n in generate_neighbours(placement):
-                new_score = evaluate_placement(apply_placement(net_string, n, groups), device_graph,
-                                               batches=self.batches, pipeline_batches=self.pipeline_batches)
+                new_score = self.evaluate_placement(apply_placement(net_string, n, groups), device_graph)
                 if (new_score < score or score == -1) and new_score != -1:
                     placement = n
                     score = new_score
@@ -65,7 +63,7 @@ class RandomHillClimbingOptimizer(BaseOptimizer):
         self.steps = steps
 
     def optimize(self, net_string, device_graph):
-        if self.verbose:
+        if self.score_save_period:
             with open(os.path.join(get_log_dir(), 'time_history.csv'), 'w') as f:
                 f.write(f'step, time\n')
 
@@ -73,12 +71,12 @@ class RandomHillClimbingOptimizer(BaseOptimizer):
         groups = self.create_colocation_groups(get_flattened_layer_names(net_string))
 
         placement = [0] * len(groups)  # generate_random_placement(len(groups), n_devices)
-        score = evaluate_placement(apply_placement(net_string, placement, groups), device_graph)
+        score = self.evaluate_placement(apply_placement(net_string, placement, groups), device_graph)
 
-        for i in tqdm(range(self.steps)):
+        for i in tqdm(range(self.steps), disable=not self.verbose):
             new_placement = placement[:]
             new_placement[randint(0, len(new_placement) - 1)] = randint(0, n_devices - 1)
-            new_score = evaluate_placement(apply_placement(net_string, new_placement, groups), device_graph)
+            new_score = self.evaluate_placement(apply_placement(net_string, new_placement, groups), device_graph)
 
             if (new_score < score or score == -1) and new_score != -1:
                 score = new_score
@@ -87,6 +85,7 @@ class RandomHillClimbingOptimizer(BaseOptimizer):
             if self.verbose and (i + 1) % self.verbose == 0:
                 log(f'[{i+1}/{self.steps}] Current time: {score:.2f}ms')
 
+            if self.score_save_period and i % self.score_save_period == 0:
                 with open(os.path.join(get_log_dir(), 'time_history.csv'), 'a') as f:
                     f.write(f'{i + 1}, {score}\n')
 

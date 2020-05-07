@@ -66,6 +66,7 @@ def plot_event_trace(events, simulator, show_transfer_lines=True, show_memory_us
         plt.savefig(os.path.expanduser(save_path), bb_inches='tight')
 
     plt.show()
+    plt.close(fig)
 
     if plot_op_time_distribution:
         op_times = defaultdict(lambda: 0)
@@ -77,6 +78,7 @@ def plot_event_trace(events, simulator, show_transfer_lines=True, show_memory_us
         plt.xticks(rotation='vertical')
         plt.bar(op_times.keys(), op_times.values())
         plt.show()
+        plt.close()
 
 
 def plot_map_elites_archive(archive_scores, n_devices=None, max_jumps=None, axes=(1, 2), save_path=None,
@@ -146,6 +148,7 @@ def plot_map_elites_archive(archive_scores, n_devices=None, max_jumps=None, axes
         return fig
 
     plt.show()
+    plt.close(fig)
 
 
 def plot_archive_animation(paths, save_path, dimension_sizes, n_devices=None, max_jumps=None, axes=(1, 2), fps=1):

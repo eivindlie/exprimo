@@ -1,17 +1,17 @@
 import json
 import os
 from random import randint, random
-import numpy as np
+from scipy.special import expit
 from tqdm import tqdm
 
-from exprimo import DeviceGraph, log, get_log_dir
+from exprimo import log, get_log_dir
 from exprimo.optimizers.base import BaseOptimizer
-from exprimo.optimizers.utils import evaluate_placement, apply_placement
+from exprimo.optimizers.utils import apply_placement
 from exprimo.graph import get_flattened_layer_names
 
 
 def exponential_multiplicative_decay(initial_value, decay):
-    return lambda t: initial_value * decay**t
+    return lambda t: initial_value * decay ** t
 
 
 temp_schedules = {
@@ -29,33 +29,31 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
 
     def optimize(self, net_string, device_graph):
         n_devices = len(device_graph.devices)
-        net = json.loads(net_string)
 
         groups = self.create_colocation_groups(get_flattened_layer_names(net_string))
 
         placement = [randint(0, n_devices - 1) for n in range(len(groups))]  # [0] * len(groups)
-        score = evaluate_placement(apply_placement(net_string, placement, groups), device_graph,
-                                   batches=self.batches, pipeline_batches=self.pipeline_batches)
+        score = self.evaluate_placement(apply_placement(net_string, placement, groups), device_graph)
 
-        if self.verbose:
+        if self.score_save_period:
             with open(os.path.join(get_log_dir(), 'time_history.csv'), 'w') as f:
                 f.write('step, time\n')
 
-        for i in tqdm(range(self.steps)):
+        for i in tqdm(range(self.steps), disable=not self.verbose):
             new_placement = placement[:]
             new_placement[randint(0, len(new_placement) - 1)] = randint(0, n_devices - 1)
-            new_score = evaluate_placement(apply_placement(net_string, new_placement, groups), device_graph,
-                                           batches=self.batches, pipeline_batches=self.pipeline_batches)
+            new_score = self.evaluate_placement(apply_placement(net_string, new_placement, groups), device_graph)
 
-            if self.verbose and (i+1) % self.verbose == 0:
-                log(f'[{i+1}/{self.steps}] Best run time: {score:,.2f}ms')
+            if self.verbose and (i + 1) % self.verbose == 0:
+                log(f'[{i + 1}/{self.steps}] Best run time: {score:,.2f}ms')
 
+            if self.score_save_period and i % self.score_save_period == 0:
                 with open(os.path.join(get_log_dir(), 'time_history.csv'), 'a') as f:
                     f.write(f'{i + 1}, {score}\n')
 
             if new_score != -1:
-                if new_score < score or score == -1\
-                        or random() < 1 - np.exp((new_score - score)/self.temp(i)):
+                if new_score < score or score == -1 \
+                        or random() < expit((score - new_score) / self.temp(i)):
                     score = new_score
                     placement = new_placement
 

@@ -3,7 +3,8 @@
   "net_path": "nets/resnet50.json",
   "optimizer": "genetic_algorithm",
 
-  "log_dir": "~/logs/ga-resnet_alt-mutations",
+  "log_dir": "~/logs/e2_ga-malvik-resnet_keep-last",
+  "drop_last_dataset_batch": false,
 
   "benchmark_solution": true,
 
@@ -12,7 +13,6 @@
     "generations": 300,
     "population_size": 50,
     "mutation_rate": 0.5,
-    "zone_mutation_rate": 0.2,
     "mutation_sharding_rate": 0,
     "crossover_rate": 0.8,
     "crossover_type": "1-point",
@@ -24,7 +24,7 @@
     "min_mutation_rate": 0.05,
     "print_diversity": true,
     "include_trivial_solutions_in_initialization": false,
-    "allow_cpu": true,
+    "allow_cpu": false,
     "pipeline_batches": 1,
     "batches": 1,
     "n_threads": -1,

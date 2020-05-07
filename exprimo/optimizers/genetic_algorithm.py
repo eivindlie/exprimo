@@ -12,8 +12,8 @@ import matplotlib.pyplot as plt
 
 from exprimo import PLOT_STYLE, get_log_dir, log
 import seaborn as sns
-sns.set(style=PLOT_STYLE)
 
+sns.set(style=PLOT_STYLE)
 
 from exprimo.optimizers.base import BaseOptimizer
 from exprimo.graph import get_flattened_layer_names
@@ -58,10 +58,11 @@ class GAOptimizer(BaseOptimizer):
                  population_size=100, generations=100, plot_fitness_history=False,
                  evolve_mutation_rate=False, elite_size=1, print_diversity=False,
                  min_mutation_rate=0.05, max_mutation_rate=0.9,
+                 copy_mutation_rate=0, zone_mutation_rate=0,
                  benchmarking_population_size=100, benchmarking_generations=50,
                  benchmarking_function=None,
                  include_trivial_solutions_in_initialization=True,
-                 simulator_comp_penalty=1, simulator_comm_penalty=1, checkpoint_period=-1,
+                 checkpoint_period=-1,
                  allow_cpu=True, **kwargs):
         """
         Initializes the GA optimizer, setting important hyperparameters.
@@ -74,6 +75,8 @@ class GAOptimizer(BaseOptimizer):
         super().__init__(**kwargs)
 
         self.mutation_rate = mutation_rate
+        self.copy_mutation_rate = copy_mutation_rate
+        self.zone_mutation_rate = zone_mutation_rate
         self.crossover_rate = crossover_rate
         self.population_size = population_size
         self.elite_size = elite_size
@@ -81,9 +84,6 @@ class GAOptimizer(BaseOptimizer):
         self.benchmarking_population_size = benchmarking_population_size
         self.benchmarking_generations = benchmarking_generations
         self.benchmarking_function = benchmarking_function
-
-        self.simulator_comp_penalty = simulator_comp_penalty
-        self.simulator_comm_penalty = simulator_comm_penalty
 
         self.mutation_sharding_rate = mutation_sharding_rate
 
@@ -111,14 +111,16 @@ class GAOptimizer(BaseOptimizer):
         self.include_trivial_solutions_in_initialization = include_trivial_solutions_in_initialization
         self.allow_cpu = allow_cpu
 
-        if self.n_threads > 1:
-            self.worker_pool = Pool(self.n_threads)
-        else:
-            self.worker_pool = None
+        self.worker_pool = None
 
         self.checkpoint_period = checkpoint_period
+        if self.checkpoint_period and not os.path.exists(os.path.join(get_log_dir(), 'checkpoints')):
+            os.makedirs(os.path.join(get_log_dir(), 'checkpoints'))
 
     def optimize(self, net_string, device_graph):
+        if self.n_threads > 1:
+            self.worker_pool = Pool(self.n_threads)
+
         n_devices = len(device_graph.devices)
         groups = self.create_colocation_groups(get_flattened_layer_names(net_string))
 
@@ -133,8 +135,12 @@ class GAOptimizer(BaseOptimizer):
                 placements.append(generate_random_placement(len(groups), n_devices, allow_device_0=self.allow_cpu))
 
             if self.evolve_mutation_rate:
-                return [Candidate(p, min(max(random.normalvariate(self.mutation_rate, 0.1), self.min_mutation_rate),
-                                    self.max_mutation_rate))
+                return [Candidate(p,
+                                  min(max(random.normalvariate(self.mutation_rate, 0.1), self.min_mutation_rate),
+                                      self.max_mutation_rate),
+                                  min(max(random.normalvariate(self.zone_mutation_rate, 0.05), self.min_mutation_rate),
+                                      self.max_mutation_rate)
+                                  )
                         for p in placements]
 
             return [Candidate(p) for p in placements]
@@ -158,7 +164,7 @@ class GAOptimizer(BaseOptimizer):
                         memory_overflow = 1
 
                     if memory_overflow > 0:
-                        time += memory_overflow * 10**9 * 1
+                        time += memory_overflow * 10 ** 9 * 1
 
                     return 1 / time
 
@@ -212,6 +218,7 @@ class GAOptimizer(BaseOptimizer):
                 return parent1, parent2
 
             mutation_rate1, mutation_rate2 = parent1.mutation_rate, parent2.mutation_rate
+            zone_mutation_rate1, zone_mutation_rate2 = parent1.zone_mutation_rate, parent2.zone_mutation_rate
             parent1, parent2 = parent1.placement, parent2.placement
 
             if self.crossover == 'uniform' or self.crossover >= len(parent1) - 1:
@@ -246,7 +253,9 @@ class GAOptimizer(BaseOptimizer):
                 mix_rate = random.normalvariate(0.5, 0.1)
                 mr1 = mutation_rate1 * mix_rate + mutation_rate2 * (1 - mix_rate)
                 mr2 = mutation_rate2 * mix_rate + mutation_rate1 * (1 - mix_rate)
-                children = Candidate(children[0], mr1), Candidate(children[1], mr2)
+                zmr1 = zone_mutation_rate1 * mix_rate + zone_mutation_rate2 * (1 - mix_rate)
+                zmr2 = zone_mutation_rate2 * mix_rate + zone_mutation_rate1 * (1 - mix_rate)
+                children = Candidate(children[0], mr1, zmr1), Candidate(children[1], mr2, zmr2)
             else:
                 children = Candidate(children[0]), Candidate(children[1])
             return children
@@ -283,13 +292,30 @@ class GAOptimizer(BaseOptimizer):
         def mutate(individual):
             if self.evolve_mutation_rate:
                 mutation_rate = individual.mutation_rate
-                new_mutation_rate = max(min(mutation_rate + random.normalvariate(0, 0.05), self.max_mutation_rate),
-                                        self.min_mutation_rate)
+                zone_mutation_rate = individual.zone_mutation_rate
+                if mutation_rate == 0:
+                    new_mutation_rate = 0
+                else:
+                    new_mutation_rate = max(min(mutation_rate + random.normalvariate(0, 0.05), self.max_mutation_rate),
+                                            self.min_mutation_rate)
+                if zone_mutation_rate == 0:
+                    new_zone_mutation_rate = 0
+                else:
+                    new_zone_mutation_rate = max(min(zone_mutation_rate + random.normalvariate(0, 0.02),
+                                                     self.max_mutation_rate),
+                                                 self.min_mutation_rate)
                 placement = individual.placement
-                placement = [mutate_single_gene(g) if random.random() < new_mutation_rate else g
-                             for g in placement]
 
-                return Candidate(placement, new_mutation_rate)
+                if random.random() < self.zone_mutation_rate:
+                    split1 = random.randint(0, len(placement) - 1)
+                    split2 = split1 + min(np.random.geometric(0.2), len(placement) - split1)
+                    dev = random.randint(0 if self.allow_cpu else 1, n_devices - 1)
+                    placement = placement[:split1] + [dev] * (split2 - split1) + placement[split2:]
+                else:
+                    placement = [mutate_single_gene(g) if random.random() < new_mutation_rate else g
+                                 for g in placement]
+
+                return Candidate(placement, new_mutation_rate, new_zone_mutation_rate)
             else:
                 placement = [mutate_single_gene(g) if random.random() < self.mutation_rate else g
                              for g in individual.placement]
@@ -317,7 +343,7 @@ class GAOptimizer(BaseOptimizer):
             with open(os.path.join(get_log_dir(), 'checkpoints/scores.csv'), 'w') as f:
                 f.write('')
 
-        if self.verbose:
+        if self.score_save_period:
             with open(os.path.join(get_log_dir(), 'time_history.csv'), 'w') as f:
                 f.write('generation, time\n')
 
@@ -325,7 +351,7 @@ class GAOptimizer(BaseOptimizer):
                              start_generation=0):
             nonlocal pop
 
-            for i in tqdm(range(generations)):
+            for i in tqdm(range(generations), disable=not self.verbose):
                 ranked_pop, fitness_scores = rank(pop, return_scores=True, benchmarking_function=benchmarking_function)
 
                 if self.checkpoint_period != -1 and i % self.checkpoint_period == 0:
@@ -335,7 +361,7 @@ class GAOptimizer(BaseOptimizer):
                     with open(os.path.join(get_log_dir(), 'checkpoints', 'scores.csv'), 'a') as f:
                         f.write(f'{i + start_generation}, {best_solution["score"]}\n')
 
-                    with open(os.path.join(get_log_dir(), 'checkpoints', f'/gen_{i + start_generation:04}.json'), 'w') \
+                    with open(os.path.join(get_log_dir(), 'checkpoints', f'gen_{i + start_generation:04}.json'), 'w') \
                             as f:
                         json.dump(best_solution, f, indent=4)
 
@@ -347,7 +373,7 @@ class GAOptimizer(BaseOptimizer):
                 candidates = mutate_population(children)
                 pop = select_offspring(ranked_pop, candidates, population_size=population_size)
 
-                if self.verbose and (i + 1) % int(self.verbose) == 0 or i == 0:
+                if self.verbose and ((i + 1) % int(self.verbose) == 0 or i == 0):
                     best_score = fitness_scores[0]
                     best_time = 1 / best_score
                     if self.print_diversity:
@@ -359,14 +385,19 @@ class GAOptimizer(BaseOptimizer):
                     else:
                         log(f'[{i + 1}/{generations}] Best current time: {best_time:.2f}ms')
 
+                if self.score_save_period and i % self.score_save_period == 0:
+                    best_score = fitness_scores[0]
+                    best_time = 1 / best_score
                     with open(os.path.join(get_log_dir(), 'time_history.csv'), 'a') as f:
-                        f.write(f'{i + 1}, {best_time}\n')
+                        f.write(f'{i + start_generation + 1}, {best_time}\n')
 
-        log('Optimizing with simulator...')
+        if self.verbose:
+            log('Optimizing with simulator...')
         run_optimization(self.generations)
 
         if self.benchmarking_generations and self.benchmarking_function:
-            log('Optimizing with benchmarking...')
+            if self.verbose:
+                log('Optimizing with benchmarking...')
 
             if self.benchmarking_population_size < self.population_size:
                 ranked_pop = rank(pop)
@@ -384,23 +415,30 @@ class GAOptimizer(BaseOptimizer):
             plt.title('Fitness')
             plt.savefig(os.path.join(get_log_dir(), 'fitness_history.pdf'), bb_inches='tight')
             plt.show()
+            plt.close()
 
         if self.print_diversity:
             plt.plot(diversity_history)
             plt.title('Diversity')
             plt.savefig(os.path.join(get_log_dir(), 'diversity_history.pdf'), bb_inches='tight')
             plt.show()
-
+            plt.close()
 
         ranked_pop = rank(pop)
         best_solution = ranked_pop[0]
+
+        if self.worker_pool:
+            self.worker_pool.close()
+
         return json.dumps(apply_placement(net_string, best_solution.placement, groups))
 
 
 class Candidate:
-    def __init__(self, placement, mutation_rate=0):
+    def __init__(self, placement, mutation_rate=0, zone_mutation_rate=0):
         self.placement = placement
         self.mutation_rate = mutation_rate
+        self.zone_mutation_rate = zone_mutation_rate
 
     def __str__(self):
-        return f'Placement: {self.placement}\t Mutation rate: {self.mutation_rate}'
+        return f'Placement: {self.placement}\t Mutation rate: {self.mutation_rate}\t ' \
+               f'Zone mutation rate: {self.zone_mutation_rate}'
