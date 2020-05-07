@@ -33,6 +33,11 @@ OPTIMIZER_NAMES = {
 }
 
 
+def test_optimizer(c, r, log_dir):
+    c['log_dir'] = log_dir + f'/{r:03}'
+    _, t = optimize_with_config(config=c, verbose=False, set_log_dir=True)
+    return t
+
 def run_optimizer_test(n_threads=-1):
     if n_threads == -1:
         n_threads = multiprocessing.cpu_count()
@@ -55,11 +60,6 @@ def run_optimizer_test(n_threads=-1):
         config['optimizer_args']['pipeline_batches'] = PIPELINE_BATCHES
         log_dir = config['log_dir']
 
-        def test_optimizer(c, r):
-            c['log_dir'] = log_dir + f'/{r:03}'
-            _, t = optimize_with_config(config=c, verbose=False, set_log_dir=True)
-            return t
-
         threaded_optimizer = config['optimizer'] in ('ga', 'genetic_algorithm', 'map-elites', 'map_elites')
 
         if n_threads == 1 or threaded_optimizer:
@@ -69,7 +69,8 @@ def run_optimizer_test(n_threads=-1):
                     f.write(f'{r},{time}\n')
         else:
             worker_pool = multiprocessing.Pool(n_threads)
-            times = worker_pool.starmap(test_optimizer, zip(repeat(config), (r for r in range(REPEATS))))
+            times = worker_pool.starmap(test_optimizer, zip(repeat(config), (r for r in range(REPEATS)),
+                                                            repeat(log_dir)))
             with open(score_path, 'a') as f:
                 for t in times:
                     f.write(f'{r},{t}\n')
