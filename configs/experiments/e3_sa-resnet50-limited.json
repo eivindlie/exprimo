@@ -1,7 +1,7 @@
 {
   "device_graph_path": "device_graphs/malvik-4gpu-reduced-resnet.json",
   "net_path": "nets/resnet50.json",
-  "optimizer": "simulated_annealing",
+  "optimizer": "scipy_simulated_annealing",
 
   "log_dir": "~/logs/e3_optimizer-comparison/sa-resnet50-limited",
   "plot_event_trace": false,
