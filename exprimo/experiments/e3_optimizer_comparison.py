@@ -1,7 +1,7 @@
 import json
 import multiprocessing
 import os
-from itertools import repeat
+from itertools import repeat, product
 
 import pandas as pd
 from tqdm import tqdm
@@ -16,11 +16,11 @@ sns.set(style=PLOT_STYLE)
 LOG_DIR = os.path.expanduser('~/logs/e3_optimizer-comparison')
 set_log_dir(LOG_DIR)
 
-run_config = (0, 0, 0)
+run_config = (0, 0, 0, 0)
 NETWORK = ('resnet50', 'alexnet', 'inception')[run_config[0]]
 BATCHES = (1, 10)[run_config[1]]
 PIPELINE_BATCHES = (1, 2, 4)[run_config[2]]
-MEMORY_LIMITED = False
+MEMORY_LIMITED = bool(run_config[3])
 
 REPEATS = 50
 
@@ -89,6 +89,31 @@ def plot_results():
     plt.close()
 
 
+def run_all_variants():
+    networks = 'resnet50', 'alexnet', 'inception'
+    test_types = 'normal', 'limited', 'pipelined'
+    global BATCHES, PIPELINE_BATCHES, MEMORY_LIMITED, NETWORK
+    for variation in tqdm(product(networks, test_types)):
+        NETWORK = variation[0]
+        if variation[1] == 'normal':
+            BATCHES = 1
+            PIPELINE_BATCHES = 1
+            MEMORY_LIMITED = False
+        elif variation[1] == 'limited':
+            BATCHES = 1
+            PIPELINE_BATCHES = 1
+            MEMORY_LIMITED = True
+        elif variation[1] == 'pipelined':
+            BATCHES = 10
+            PIPELINE_BATCHES = 4
+            MEMORY_LIMITED = False
+
+        run_optimizer_test()
+
+
 if __name__ == '__main__':
-    run_optimizer_test()
-    plot_results()
+    if run_config == 'all':
+        run_all_variants()
+    else:
+        run_optimizer_test()
+        plot_results()
