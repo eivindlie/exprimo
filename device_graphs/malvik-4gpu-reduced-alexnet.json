@@ -1,0 +1,152 @@
+{
+  "comm_channels": [
+    {
+      "type": "pcie3",
+      "bandwidth": 128
+    },
+    {
+      "type": "pcie3",
+      "bandwidth": 128
+    },
+    {
+      "type": "pcie3",
+      "bandwidth": 128
+    },
+    {
+      "type": "pcie3",
+      "bandwidth": 128
+    }
+  ],
+  "devices": [
+    {
+      "model": "Intel Xeon Gold 6132",
+      "clock": 145600,
+      "peak_gflops": 1800,
+      "memory": 395,
+      "mem_bandwidth": 76.8,
+      "type": "cpu",
+      "neighbours": [
+        {
+          "comm_channel": 0,
+          "device": 1
+        },
+        {
+          "comm_channel": 1,
+          "device": 2
+        },
+        {
+          "comm_channel": 2,
+          "device": 3
+        },
+        {
+          "comm_channel": 3,
+          "device": 4
+        }
+      ]
+    },
+    {
+      "model": "NVIDIA Tesla V100",
+      "clock": 1312,
+      "peak_gflops": 14000,
+      "memory": 0.2,
+      "mem_bandwidth": 900,
+      "type": "gpu",
+      "neighbours": [
+        {
+          "comm_channel": 0,
+          "device": 0
+        },
+        {
+          "comm_channel": 0,
+          "device": 2
+        },
+        {
+          "comm_channel": 0,
+          "device": 3
+        },
+        {
+          "comm_channel": 0,
+          "device": 4
+        }
+      ]
+    },
+    {
+      "model": "NVIDIA Tesla V100",
+      "clock": 1312,
+      "peak_gflops": 14000,
+      "memory": 0.2,
+      "mem_bandwidth": 900,
+      "type": "gpu",
+      "neighbours": [
+        {
+          "comm_channel": 1,
+          "device": 0
+        },
+        {
+          "comm_channel": 1,
+          "device": 1
+        },
+        {
+          "comm_channel": 1,
+          "device": 3
+        },
+        {
+          "comm_channel": 1,
+          "device": 4
+        }
+      ]
+    },
+    {
+      "model": "NVIDIA Tesla V100",
+      "clock": 1312,
+      "peak_gflops": 14000,
+      "memory": 0.2,
+      "mem_bandwidth": 900,
+      "type": "gpu",
+      "neighbours": [
+        {
+          "comm_channel": 2,
+          "device": 0
+        },
+        {
+          "comm_channel": 2,
+          "device": 1
+        },
+        {
+          "comm_channel": 2,
+          "device": 2
+        },
+        {
+          "comm_channel": 2,
+          "device": 4
+        }
+      ]
+    },
+    {
+      "model": "NVIDIA Tesla V100",
+      "clock": 1312,
+      "peak_gflops": 14000,
+      "memory": 0.2,
+      "mem_bandwidth": 900,
+      "type": "gpu",
+      "neighbours": [
+        {
+          "comm_channel": 3,
+          "device": 0
+        },
+        {
+          "comm_channel": 3,
+          "device": 1
+        },
+        {
+          "comm_channel": 3,
+          "device": 2
+        },
+        {
+          "comm_channel": 3,
+          "device": 3
+        }
+      ]
+    }
+  ]
+}
