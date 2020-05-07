@@ -39,9 +39,10 @@ def run_optimizer_test(n_threads=-1):
 
     for optimizer in tqdm(OPTIMIZERS):
         # log(f'Testing optimizer {optimizer}')
-        run_name = f'e3_{optimizer}-{NETWORK}{"-pipeline" if PIPELINE_BATCHES > 1 else ""}'
+        run_name = f'e3_{optimizer}-{NETWORK}{"-pipeline" if PIPELINE_BATCHES > 1 else ""}' \
+                   f'{"-limited" if MEMORY_LIMITED else ""}'
         config_path = f'configs/experiments/{run_name}.json'
-        score_path = os.path.join(LOG_DIR, f'{run_name}{"-limited" if MEMORY_LIMITED else ""}_scores.csv')
+        score_path = os.path.join(LOG_DIR, '_scores.csv')
 
         with open(score_path, 'w') as f:
             f.write('run, time\n')
