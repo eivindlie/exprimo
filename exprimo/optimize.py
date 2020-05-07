@@ -6,7 +6,7 @@ import sys
 import exprimo
 from exprimo import DeviceGraph, Simulator, plot_event_trace, ComputationGraph, log
 from exprimo.optimizers import SimulatedAnnealingOptimizer, HillClimbingOptimizer, RandomHillClimbingOptimizer, \
-    GAOptimizer, LinearSearchOptimizer, MapElitesOptimizer
+    GAOptimizer, LinearSearchOptimizer, MapElitesOptimizer, ScipySimulatedAnnealingOptimizer
 from exprimo.benchmarking import create_benchmark_function
 from exprimo.optimizers.particle_swarm_optimizer import ParticleSwarmOptimizer
 from exprimo.optimizers.utils import get_device_assignment
@@ -63,6 +63,8 @@ def optimize_with_config(config_path=None, config=None, verbose=True, set_log_di
         'linear_search': LinearSearchOptimizer,
         'simulated_annealing': SimulatedAnnealingOptimizer,
         'sa': SimulatedAnnealingOptimizer,
+        'scipy_sa': ScipySimulatedAnnealingOptimizer,
+        'scipy_simulated_annealing': ScipySimulatedAnnealingOptimizer,
         'genetic_algorithm': GAOptimizer,
         'ga': GAOptimizer,
         'pso': ParticleSwarmOptimizer,
