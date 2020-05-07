@@ -90,4 +90,7 @@ class ScipySimulatedAnnealingOptimizer(BaseOptimizer):
 
         placement = [int(round(g)) for g in result.x]
 
+        if self.verbose:
+            log(f'Best found placement: {placement}')
+
         return json.dumps(apply_placement(net_string, placement, groups))
