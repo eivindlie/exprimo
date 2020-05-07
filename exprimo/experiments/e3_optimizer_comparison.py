@@ -51,6 +51,8 @@ def run_optimizer_test(n_threads=-1):
             config = json.load(f)
 
         config['optimizer_args']['verbose'] = False
+        config['optimizer_args']['batches'] = BATCHES
+        config['optimizer_args']['pipeline_batches'] = PIPELINE_BATCHES
         log_dir = config['log_dir']
 
         def test_optimizer(c, r):
