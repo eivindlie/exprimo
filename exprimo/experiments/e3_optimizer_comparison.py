@@ -72,7 +72,7 @@ def run_optimizer_test(n_threads=-1):
             times = worker_pool.starmap(test_optimizer, zip(repeat(config), (r for r in range(REPEATS)),
                                                             repeat(log_dir)))
             with open(score_path, 'a') as f:
-                for t in times:
+                for r, t in enumerate(times):
                     f.write(f'{r},{t}\n')
 
         set_log_dir(LOG_DIR)
