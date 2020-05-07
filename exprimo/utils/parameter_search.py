@@ -1,4 +1,5 @@
 import json
+import multiprocessing
 
 import itertools
 from tqdm import tqdm
@@ -6,7 +7,13 @@ from tqdm import tqdm
 from exprimo.optimize import optimize_with_config
 
 
-def do_parameter_search(config_path, parameter_grid, repeats=10, verbose=False):
+def do_parameter_search(config_path, parameter_grid, repeats=10, verbose=False, n_threads=1):
+    if n_threads == -1:
+        n_threads = multiprocessing.cpu_count()
+
+    if n_threads > 1:
+        worker_pool = multiprocessing.Pool(n_threads)
+
     with open(config_path) as f:
         config = json.load(f)
 
@@ -58,7 +65,12 @@ def do_parameter_search(config_path, parameter_grid, repeats=10, verbose=False):
         current_config = config.copy()
         current_config['optimizer_args'] = args
 
-        best_times = [optimize_with_config(config=current_config, verbose=False)[1] for _ in tqdm(range(repeats))]
+        if n_threads == 1:
+            best_times = [optimize_with_config(config=current_config, verbose=False)[1] for _ in tqdm(range(repeats))]
+        else:
+            best_times = worker_pool.starmap(optimize_with_config, zip(itertools.repeat(None, repeats),
+                                                                       itertools.repeat(current_config),
+                                                                       itertools.repeat(False)))
 
         mean_time = sum(best_times) / len(best_times)
 
@@ -96,5 +108,5 @@ if __name__ == '__main__':
         'configs/sa-malvik-resnet50.json',
     )[1]
 
-    best_params = do_parameter_search(config_path, grid, verbose=VERBOSE)
+    best_params = do_parameter_search(config_path, grid, verbose=VERBOSE, n_threads=-1)
     print(f'Best parameters: \n{best_params}')
