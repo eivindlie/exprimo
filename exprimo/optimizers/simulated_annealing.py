@@ -1,6 +1,9 @@
 import json
 import os
 from random import randint, random
+
+import numpy as np
+import scipy
 from scipy.special import expit
 from tqdm import tqdm
 
@@ -63,3 +66,26 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
         if callable(self.temp_schedule):
             return self.temp_schedule(i)
         return self.temp_schedule
+
+
+class ScipySimulatedAnnealingOptimizer(BaseOptimizer):
+
+    def __init__(self, *args, temp_schedule=exponential_multiplicative_decay(40, 0.95), steps=500,
+                 **kwargs):
+        super().__init__(*args, **kwargs)
+        self.temp_schedule = temp_schedule
+        self.steps = steps
+
+    def optimize(self, net_string, device_graph):
+        n_devices = len(device_graph.devices)
+
+        groups = self.create_colocation_groups(get_flattened_layer_names(net_string))
+
+        def eval_function(x):
+            new_placement = [int(round(g)) for g in x]
+            score = self.evaluate_placement(apply_placement(net_string, new_placement, groups), device_graph)
+            return score
+
+        return scipy.optimize.dual_annealing(eval_function, [(0, n_devices-1)]*len(groups),
+                                             no_local_search=True,
+                                             maxfun=self.steps)
