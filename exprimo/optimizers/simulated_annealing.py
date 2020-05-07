@@ -70,10 +70,8 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
 
 class ScipySimulatedAnnealingOptimizer(BaseOptimizer):
 
-    def __init__(self, *args, temp_schedule=exponential_multiplicative_decay(40, 0.95), steps=500,
-                 **kwargs):
+    def __init__(self, *args, steps=500, **kwargs):
         super().__init__(*args, **kwargs)
-        self.temp_schedule = temp_schedule
         self.steps = steps
 
     def optimize(self, net_string, device_graph):
