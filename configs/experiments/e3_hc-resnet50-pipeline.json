@@ -1,0 +1,22 @@
+{
+  "device_graph_path": "device_graphs/malvik.json",
+  "net_path": "nets/resnet50.json",
+  "optimizer": "random_hill_climber",
+
+  "log_dir": "~/logs/e3_optimizer-comparison/hc-resnet50-pipeline",
+  "plot_event_trace": false,
+
+  "benchmark_solution": true,
+
+  "optimizer_args": {
+    "steps": 20000,
+    "simulator_comp_penalty": 0.9,
+    "simulator_comm_penalty": 0.25,
+
+    "verbose": 50,
+    "score_save_period": 50,
+    "pipeline_batches": 1,
+    "batches": 1,
+    "n_threads": -1
+  }
+}
