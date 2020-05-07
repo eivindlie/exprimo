@@ -1,5 +1,7 @@
 import json
+import multiprocessing
 import os
+from itertools import repeat
 
 import pandas as pd
 from tqdm import tqdm
@@ -31,7 +33,10 @@ OPTIMIZER_NAMES = {
 }
 
 
-def run_optimizer_test():
+def run_optimizer_test(n_threads=-1):
+    if n_threads == -1:
+        n_threads = multiprocessing.cpu_count()
+
     for optimizer in tqdm(OPTIMIZERS):
         # log(f'Testing optimizer {optimizer}')
         run_name = f'e3_{optimizer}-{NETWORK}{"-pipeline" if PIPELINE_BATCHES > 1 else ""}'
@@ -47,11 +52,25 @@ def run_optimizer_test():
         config['optimizer_args']['verbose'] = False
         log_dir = config['log_dir']
 
-        for r in tqdm(range(REPEATS)):
-            config['log_dir'] = log_dir +  f'/{r:03}'
-            _, time = optimize_with_config(config=config, verbose=False, set_log_dir=True)
+        def test_optimizer(c, r):
+            c['log_dir'] = log_dir + f'/{r:03}'
+            _, t = optimize_with_config(config=c, verbose=False, set_log_dir=True)
+            return t
+
+        threaded_optimizer = config['optimizer'] in ('ga', 'genetic_algorithm', 'map-elites', 'map_elites')
+
+        if n_threads == 1 or threaded_optimizer:
+            for r in tqdm(range(REPEATS)):
+                time = test_optimizer(config, r)
+                with open(score_path, 'a') as f:
+                    f.write(f'{r},{time}\n')
+        else:
+            worker_pool = multiprocessing.Pool(n_threads)
+            times = worker_pool.starmap(test_optimizer, zip(repeat(config), (r for r in range(REPEATS))))
             with open(score_path, 'a') as f:
-                f.write(f'{r},{time}\n')
+                for t in times:
+                    f.write(f'{r},{t}\n')
+
         set_log_dir(LOG_DIR)
 
 
