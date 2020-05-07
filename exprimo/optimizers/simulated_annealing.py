@@ -86,6 +86,10 @@ class ScipySimulatedAnnealingOptimizer(BaseOptimizer):
             score = self.evaluate_placement(apply_placement(net_string, new_placement, groups), device_graph)
             return score
 
-        return scipy.optimize.dual_annealing(eval_function, [(0, n_devices-1)]*len(groups),
-                                             no_local_search=True,
-                                             maxfun=self.steps)
+        result = scipy.optimize.dual_annealing(eval_function, [(0, n_devices - 1)] * len(groups),
+                                               no_local_search=True,
+                                               maxfun=self.steps)
+
+        placement = [int(round(g)) for g in result.x]
+
+        return placement
