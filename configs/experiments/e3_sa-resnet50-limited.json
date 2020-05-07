@@ -11,7 +11,6 @@
   "optimizer_args": {
     "steps": 20000,
 
-    "temp_schedule": ["exponential_multiplicative_decay", 50, 0.98],
     "simulator_comp_penalty": 0.9,
     "simulator_comm_penalty": 0.25,
 
