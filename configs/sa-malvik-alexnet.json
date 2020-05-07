@@ -1,0 +1,20 @@
+{
+  "device_graph_path": "device_graphs/malvik.json",
+  "net_path": "nets/alex_v2.json",
+  "optimizer": "simulated_annealing",
+
+  "log_dir": "~/logs/sa-resnet",
+
+  "benchmark_solution": true,
+
+  "optimizer_args": {
+    "steps": 2000,
+
+    "temp_schedule": ["exponential_multiplicative_decay", 50, 0.98],
+
+    "verbose": 50,
+    "pipeline_batches": 1,
+    "batches": 1,
+    "n_threads": -1
+  }
+}
