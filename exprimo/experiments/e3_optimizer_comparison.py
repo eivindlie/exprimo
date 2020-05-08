@@ -88,14 +88,17 @@ def plot_results():
         scores = pd.read_csv(score_path, index_col=0, squeeze=True)
         all_results[OPTIMIZER_NAMES[optimizer]] = scores
 
-    sns.barplot(data=all_results)
-    plt.savefig(os.path.join(LOG_DIR, 'score_comparison.pdf'))
+    chart = sns.barplot(data=all_results)
+    chart.set_xticklabels(
+        chart.get_xticklabels(),
+        rotation=45,
+        horizontalalignment='right',
+        fontweight='light',
+        fontsize='x-large'
+    )
+    plt.savefig(os.path.join(LOG_DIR, 'score_comparison.pdf'), bb_inches='tight')
     plt.show()
     plt.close()
-
-
-def plot_result_all_networks():
-
 
 
 def run_all_variants():
