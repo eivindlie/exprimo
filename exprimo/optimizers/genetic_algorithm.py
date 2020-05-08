@@ -430,7 +430,12 @@ class GAOptimizer(BaseOptimizer):
         if self.worker_pool:
             self.worker_pool.close()
 
-        return json.dumps(apply_placement(net_string, best_solution.placement, groups))
+        solution = json.dumps(apply_placement(net_string, best_solution.placement, groups), indent=4)
+
+        with open(os.path.join(get_log_dir(), 'ga_solution.json'), 'w') as f:
+            f.write(solution)
+
+        return solution
 
 
 class Candidate:

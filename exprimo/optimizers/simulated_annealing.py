@@ -60,7 +60,12 @@ class SimulatedAnnealingOptimizer(BaseOptimizer):
                     score = new_score
                     placement = new_placement
 
-        return json.dumps(apply_placement(net_string, placement, groups))
+        solution = json.dumps(apply_placement(net_string, placement, groups), indent=4)
+
+        with open(os.path.join(get_log_dir(), 'sa_solution.json'), 'w') as f:
+            f.write(solution)
+
+        return solution
 
     def temp(self, i):
         if callable(self.temp_schedule):
@@ -93,4 +98,9 @@ class ScipySimulatedAnnealingOptimizer(BaseOptimizer):
         if self.verbose:
             log(f'Best found placement: {placement}')
 
-        return json.dumps(apply_placement(net_string, placement, groups))
+        solution = json.dumps(apply_placement(net_string, placement, groups), indent=4)
+
+        with open(os.path.join(get_log_dir(), 'sa_solution.json'), 'w') as f:
+            f.write(solution)
+
+        return solution

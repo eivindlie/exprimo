@@ -351,4 +351,9 @@ class MapElitesOptimizer(BaseOptimizer):
         if self.verbose:
             log(f'Best individual: {best_individual.tolist()}')
 
-        return json.dumps(apply_placement(net_string, best_individual.tolist(), groups))
+        solution = json.dumps(apply_placement(net_string, best_individual, groups), indent=4)
+
+        with open(os.path.join(get_log_dir(), 'me_solution.json'), 'w') as f:
+            f.write(solution)
+
+        return solution

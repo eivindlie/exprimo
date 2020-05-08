@@ -89,4 +89,9 @@ class RandomHillClimbingOptimizer(BaseOptimizer):
                 with open(os.path.join(get_log_dir(), 'time_history.csv'), 'a') as f:
                     f.write(f'{i + 1}, {score}\n')
 
-        return json.dumps(apply_placement(net_string, placement, groups))
+        solution = json.dumps(apply_placement(net_string, placement, groups), indent=4)
+
+        with open(os.path.join(get_log_dir(), 'hc_solution.json'), 'w') as f:
+            f.write(solution)
+
+        return solution
