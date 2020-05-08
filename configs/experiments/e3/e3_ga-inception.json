@@ -26,8 +26,6 @@
     "print_diversity": false,
     "include_trivial_solutions_in_initialization": false,
     "allow_cpu": true,
-    "pipeline_batches": 1,
-    "batches": 1,
     "n_threads": -1,
     "checkpoint_period": 0,
     "score_save_period": 1,
