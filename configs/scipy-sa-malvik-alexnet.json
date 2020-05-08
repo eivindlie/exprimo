@@ -1,0 +1,18 @@
+{
+  "device_graph_path": "device_graphs/malvik.json",
+  "net_path": "nets/alex_v2.json",
+  "optimizer": "scipy_simulated_annealing",
+
+  "log_dir": "~/logs/scipy-sa-resnet",
+
+  "benchmark_solution": true,
+
+  "optimizer_args": {
+    "steps": 2000,
+
+    "verbose": 50,
+    "pipeline_batches": 1,
+    "batches": 1,
+    "n_threads": -1
+  }
+}
