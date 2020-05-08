@@ -89,24 +89,26 @@ class ScipySimulatedAnnealingOptimizer(BaseOptimizer):
 
         i = 0
 
-        def eval_function(x):
-            nonlocal i
-            new_placement = [int(round(g)) for g in x]
-            score = self.evaluate_placement(apply_placement(net_string, new_placement, groups), device_graph)
+        with tqdm(total=self.steps, disable=not self.verbose) as t:
+            def eval_function(x):
+                nonlocal i
+                t.update(1)
+                new_placement = [int(round(g)) for g in x]
+                score = self.evaluate_placement(apply_placement(net_string, new_placement, groups), device_graph)
 
-            i += 1
-            return score
+                i += 1
+                return score
 
-        def callback(x, score, context):
-            if self.verbose:
-                log(f'[{i + 1}/{self.steps}] Found new minima: {score:.2f}ms')
-            with open(os.path.join(get_log_dir(), 'time_history.csv'), 'a') as f:
-                f.write(f'{i + 1}, {score}\n')
+            def callback(x, score, context):
+                if self.verbose:
+                    log(f'[{i + 1}/{self.steps}] Found new minimum: {score:.2f}ms')
+                with open(os.path.join(get_log_dir(), 'time_history.csv'), 'a') as f:
+                    f.write(f'{i + 1}, {score}\n')
 
-        result = scipy.optimize.dual_annealing(eval_function, [(0, n_devices - 1)] * len(groups),
-                                               no_local_search=True,
-                                               maxfun=self.steps,
-                                               callback=callback)
+            result = scipy.optimize.dual_annealing(eval_function, [(0, n_devices - 1)] * len(groups),
+                                                   no_local_search=True,
+                                                   maxfun=self.steps,
+                                                   callback=callback)
 
         placement = [int(round(g)) for g in result.x]
 
