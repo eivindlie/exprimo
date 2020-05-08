@@ -99,6 +99,7 @@ def run_all_variants():
     test_types = 'normal', 'limited', 'pipelined'
     global BATCHES, PIPELINE_BATCHES, MEMORY_LIMITED, NETWORK
     for variation in tqdm(product(networks, test_types)):
+        log(f'Testing f{variation[0]} network in {variation[1]} configuration')
         NETWORK = variation[0]
         if variation[1] == 'normal':
             BATCHES = 1
