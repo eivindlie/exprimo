@@ -1,0 +1,46 @@
+{
+  "device_graph_path": "device_graphs/malvik.json",
+  "net_path": "nets/alex_v2.json",
+  "optimizer": "map_elites",
+
+  "plot_event_trace": false,
+
+  "log_dir": "~/logs/e3_optimizer-comparison/me-alexnet",
+
+  "benchmark_solution": true,
+
+  "optimizer_args": {
+    "dimension_sizes": [-1, -1, 40],
+    "initial_size": 3,
+    "mutation_rate": 0.4,
+    "copy_mutation_rate": 0.4,
+    "replace_mutation_rate": 0.01,
+    "zone_mutation_rate": 0.05,
+    "crossover_rate": 0.4,
+    "steps": 20000,
+
+    "simulator_comp_penalty": 0.9,
+    "simulator_comm_penalty": 0.25,
+    "allow_cpu": true,
+    "pipeline_batches": 1,
+    "batches": 1,
+
+    "benchmarking_steps": 0,
+    "benchmark_before_selection": false,
+    "benchmarking_n_keep": 50,
+    "benchmarking_time_threshold": 500,
+    "benchmarking_function": {"model_type": "resnet", "batches": 5, "drop_batches": 1},
+
+    "include_trivial_solutions": false,
+
+    "show_score_plot": true,
+    "plot_axes": [0, 1, 2],
+
+    "archive_log_period": 500,
+    "plot_animation": false,
+    "animation_fps": 1,
+    "verbose": 500,
+    "score_save_period": 50,
+    "n_threads": -1
+  }
+}
