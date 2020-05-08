@@ -134,7 +134,7 @@ def benchmark_with_placement(model_type, placement='cuda:0', batches=50, drop_ba
 
 def benchmark_all_placements(placement_directory, results_file, model_type, generation_divisible_by=None, last_gen=None,
                              verbose=False, batches=50, drop_batches=0, device_map=None, gpu_memory_limit=None,
-                             drop_last=True):
+                             drop_last=True, format='wide'):
     with open(results_file, 'w') as f:
         f.write('')
 
@@ -170,7 +170,14 @@ def benchmark_all_placements(placement_directory, results_file, model_type, gene
         with open(results_file, 'a') as f:
             if batch_times == -1:
                 batch_times = itertools.repeat(batch_times, batches)
-            f.write(f'{generation:04}, {",".join(map(lambda x: str(x), batch_times))}\n')
+
+            if format == 'wide':
+                f.write(f'{generation:04}, {",".join(map(lambda x: str(x), batch_times))}\n')
+            elif format == 'long':
+                for t in batch_times:
+                    f.write(f'{generation:04}, {t}\n')
+            else:
+                raise RuntimeError('Invalid format')
 
         if verbose:
             log(f'{sum(batch_times)/len(batch_times):.2f}ms')
