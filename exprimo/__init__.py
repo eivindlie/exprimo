@@ -11,7 +11,7 @@ LOG_CONFIG = {
         print,
         'output.log'
     ],
-    'log_dir': 'logs/'
+    'log_dir': '~/logs/default'
 }
 
 
