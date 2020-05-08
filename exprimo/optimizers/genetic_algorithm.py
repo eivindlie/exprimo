@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 from exprimo import PLOT_STYLE, get_log_dir, log
 import seaborn as sns
 
-from utils.processor_monitoring import clear_processor_log, update_processor_log
+from exprimo.utils.processor_monitoring import clear_processor_log, update_processor_log
 
 sns.set(style=PLOT_STYLE)
 
