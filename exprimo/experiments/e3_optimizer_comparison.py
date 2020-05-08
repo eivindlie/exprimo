@@ -73,6 +73,7 @@ def run_optimizer_test(n_threads=-1):
             worker_pool = multiprocessing.Pool(n_threads)
             times = worker_pool.starmap(test_optimizer, zip(repeat(config), (r for r in range(REPEATS)),
                                                             repeat(log_dir)))
+            worker_pool.close()
             with open(score_path, 'a') as f:
                 for r, t in enumerate(times):
                     f.write(f'{r},{t}\n')
