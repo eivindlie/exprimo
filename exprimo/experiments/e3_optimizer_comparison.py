@@ -89,6 +89,7 @@ def plot_results():
         scores = pd.read_csv(score_path, index_col=0, squeeze=True)
         all_results[OPTIMIZER_NAMES[optimizer]] = scores
 
+    plt.figure(figsize=(8, 8))
     chart = sns.barplot(data=all_results)
     chart.set_xticklabels(
         chart.get_xticklabels(),
@@ -97,7 +98,8 @@ def plot_results():
         fontweight='light',
         fontsize='x-large'
     )
-    plt.savefig(os.path.join(LOG_DIR, 'score_comparison.pdf'), bb_inches='tight')
+    plt.tight_layout()
+    plt.savefig(os.path.join(LOG_DIR, 'score_comparison.pdf'))
     plt.show()
     plt.close()
 
