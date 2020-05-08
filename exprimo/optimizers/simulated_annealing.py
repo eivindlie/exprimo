@@ -84,10 +84,24 @@ class ScipySimulatedAnnealingOptimizer(BaseOptimizer):
 
         groups = self.create_colocation_groups(get_flattened_layer_names(net_string))
 
+        with open(os.path.join(get_log_dir(), 'time_history.csv'), 'w') as f:
+            f.write('generation, time\n')
+
+        i = 0
+
         def eval_function(x):
+            nonlocal i
             new_placement = [int(round(g)) for g in x]
             score = self.evaluate_placement(apply_placement(net_string, new_placement, groups), device_graph)
+
+            if self.verbose and ((i + 1) % int(self.verbose) == 0 or i == 0):
+                log(f'[{i + 1}/{self.steps}] Current time: {score:.2f}ms')
+            i += 1
             return score
+
+        def callback(x, score, context):
+            with open(os.path.join(get_log_dir(), 'time_history.csv'), 'a') as f:
+                f.write(f'{i + 1}, {score}\n')
 
         result = scipy.optimize.dual_annealing(eval_function, [(0, n_devices - 1)] * len(groups),
                                                no_local_search=True,
