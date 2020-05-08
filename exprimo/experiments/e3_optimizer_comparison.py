@@ -94,6 +94,10 @@ def plot_results():
     plt.close()
 
 
+def plot_result_all_networks():
+
+
+
 def run_all_variants():
     networks = 'resnet50', 'alexnet', 'inception'
     test_types = 'normal', 'limited', 'pipelined'
@@ -105,14 +109,17 @@ def run_all_variants():
             BATCHES = 1
             PIPELINE_BATCHES = 1
             MEMORY_LIMITED = False
+            REPEATS = 50
         elif variation[1] == 'limited':
             BATCHES = 1
             PIPELINE_BATCHES = 1
             MEMORY_LIMITED = True
+            REPEATS = 50
         elif variation[1] == 'pipelined':
             BATCHES = 10
             PIPELINE_BATCHES = 4
             MEMORY_LIMITED = False
+            REPEATS = 10
 
         run_optimizer_test()
 
