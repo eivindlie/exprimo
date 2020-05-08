@@ -94,18 +94,19 @@ class ScipySimulatedAnnealingOptimizer(BaseOptimizer):
             new_placement = [int(round(g)) for g in x]
             score = self.evaluate_placement(apply_placement(net_string, new_placement, groups), device_graph)
 
-            if self.verbose and ((i + 1) % int(self.verbose) == 0 or i == 0):
-                log(f'[{i + 1}/{self.steps}] Current time: {score:.2f}ms')
             i += 1
             return score
 
         def callback(x, score, context):
+            if self.verbose:
+                log(f'[{i + 1}/{self.steps}] Found new minima: {score:.2f}ms')
             with open(os.path.join(get_log_dir(), 'time_history.csv'), 'a') as f:
                 f.write(f'{i + 1}, {score}\n')
 
         result = scipy.optimize.dual_annealing(eval_function, [(0, n_devices - 1)] * len(groups),
                                                no_local_search=True,
-                                               maxfun=self.steps)
+                                               maxfun=self.steps,
+                                               callback=callback)
 
         placement = [int(round(g)) for g in result.x]
 
