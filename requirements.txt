@@ -7,3 +7,5 @@ torchvision==0.6.0
 seaborn==0.10.1
 imageio==2.8.0
 imageio-ffmpeg==0.4.1
+gputil==1.4.0
+psutil==5.7.0
