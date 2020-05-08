@@ -88,6 +88,9 @@ def plot_results():
                    f'{"-limited" if MEMORY_LIMITED else ""}'
         score_path = os.path.join(LOG_DIR, f'{run_name}_scores.csv')
         scores = pd.read_csv(score_path, index_col=0, squeeze=True)
+
+        scores /= PIPELINE_BATCHES
+
         all_results[OPTIMIZER_NAMES[optimizer]] = scores
 
     plt.figure(figsize=(8, 8))
@@ -114,6 +117,7 @@ def plot_result_all_networks(test_type='normal'):
                        f'{"-limited" if test_type == "limited" else ""}'
             score_path = os.path.join(LOG_DIR, f'{run_name}_scores.csv')
             scores = pd.read_csv(score_path, index_col=0, squeeze=True)
+            scores /= PIPELINE_BATCHES
             all_results['score'] = scores
             all_results['optimizer'] = OPTIMIZER_NAMES[optimizer]
             all_results['network'] = network
