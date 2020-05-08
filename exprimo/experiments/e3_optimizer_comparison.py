@@ -130,11 +130,10 @@ def plot_result_all_networks(test_type='normal'):
         plt.close()
 
 
-def run_all_variants():
+def run_variants(variants=('normal', 'limited', 'pipelined')):
     networks = 'resnet50', 'alexnet', 'inception'
-    test_types = 'normal', 'limited', 'pipelined'
-    global BATCHES, PIPELINE_BATCHES, MEMORY_LIMITED, NETWORK
-    for variation in tqdm(product(networks, test_types)):
+    global BATCHES, PIPELINE_BATCHES, MEMORY_LIMITED, NETWORK, REPEATS
+    for variation in tqdm(product(networks, variants)):
         log(f'Testing f{variation[0]} network in {variation[1]} configuration')
         NETWORK = variation[0]
         if variation[1] == 'normal':
@@ -158,7 +157,9 @@ def run_all_variants():
 
 if __name__ == '__main__':
     if run_config == 'all':
-        run_all_variants()
+        run_variants()
+    elif isinstance(run_config, str):
+        run_variants((run_config,))
     else:
         run_optimizer_test()
         plot_results()
