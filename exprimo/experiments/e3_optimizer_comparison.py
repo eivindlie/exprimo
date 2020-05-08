@@ -17,10 +17,10 @@ LOG_DIR = os.path.expanduser('~/logs/e3_optimizer-comparison')
 set_log_dir(LOG_DIR)
 
 run_config = (1, 0, 0, 0)
-NETWORK = ('resnet50', 'alexnet', 'inception')[run_config[0]]
-BATCHES = (1, 10)[run_config[1]]
-PIPELINE_BATCHES = (1, 2, 4)[run_config[2]]
-MEMORY_LIMITED = bool(run_config[3])
+NETWORK = ('resnet50', 'alexnet', 'inception')[run_config[0] if isinstance(run_config[0], int) else 0]
+BATCHES = (1, 10)[run_config[1] if isinstance(run_config[1], int) else 0]
+PIPELINE_BATCHES = (1, 2, 4)[run_config[2] if isinstance(run_config[2], int) else 0]
+MEMORY_LIMITED = bool(run_config[3] if len(run_config) > 3 and isinstance(run_config[3], int) else 0)
 
 REPEATS = 50
 
