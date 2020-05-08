@@ -83,8 +83,9 @@ def plot_results():
     all_results = pd.DataFrame()
     # CREATE PLOT OF RESULTS
     for optimizer in OPTIMIZERS:
-        run_name = f'e3_{optimizer}-{NETWORK}{"-pipeline" if PIPELINE_BATCHES > 1 else ""}'
-        score_path = os.path.join(LOG_DIR, f'{run_name}{"-limited" if MEMORY_LIMITED else ""}_scores.csv')
+        run_name = f'e3_{optimizer}-{NETWORK}{"-pipeline" if PIPELINE_BATCHES > 1 else ""}' \
+                   f'{"-limited" if MEMORY_LIMITED else ""}'
+        score_path = os.path.join(LOG_DIR, f'{run_name}_scores.csv')
         scores = pd.read_csv(score_path, index_col=0, squeeze=True)
         all_results[OPTIMIZER_NAMES[optimizer]] = scores
 
@@ -99,6 +100,32 @@ def plot_results():
     plt.savefig(os.path.join(LOG_DIR, 'score_comparison.pdf'), bb_inches='tight')
     plt.show()
     plt.close()
+
+
+def plot_result_all_networks(test_type='normal'):
+    all_results = pd.DataFrame()
+    # CREATE PLOT OF RESULTS
+    for network in ('alexnet', 'resnet50', 'inception'):
+        for optimizer in OPTIMIZERS:
+            run_name = f'e3_{optimizer}-{network}{"-pipeline" if test_type == "pipelined" else ""}' \
+                       f'{"-limited" if test_type == "limited" else ""}'
+            score_path = os.path.join(LOG_DIR, f'{run_name}_scores.csv')
+            scores = pd.read_csv(score_path, index_col=0, squeeze=True)
+            all_results['score'] = scores
+            all_results['optimizer'] = OPTIMIZER_NAMES[optimizer]
+            all_results['network'] = network
+
+        chart = sns.barplot(x='network', y='score', hue='optimizer', data=all_results)
+        chart.set_xticklabels(
+            chart.get_xticklabels(),
+            rotation=45,
+            horizontalalignment='right',
+            fontweight='light',
+            fontsize='x-large'
+        )
+        plt.savefig(os.path.join(LOG_DIR, f'score_comparison_{test_type}.pdf'), bb_inches='tight')
+        plt.show()
+        plt.close()
 
 
 def run_all_variants():
