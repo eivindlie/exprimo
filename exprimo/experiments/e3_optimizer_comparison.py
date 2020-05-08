@@ -32,6 +32,12 @@ OPTIMIZER_NAMES = {
     'me': 'MAP-elites',
 }
 
+NETWORK_NAMES = {
+    'resnet50': 'ResNet-50',
+    'alexnet': 'AlexNet',
+    'inception': 'Inception V3'
+}
+
 cmap = sns.cubehelix_palette(5, start=.5, rot=-.75, reverse=True)
 
 def test_optimizer(c, r, log_dir):
@@ -119,21 +125,35 @@ def plot_result_all_networks(test_type='normal'):
             score_path = os.path.join(LOG_DIR, f'{run_name}_scores.csv')
             scores = pd.read_csv(score_path, index_col=0, squeeze=True)
             scores /= PIPELINE_BATCHES
-            all_results['score'] = scores
-            all_results['optimizer'] = OPTIMIZER_NAMES[optimizer]
-            all_results['network'] = network
+            new_results = pd.DataFrame()
+            new_results['score'] = scores
+            new_results['optimizer'] = OPTIMIZER_NAMES[optimizer]
+            new_results['network'] = network
 
-        chart = sns.barplot(x='network', y='score', hue='optimizer', data=all_results, palette=cmap)
+            all_results = pd.concat([all_results, new_results])
+
+    if test_type == 'normal':
+        if os.path.exists(os.path.join(LOG_DIR, 'single-gpu.csv')):
+            all_results = pd.concat([all_results, pd.read_csv(os.path.join(LOG_DIR, 'single-gpu.csv'))])
+
+    fig, ax = plt.subplots(1, 3, figsize=(10, 6))
+
+    for a, net in zip(ax, ('alexnet', 'resnet50', 'inception')):
+        chart = sns.barplot(x='optimizer', y='score', data=all_results[all_results['network'] == net],
+                            palette=cmap, ax=a)
+        a.set_xlabel('')
+        a.set_ylabel('')
         chart.set_xticklabels(
             chart.get_xticklabels(),
             rotation=45,
             horizontalalignment='right',
         )
-        plt.ylabel('Batch execution time (ms)')
-        plt.xlabel('Optimization algorithm')
-        plt.savefig(os.path.join(LOG_DIR, f'score_comparison_{test_type}.pdf'), bb_inches='tight')
-        plt.show()
-        plt.close()
+        a.set_title(NETWORK_NAMES[net])
+    fig.text(0.01, 0.5, 'Batch training time (ms)', va='center', rotation='vertical')
+    plt.tight_layout()
+    plt.savefig(os.path.join(LOG_DIR, f'score_comparison_{test_type}.pdf'), bb_inches='tight')
+    plt.show()
+    plt.close()
 
 
 def run_variants(variants=('normal', 'limited', 'pipelined')):
@@ -164,8 +184,11 @@ def run_variants(variants=('normal', 'limited', 'pipelined')):
 if __name__ == '__main__':
     if run_config == 'all':
         run_variants()
+        for test_type in ('normal', 'limited', 'pipeline'):
+            plot_result_all_networks(test_type)
     elif isinstance(run_config, str):
         run_variants((run_config,))
+        plot_result_all_networks(run_config)
     else:
         run_optimizer_test()
         plot_results()
