@@ -32,6 +32,7 @@ OPTIMIZER_NAMES = {
     'me': 'MAP-elites',
 }
 
+cmap = sns.cubehelix_palette(5, start=.5, rot=-.75, reverse=True)
 
 def test_optimizer(c, r, log_dir):
     c['log_dir'] = log_dir + f'/{r:03}'
@@ -90,7 +91,7 @@ def plot_results():
         all_results[OPTIMIZER_NAMES[optimizer]] = scores
 
     plt.figure(figsize=(8, 8))
-    chart = sns.barplot(data=all_results)
+    chart = sns.barplot(data=all_results, palette=cmap)
     chart.set_xticklabels(
         chart.get_xticklabels(),
         rotation=45,
@@ -117,7 +118,7 @@ def plot_result_all_networks(test_type='normal'):
             all_results['optimizer'] = OPTIMIZER_NAMES[optimizer]
             all_results['network'] = network
 
-        chart = sns.barplot(x='network', y='score', hue='optimizer', data=all_results)
+        chart = sns.barplot(x='network', y='score', hue='optimizer', data=all_results, palette=cmap)
         chart.set_xticklabels(
             chart.get_xticklabels(),
             rotation=45,
