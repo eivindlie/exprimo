@@ -13,6 +13,8 @@ import matplotlib.pyplot as plt
 from exprimo import PLOT_STYLE, get_log_dir, log
 import seaborn as sns
 
+from utils.processor_monitoring import clear_processor_log, update_processor_log
+
 sns.set(style=PLOT_STYLE)
 
 from exprimo.optimizers.base import BaseOptimizer
@@ -63,6 +65,7 @@ class GAOptimizer(BaseOptimizer):
                  benchmarking_function=None,
                  include_trivial_solutions_in_initialization=True,
                  checkpoint_period=-1,
+                 monitor_processors=False,
                  allow_cpu=True, **kwargs):
         """
         Initializes the GA optimizer, setting important hyperparameters.
@@ -111,11 +114,16 @@ class GAOptimizer(BaseOptimizer):
         self.include_trivial_solutions_in_initialization = include_trivial_solutions_in_initialization
         self.allow_cpu = allow_cpu
 
+        self.monitor_processors = monitor_processors
+
         self.worker_pool = None
 
         self.checkpoint_period = checkpoint_period
         if self.checkpoint_period > 0 and not os.path.exists(os.path.join(get_log_dir(), 'checkpoints')):
             os.makedirs(os.path.join(get_log_dir(), 'checkpoints'))
+
+        if monitor_processors:
+            clear_processor_log()
 
     def optimize(self, net_string, device_graph):
         if self.n_threads > 1:
@@ -390,6 +398,9 @@ class GAOptimizer(BaseOptimizer):
                     best_time = 1 / best_score
                     with open(os.path.join(get_log_dir(), 'time_history.csv'), 'a') as f:
                         f.write(f'{i + start_generation + 1}, {best_time}\n')
+
+                if self.monitor_processors:
+                    update_processor_log(step=i + start_generation)
 
         if self.verbose:
             log('Optimizing with simulator...')

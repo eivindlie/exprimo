@@ -1,8 +1,6 @@
 import os
 from datetime import datetime
 
-import time
-
 import GPUtil
 import psutil
 
