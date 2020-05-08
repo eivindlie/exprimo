@@ -114,7 +114,7 @@ class GAOptimizer(BaseOptimizer):
         self.worker_pool = None
 
         self.checkpoint_period = checkpoint_period
-        if self.checkpoint_period and not os.path.exists(os.path.join(get_log_dir(), 'checkpoints')):
+        if self.checkpoint_period > 0 and not os.path.exists(os.path.join(get_log_dir(), 'checkpoints')):
             os.makedirs(os.path.join(get_log_dir(), 'checkpoints'))
 
     def optimize(self, net_string, device_graph):
@@ -339,7 +339,7 @@ class GAOptimizer(BaseOptimizer):
         if self.print_diversity:
             diversity_history = []
 
-        if self.checkpoint_period != -1:
+        if self.checkpoint_period > 0:
             with open(os.path.join(get_log_dir(), 'checkpoints/scores.csv'), 'w') as f:
                 f.write('')
 
@@ -354,7 +354,7 @@ class GAOptimizer(BaseOptimizer):
             for i in tqdm(range(generations), disable=not self.verbose):
                 ranked_pop, fitness_scores = rank(pop, return_scores=True, benchmarking_function=benchmarking_function)
 
-                if self.checkpoint_period != -1 and i % self.checkpoint_period == 0:
+                if self.checkpoint_period > 0 and i % self.checkpoint_period == 0:
                     best_solution = apply_placement(net_string, ranked_pop[0].placement, groups)
                     best_solution['score'] = 1 / fitness_scores[0]
 
