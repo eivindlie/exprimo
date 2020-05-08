@@ -6,7 +6,7 @@ __version__ = '0.1'
 PLOT_STYLE = 'darkgrid'
 
 LOG_CONFIG = {
-    'clear_files': True,
+    'clear_files': False,
     'streams': [
         print,
         'output.log'
@@ -22,19 +22,18 @@ def set_log_dir(path):
 
     LOG_CONFIG['log_dir'] = path
 
+    if LOG_CONFIG['clear_files'] or not os.path.exists(os.path.join(path, 'output.log')):
+        for stream in LOG_CONFIG['streams']:
+            if isinstance(stream, str):
+                with open(stream, 'w') as f:
+                    f.write('')
+
 
 def get_log_dir():
     return os.path.expanduser(LOG_CONFIG['log_dir'])
 
 
 set_log_dir(LOG_CONFIG['log_dir'])
-
-
-if LOG_CONFIG['clear_files']:
-    for stream in LOG_CONFIG['streams']:
-        if isinstance(stream, str):
-            with open(stream, 'w') as f:
-                f.write('')
 
 
 def log(*strings, end='\n', sep=''):
