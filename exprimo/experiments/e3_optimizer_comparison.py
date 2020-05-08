@@ -47,7 +47,7 @@ def run_optimizer_test(n_threads=-1):
         # log(f'Testing optimizer {optimizer}')
         run_name = f'e3_{optimizer}-{NETWORK}{"-pipeline" if PIPELINE_BATCHES > 1 else ""}' \
                    f'{"-limited" if MEMORY_LIMITED else ""}'
-        config_path = f'configs/experiments/{run_name}.json'
+        config_path = f'configs/experiments/e3/{run_name}.json'
         score_path = os.path.join(LOG_DIR, '_scores.csv')
 
         with open(score_path, 'w') as f:
