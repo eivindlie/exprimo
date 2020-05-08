@@ -134,7 +134,7 @@ def run_variants(variants=('normal', 'limited', 'pipelined')):
     networks = 'resnet50', 'alexnet', 'inception'
     global BATCHES, PIPELINE_BATCHES, MEMORY_LIMITED, NETWORK, REPEATS
     for variation in tqdm(product(networks, variants)):
-        log(f'Testing f{variation[0]} network in {variation[1]} configuration')
+        log(f'Testing {variation[0]} network in {variation[1]} configuration')
         NETWORK = variation[0]
         if variation[1] == 'normal':
             BATCHES = 1
