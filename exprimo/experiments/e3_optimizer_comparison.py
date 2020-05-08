@@ -95,9 +95,9 @@ def plot_results():
         chart.get_xticklabels(),
         rotation=45,
         horizontalalignment='right',
-        fontweight='light',
-        fontsize='x-large'
     )
+    plt.ylabel('Batch execution time (ms)')
+    plt.xlabel('Optimization algorithm')
     plt.tight_layout()
     plt.savefig(os.path.join(LOG_DIR, 'score_comparison.pdf'))
     plt.show()
@@ -122,9 +122,9 @@ def plot_result_all_networks(test_type='normal'):
             chart.get_xticklabels(),
             rotation=45,
             horizontalalignment='right',
-            fontweight='light',
-            fontsize='x-large'
         )
+        plt.ylabel('Batch execution time (ms)')
+        plt.xlabel('Optimization algorithm')
         plt.savefig(os.path.join(LOG_DIR, f'score_comparison_{test_type}.pdf'), bb_inches='tight')
         plt.show()
         plt.close()
