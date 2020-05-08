@@ -9,7 +9,7 @@ from exprimo.optimizers.utils import prefix_heuristic, create_colocation_groups,
 
 
 if __name__ == '__main__':
-    graph_file = '../nets/resnet50.json'
+    graph_file = '../nets/inception_v3.json'
     device_file = '../device_graphs/malvik.json'
     batches = 1
     pipeline_batches = 1
@@ -24,7 +24,8 @@ if __name__ == '__main__':
     device_graph = DeviceGraph.load_from_file(device_file)
     simulator = Simulator(graph, device_graph)
     run_time, events = simulator.simulate(batch_size=128, batches=batches, pipeline_batches=pipeline_batches,
-                                          return_event_trace=True, print_event_trace=True)
+                                          return_event_trace=True, print_event_trace=True,
+                                          comp_penalization=0.9, comm_penalization=0.25)
 
     plot_event_trace(events, simulator, show_transfer_lines=True, plot_op_time_distribution=True)
 
