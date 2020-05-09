@@ -6,7 +6,7 @@
   "log_dir": "~/logs/e3_optimizer-comparison/ga-inception-pipeline",
   "plot_event_trace": false,
 
-  "benchmark_solution": true,
+  "benchmark_solution": false,
 
   "optimizer_args": {
     "plot_fitness_history": false,

@@ -7,7 +7,7 @@
 
   "log_dir": "~/logs/e3_optimizer-comparison/me-alexnet",
 
-  "benchmark_solution": true,
+  "benchmark_solution": false,
 
   "optimizer_args": {
     "dimension_sizes": [-1, -1, 40],
