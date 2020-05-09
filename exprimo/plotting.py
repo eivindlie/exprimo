@@ -130,7 +130,7 @@ def plot_map_elites_archive(archive_scores, n_devices=None, max_jumps=None, axes
             continue
         plot = sns.heatmap(data, ax=ax, mask=mask1, square=True, cmap=cmap,
                            xticklabels=AXIS_TICKS[plotted_axes[0]], yticklabels=AXIS_TICKS[plotted_axes[1]],
-                           vmin=vmin if vmin else min_time, vmax=vmax if vmax else max_time)
+                           vmin=vmin if vmin else min_time, vmax=vmax if vmax else min(max_time, 5*10**4))
         plot.invert_yaxis()
 
         ax.set_xlabel(AXIS_NAMES[plotted_axes[0]])
