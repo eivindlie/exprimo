@@ -88,6 +88,12 @@ class MapElitesOptimizer(BaseOptimizer):
         if self.dimension_sizes[1] == -1:
             self.dimension_sizes[1] = n_devices
 
+        if self.dimension_sizes[2] == -1:
+            comp_graph = ComputationGraph()
+            comp_graph.load_from_string(net_string)
+            _, max_jumps = comp_graph.get_number_of_jumps(return_max_jumps=True)
+            self.dimension_sizes[2] == max_jumps
+
         archive_scores = np.empty(self.dimension_sizes)
         archive_scores[:] = np.NaN
         archive_individuals = np.zeros(list(self.dimension_sizes) + [len(groups)], dtype=int)
