@@ -1,11 +1,11 @@
 {
-  "device_graph_path": "device_graphs/malvik-4gpu-reduced-resnet.json",
-  "net_path": "nets/resnet50.json",
+  "device_graph_path": "device_graphs/malvik-4gpu-reduced-inception.json",
+  "net_path": "nets/inception_v3.json",
   "optimizer": "map_elites",
 
   "plot_event_trace": false,
 
-  "log_dir": "~/logs/e3_optimizer-comparison/me-resnet50-limited",
+  "log_dir": "~/logs/e3_optimizer-comparison/me-inception-limited",
 
   "benchmark_solution": false,
 

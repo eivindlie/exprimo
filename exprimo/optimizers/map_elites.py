@@ -41,7 +41,7 @@ class MapElitesOptimizer(BaseOptimizer):
 
     def __init__(self, dimension_sizes=(-1, -1, 10), initial_size=50,
                  steps=1000, allow_cpu=True, mutation_rate=0.05, copy_mutation_rate=0, replace_mutation_rate=0,
-                 zone_mutation_rate=0, crossover_rate=0.4, selection='random', tournament_size=50,
+                 zone_mutation_rate=0, crossover_rate=0.4, selection='random', tournament_size=10,
                  benchmarking_function=None, benchmarking_steps=0, benchmark_before_selection=False,
                  benchmarking_n_keep=None, benchmarking_time_threshold=None, include_trivial_solutions=True,
                  show_score_plot=False, plot_axes=(0, 2), plot_animation=False, animation_fps=1,
