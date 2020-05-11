@@ -167,8 +167,9 @@ class MapElitesOptimizer(BaseOptimizer):
                                 c.append(archive_individuals[idx[0], idx[1], idx[2], :].tolist())
                         elif self.selection == 'tournament':
                             idx = []
+                            t = min(self.tournament_size, len(selectable_indices))
                             while len(idx) < 1 + int(random.random() < self.crossover_rate):
-                                competitors = random.sample(selectable_indices, self.tournament_size)
+                                competitors = random.sample(selectable_indices.tolist(), t)
                                 winner = max(competitors, key=lambda x: archive_scores[x[0], x[1], x[2]])
                                 idx.append(winner)
                             for i in idx:
