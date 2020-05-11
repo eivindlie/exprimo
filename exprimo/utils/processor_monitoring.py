@@ -36,7 +36,7 @@ def update_processor_log(step='null'):
         for cpu_util in psutil.cpu_percent(percpu=True):
             log_line.append(f'{cpu_util:.2f}')
 
-        f.write(f'{",".join(log_line)}\n')
+        f.write(f'{",".join(map(str, log_line))}\n')
 
 
 if __name__ == '__main__':
