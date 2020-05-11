@@ -18,6 +18,8 @@
     "replace_mutation_rate": 0.01,
     "zone_mutation_rate": 0.05,
     "crossover_rate": 0.4,
+    "selection": "tournament",
+    "tournament_size": 10,
     "steps": 20000,
 
     "simulator_comp_penalty": 0.9,
