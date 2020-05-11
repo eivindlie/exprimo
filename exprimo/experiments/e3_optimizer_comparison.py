@@ -157,6 +157,35 @@ def plot_result_all_networks(test_type='normal'):
     plt.close()
 
 
+def plot_histories(test_type='normal', network='alexnet'):
+    all_data = pd.DataFrame()
+    for optimizer in OPTIMIZERS:
+        run_name = f'{optimizer}-{network}{"-pipeline" if test_type == "pipelined" else ""}' \
+                   f'{"-limited" if test_type == "limited" else ""}'
+        for run_dir in os.listdir(os.path.join(LOG_DIR, run_name)):
+            with open(os.path.join(LOG_DIR, run_name, run_dir, 'time_history.csv')) as f:
+                run_data = pd.read_csv(f, index_col=0)
+                if test_type == 'pipelined':
+                    run_data /= 10
+                run_data['Optimizer'] = OPTIMIZER_NAMES[optimizer]
+
+                run_data = run_data.rename(columns=lambda x: x.strip())
+
+                if run_data.index.name == 'generation':
+                    # Multiply by population size to get comparable plots
+                    run_data.index *= 50
+                    run_data.index.name = 'step'
+            all_data = pd.concat([all_data, run_data])
+
+    sns.lineplot(x=all_data.index, y='time', hue='Optimizer', data=all_data)
+    plt.tight_layout()
+    plt.xlabel('Step')
+    plt.ylabel('Batch training time (ms)')
+    plt.savefig(os.path.join(LOG_DIR, f'score_history_{test_type}.pdf'))
+    plt.show()
+    plt.close()
+
+
 def run_variants(variants=('normal', 'limited', 'pipelined')):
     networks = 'resnet50', 'alexnet', 'inception'
     global BATCHES, PIPELINE_BATCHES, MEMORY_LIMITED, NETWORK, REPEATS
