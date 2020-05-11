@@ -16,7 +16,7 @@ sns.set(style=PLOT_STYLE)
 LOG_DIR = os.path.expanduser('~/logs/e3_optimizer-comparison')
 set_log_dir(LOG_DIR)
 
-run_config = 'limited' # (1, 0, 0, 1)
+run_config = 'pipelined' # (1, 0, 0, 1)
 NETWORK = ('resnet50', 'alexnet', 'inception')[run_config[0] if isinstance(run_config[0], int) else 0]
 BATCHES = (1, 10)[run_config[1] if isinstance(run_config[1], int) else 0]
 PIPELINE_BATCHES = (1, 2, 4)[run_config[2] if isinstance(run_config[2], int) else 0]
@@ -39,6 +39,7 @@ NETWORK_NAMES = {
 }
 
 cmap = sns.cubehelix_palette(5, start=.5, rot=-.75, reverse=True)
+
 
 def test_optimizer(c, r, log_dir):
     c['log_dir'] = log_dir + f'/{r:03}'
