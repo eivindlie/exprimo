@@ -23,7 +23,7 @@ from exprimo.optimizers.utils import evaluate_placement, apply_placement, genera
     get_device_assignment
 
 
-def _create_parent_selection_function(type, s=2):
+def create_parent_selection_function(type, s=2):
     if type in ('linear', 'lin'):
         def linear(n_parents):
             return np.array([((2 - s) / n_parents) + ((2 * i * (s - 1)) / (n_parents * (n_parents - 1)))
@@ -102,8 +102,8 @@ class GAOptimizer(BaseOptimizer):
         self.parent_selection_mechanism = parent_selection_mechanism
 
         self.tournament_size = tournament_size
-        self.parent_selection_distribution = _create_parent_selection_function(parent_selection_function,
-                                                                               parent_selection_function_s)
+        self.parent_selection_distribution = create_parent_selection_function(parent_selection_function,
+                                                                              parent_selection_function_s)
         self.generations = generations
         self.evolve_mutation_rate = evolve_mutation_rate
         self.plot_fitness_history = plot_fitness_history

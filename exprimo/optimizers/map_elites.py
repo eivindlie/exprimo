@@ -41,7 +41,7 @@ class MapElitesOptimizer(BaseOptimizer):
 
     def __init__(self, dimension_sizes=(-1, -1, 10), initial_size=50,
                  steps=1000, allow_cpu=True, mutation_rate=0.05, copy_mutation_rate=0, replace_mutation_rate=0,
-                 zone_mutation_rate=0, crossover_rate=0.4,
+                 zone_mutation_rate=0, crossover_rate=0.4, selection='random', tournament_size=50,
                  benchmarking_function=None, benchmarking_steps=0, benchmark_before_selection=False,
                  benchmarking_n_keep=None, benchmarking_time_threshold=None, include_trivial_solutions=True,
                  show_score_plot=False, plot_axes=(0, 2), plot_animation=False, animation_fps=1,
@@ -56,6 +56,8 @@ class MapElitesOptimizer(BaseOptimizer):
         self.replace_mutation_rate = replace_mutation_rate
         self.zone_mutation_rate = zone_mutation_rate
         self.crossover_rate = crossover_rate
+        self.selection = selection
+        self.tournament_size = tournament_size
         self.include_trivial_solutions = include_trivial_solutions
         self.benchmarking_steps = benchmarking_steps
         self.benchmark_before_selection = benchmark_before_selection
@@ -152,15 +154,25 @@ class MapElitesOptimizer(BaseOptimizer):
                     candidates.append(generate_random_placement(len(groups), n_devices, allow_device_0=self.allow_cpu))
             else:
                 selectable_indices = np.argwhere(np.isfinite(archive_scores))
+                # selectable_indices = sorted(selectable_indices, key=lambda x: -archive_scores[x[0], x[1], x[2]])
                 while len(candidates) < n:
                     c = []
                     if selectable_candidates:
                         for _ in range(1 + int(random.random() < self.crossover_rate)):
                             c.append(random.choice(selectable_candidates))
                     else:
-                        for _ in range(1 + int(random.random() < self.crossover_rate)):
-                            idx = random.choice(selectable_indices)
-                            c.append(archive_individuals[idx[0], idx[1], idx[2], :].tolist())
+                        if self.selection == 'random':
+                            for _ in range(1 + int(random.random() < self.crossover_rate)):
+                                idx = random.choice(selectable_indices)
+                                c.append(archive_individuals[idx[0], idx[1], idx[2], :].tolist())
+                        elif self.selection == 'tournament':
+                            idx = []
+                            while len(idx) < 1 + int(random.random() < self.crossover_rate):
+                                competitors = random.sample(selectable_indices, self.tournament_size)
+                                winner = max(competitors, key=lambda x: archive_scores[x[0], x[1], x[2]])
+                                idx.append(winner)
+                            for i in idx:
+                                c.append(archive_individuals[i[0], i[1], i[2], :].tolist())
 
                     if len(c) == 2:
                         candidate = crossover(*c)
