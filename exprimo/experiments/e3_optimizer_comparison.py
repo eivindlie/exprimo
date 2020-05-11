@@ -133,7 +133,7 @@ def plot_result_all_networks(test_type='normal'):
 
             all_results = pd.concat([all_results, new_results])
 
-    if test_type == 'normal':
+    if test_type in ('normal', 'pipelined'):
         if os.path.exists(os.path.join(LOG_DIR, 'single-gpu.csv')):
             all_results = pd.concat([all_results, pd.read_csv(os.path.join(LOG_DIR, 'single-gpu.csv'))])
 
