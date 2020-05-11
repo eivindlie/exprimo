@@ -157,7 +157,7 @@ def plot_result_all_networks(test_type='normal'):
     plt.close()
 
 
-def plot_histories(test_type='normal', network='alexnet'):
+def plot_histories(test_type='normal', network='alexnet', ylim=None):
     all_data = pd.DataFrame()
     for optimizer in OPTIMIZERS:
         run_name = f'{optimizer}-{network}{"-pipeline" if test_type == "pipelined" else ""}' \
@@ -177,11 +177,13 @@ def plot_histories(test_type='normal', network='alexnet'):
                     run_data.index.name = 'step'
             all_data = pd.concat([all_data, run_data])
 
-    sns.lineplot(x=all_data.index, y='time', hue='Optimizer', data=all_data)
+    sns.lineplot(x=all_data.index, y='time', hue='Optimizer', style='Optimizer', data=all_data)
+    if ylim:
+        plt.ylim(0, ylim)
     plt.tight_layout()
     plt.xlabel('Step')
     plt.ylabel('Batch training time (ms)')
-    plt.savefig(os.path.join(LOG_DIR, f'score_history_{test_type}.pdf'))
+    plt.savefig(os.path.join(LOG_DIR, f'score_history_{test_type}_{network}.pdf'))
     plt.show()
     plt.close()
 
