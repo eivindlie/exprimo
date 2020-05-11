@@ -1,5 +1,5 @@
 {
-  "device_graph_path": "device_graphs/malvik.json",
+  "device_graph_path": "device_graphs/malvik-4gpu.json",
   "net_path": "nets/resnet50.json",
   "optimizer": "scipy_simulated_annealing",
 
