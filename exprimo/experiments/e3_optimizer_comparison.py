@@ -125,7 +125,8 @@ def plot_result_all_networks(test_type='normal'):
                        f'{"-limited" if test_type == "limited" else ""}'
             score_path = os.path.join(LOG_DIR, f'{run_name}_scores.csv')
             scores = pd.read_csv(score_path, index_col=0, squeeze=True)
-            scores /= PIPELINE_BATCHES
+            if test_type == 'pipelined':
+                scores /= 10
             new_results = pd.DataFrame()
             new_results['score'] = scores
             new_results['optimizer'] = OPTIMIZER_NAMES[optimizer]
