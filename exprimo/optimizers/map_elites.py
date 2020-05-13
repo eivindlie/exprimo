@@ -303,12 +303,12 @@ class MapElitesOptimizer(BaseOptimizer):
                     best_time = 1 / np.nanmax(archive_scores)
                     log(f'[{i + 1}/{steps}] Best time: {best_time:.4f}ms')
 
-                if self.score_save_period and i % self.score_save_period == 0:
+                if self.score_save_period and (i % self.score_save_period == 0 or steps - i < step_size):
                     best_time = 1 / np.nanmax(archive_scores)
                     with open(os.path.join(get_log_dir(), 'time_history.csv'), 'a') as f:
                         f.write(f'{i + start_step + 1}, {best_time}\n')
 
-                if self.archive_log_period and ((i + 1) % self.archive_log_period < step_size or steps - i < step_size):
+                if self.archive_log_period and (i + 1) % self.archive_log_period < step_size:
                     log_archive(f'step_{i + start_step + 1:06}.csv')
 
         if self.score_save_period:

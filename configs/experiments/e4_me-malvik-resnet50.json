@@ -17,7 +17,7 @@
     "replace_mutation_rate": 0.01,
     "zone_mutation_rate": 0.05,
     "crossover_rate": 0.4,
-      "selection": "tournament",
+    "selection": "tournament",
     "tournament_size": 10,
     "steps": 20000,
 
@@ -39,6 +39,7 @@
     "plot_axes": [0, 1, 2],
 
     "archive_log_period": 500,
+    "score_save_period": 5,
     "plot_animation": false,
     "animation_fps": 1,
     "verbose": 500,
