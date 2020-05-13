@@ -27,7 +27,7 @@
     "pipeline_batches": 1,
     "batches": 1,
 
-    "benchmarking_steps": 0,
+    "benchmarking_steps": 50,
     "benchmark_before_selection": true,
     "benchmarking_n_keep": 50,
     "benchmarking_time_threshold": 1500,
