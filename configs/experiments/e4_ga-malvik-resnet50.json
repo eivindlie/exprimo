@@ -31,6 +31,7 @@
     "checkpoint_period": -1,
     "simulator_comp_penalty": 0.9,
     "simulator_comm_penalty": 0.25,
+    "score_save_period": 1,
 
     "monitor_processors": true,
 
