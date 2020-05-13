@@ -3,7 +3,7 @@
   "net_path": "nets/resnet50.json",
   "optimizer": "genetic_algorithm",
 
-  "log_dir": "~/logs/e4-4_ga-malvik-resnet-long",
+  "log_dir": "~/logs/e4_ga-resnet",
 
   "benchmark_solution": true,
 
