@@ -308,7 +308,7 @@ class MapElitesOptimizer(BaseOptimizer):
                     with open(os.path.join(get_log_dir(), 'time_history.csv'), 'a') as f:
                         f.write(f'{i + start_step + 1}, {best_time}\n')
 
-                if self.archive_log_period and (i + 1) % self.archive_log_period < step_size:
+                if self.archive_log_period and ((i + 1) % self.archive_log_period < step_size or steps - i < step_size):
                     log_archive(f'step_{i + start_step + 1:06}.csv')
 
         if self.score_save_period:
