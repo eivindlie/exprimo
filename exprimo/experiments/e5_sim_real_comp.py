@@ -14,15 +14,16 @@ sns.set(style=PLOT_STYLE)
 
 model_type = 'inception'
 config_path = f'configs/experiments/e5_ga-malvik-{model_type}.json'
+repeats = 1
 with open(config_path) as f:
     log_dir = json.load(f)['log_dir']
 
 BATCHES = 20
 
 
-def run_experiment():
-    set_log_dir(log_dir)
-    optimize_with_config(config_path, set_log_dir=True)
+def run_experiment(lg_dir):
+    set_log_dir(lg_dir)
+    optimize_with_config(config_path)
 
     convert_to_placement(os.path.join(get_log_dir(), 'checkpoints'),
                          os.path.join(get_log_dir(), 'checkpoints', 'placements'))
@@ -53,8 +54,19 @@ def plot_results(sim_path, real_path):
     plt.close()
 
 
-if __name__ == '__main__':
-    run_experiment()
+def run_n_times(n):
+    for i in range(n):
+        run_experiment(lg_dir=os.path.join(log_dir, '{i:03}'))
 
-    plot_results(os.path.join(get_log_dir(), 'checkpoints', 'scores.csv'),
-                 os.path.join(get_log_dir(), 'batch_times.csv'))
+        plot_results(os.path.join(get_log_dir(), 'checkpoints', 'scores.csv'),
+                     os.path.join(get_log_dir(), 'batch_times.csv'))
+
+
+if __name__ == '__main__':
+    if repeats == 1:
+        run_experiment(log_dir=log_dir)
+
+        plot_results(os.path.join(get_log_dir(), 'checkpoints', 'scores.csv'),
+                     os.path.join(get_log_dir(), 'batch_times.csv'))
+    else:
+        run_n_times(repeats)
