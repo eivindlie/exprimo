@@ -16,7 +16,6 @@ model_type = 'inception'
 config_path = f'configs/experiments/e5_ga-malvik-{model_type}.json'
 with open(config_path) as f:
     log_dir = json.load(f)['log_dir']
-model_type = 'inception'
 
 BATCHES = 20
 
