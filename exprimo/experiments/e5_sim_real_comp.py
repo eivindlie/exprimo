@@ -12,7 +12,7 @@ sns.set(style=PLOT_STYLE)
 
 
 config_path = 'configs/experiments/e5_ga-malvik-inception.json'
-model_type = 'resnet50'
+model_type = 'inception'
 
 BATCHES = 20
 
