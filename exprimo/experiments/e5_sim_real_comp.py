@@ -1,3 +1,4 @@
+import json
 import os
 
 import pandas as pd
@@ -5,19 +6,22 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 from exprimo.benchmarking.benchmark import benchmark_all_placements
-from exprimo import PLOT_STYLE, get_log_dir, optimize_with_config
+from exprimo import PLOT_STYLE, get_log_dir, optimize_with_config, set_log_dir
 from exprimo.utils.convert_nets_to_placements import convert_to_placement
 
 sns.set(style=PLOT_STYLE)
 
 
 config_path = 'configs/experiments/e5_ga-malvik-inception.json'
+with open(config_path) as f:
+    log_dir = json.load(f)['log_dir']
 model_type = 'inception'
 
 BATCHES = 20
 
 
 def run_experiment():
+    set_log_dir(log_dir)
     optimize_with_config(config_path, set_log_dir=True)
 
     convert_to_placement(os.path.join(get_log_dir(), 'checkpoints'),
