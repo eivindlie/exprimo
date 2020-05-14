@@ -29,9 +29,9 @@ def run_experiment():
 
 
 def plot_results(sim_path, real_path):
-    sim_results = pd.read_csv(sim_path)
+    sim_results = pd.read_csv(sim_path, names=['generation', 'time'])
     sim_results['category'] = 'Simulated'
-    real_results = pd.read_csv(real_path)
+    real_results = pd.read_csv(real_path, names=['generation', 'time'])
     real_results['category'] = 'Benchmarked'
 
     all_results = pd.concat([sim_results, real_results], axis=0)
