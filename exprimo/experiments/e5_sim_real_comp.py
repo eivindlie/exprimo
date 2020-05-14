@@ -4,6 +4,7 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from tqdm import tqdm
 
 from exprimo.benchmarking.benchmark import benchmark_all_placements
 from exprimo import PLOT_STYLE, get_log_dir, optimize_with_config, set_log_dir
@@ -55,8 +56,8 @@ def plot_results(sim_path, real_path):
 
 
 def run_n_times(n):
-    for i in range(n):
-        run_experiment(lg_dir=os.path.join(log_dir, '{i:03}'))
+    for i in tqdm(range(n)):
+        run_experiment(lg_dir=os.path.join(log_dir, f'{i:03}'))
 
         plot_results(os.path.join(get_log_dir(), 'checkpoints', 'scores.csv'),
                      os.path.join(get_log_dir(), 'batch_times.csv'))
