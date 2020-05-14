@@ -12,7 +12,8 @@ from exprimo.utils.convert_nets_to_placements import convert_to_placement
 sns.set(style=PLOT_STYLE)
 
 
-config_path = 'configs/experiments/e5_ga-malvik-inception.json'
+model_type = 'inception'
+config_path = f'configs/experiments/e5_ga-malvik-{model_type}.json'
 with open(config_path) as f:
     log_dir = json.load(f)['log_dir']
 model_type = 'inception'
