@@ -3,13 +3,13 @@
   "net_path": "nets/resnet50.json",
   "optimizer": "genetic_algorithm",
 
-  "log_dir": "~/logs/e4_ga-malvik-resnet-long",
+  "log_dir": "~/logs/e4_ga-malvik-resnet-long_sim-only",
 
   "benchmark_solution": true,
 
   "optimizer_args": {
     "plot_fitness_history": true,
-    "generations": 50,
+    "generations": 350,
     "population_size": 50,
     "mutation_rate": 0.5,
     "mutation_sharding_rate": 0,
@@ -33,7 +33,7 @@
 
     "monitor_processors": true,
 
-    "benchmarking_population_size": 30,
+    "benchmarking_population_size": 0,
     "benchmarking_generations": 300,
     "benchmarking_function": {"model_type": "resnet", "batches": 5, "drop_batches": 1, "gpu_memory_limit": 8}
   }
