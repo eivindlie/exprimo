@@ -9,7 +9,7 @@
 
   "optimizer_args": {
     "plot_fitness_history": true,
-    "generations": 330,
+    "generations": 190,
     "population_size": 50,
     "mutation_rate": 0.5,
     "mutation_sharding_rate": 0,
