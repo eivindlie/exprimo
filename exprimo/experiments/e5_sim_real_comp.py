@@ -11,7 +11,7 @@ from exprimo.utils.convert_nets_to_placements import convert_to_placement
 sns.set(style=PLOT_STYLE)
 
 
-config_path = 'configs/experiments/e5_ga-malvik-resnet50.json'
+config_path = 'configs/experiments/e5_ga-malvik-inception.json'
 model_type = 'resnet50'
 
 BATCHES = 20
