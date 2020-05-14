@@ -571,7 +571,7 @@ class InceptionAux(nn.Module):
         self.placement = placement
         self.name = name
 
-        self.device = torch.device(self.placement['Mixed_6e/concat'])
+        self.device = torch.device(self.placement['softmax'])
 
         if conv_block is None:
             conv_block = BasicConv2d
