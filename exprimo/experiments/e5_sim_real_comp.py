@@ -12,9 +12,9 @@ from exprimo.utils.convert_nets_to_placements import convert_to_placement
 sns.set(style=PLOT_STYLE)
 
 
-model_type = 'inception'
+model_type = 'alexnet'
 config_path = f'configs/experiments/e5_ga-malvik-{model_type}.json'
-repeats = 1
+repeats = 10
 with open(config_path) as f:
     log_dir = json.load(f)['log_dir']
 
