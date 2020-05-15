@@ -1,5 +1,6 @@
 import json
 import os
+import re
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -63,11 +64,41 @@ def run_n_times(n):
                      os.path.join(get_log_dir(), 'batch_times.csv'))
 
 
-if __name__ == '__main__':
-    if repeats == 1:
-        run_experiment(log_dir=log_dir)
+def scatter_plot_all_runs(lg_dir, use_benchmark_mean=True):
+    all_results = pd.DataFrame()
 
-        plot_results(os.path.join(get_log_dir(), 'checkpoints', 'scores.csv'),
-                     os.path.join(get_log_dir(), 'batch_times.csv'))
-    else:
-        run_n_times(repeats)
+    for path in os.listdir(lg_dir):
+        if not re.search('^[0-9]+$', path):
+            continue
+
+        real_scores = pd.read_csv(os.path.join(lg_dir, path, 'batch_times.csv'), index_col=0,
+                                  names=['generation', 'time'])
+        real_scores.index = real_scores.index.astype(int)
+
+        if use_benchmark_mean:
+            real_scores = real_scores.groupby(real_scores.index).mean()
+
+        sim_scores = pd.read_csv(os.path.join(lg_dir, path, 'checkpoints', 'scores.csv'), index_col=0,
+                                 names=['generation', 'time'])
+        sim_scores.index = sim_scores.index.astype(int)
+
+        combined_scores = real_scores.join(sim_scores, lsuffix='_benchmarked', rsuffix='_simulated')
+
+        all_results = pd.concat([all_results, combined_scores])
+
+    plt.scatter(x=all_results['time_simulated'], y=all_results['time_benchmarked'])
+    plt.xlabel('Simulated batch time (ms)')
+    plt.ylabel('Benchmarked batch time (ms)')
+
+    plt.tight_layout()
+    plt.show()
+
+
+if __name__ == '__main__':
+     if repeats == 1:
+         run_experiment(log_dir=log_dir)
+    
+         plot_results(os.path.join(get_log_dir(), 'checkpoints', 'scores.csv'),
+                      os.path.join(get_log_dir(), 'batch_times.csv'))
+     else:
+         run_n_times(repeats)
