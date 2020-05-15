@@ -91,6 +91,8 @@ def scatter_plot_all_runs(lg_dir, use_benchmark_mean=True):
     plt.ylabel('Benchmarked batch time (ms)')
 
     plt.tight_layout()
+
+    plt.savefig(os.path.join(lg_dir, 'scatter_plot.pdf'))
     plt.show()
 
 
