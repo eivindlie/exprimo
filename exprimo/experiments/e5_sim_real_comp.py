@@ -95,10 +95,9 @@ def scatter_plot_all_runs(lg_dir, use_benchmark_mean=True):
 
 
 if __name__ == '__main__':
-     if repeats == 1:
-         run_experiment(log_dir=log_dir)
-    
-         plot_results(os.path.join(get_log_dir(), 'checkpoints', 'scores.csv'),
-                      os.path.join(get_log_dir(), 'batch_times.csv'))
-     else:
-         run_n_times(repeats)
+    if repeats == 1:
+        run_experiment(log_dir=log_dir)
+        plot_results(os.path.join(get_log_dir(), 'checkpoints', 'scores.csv'),
+                     os.path.join(get_log_dir(), 'batch_times.csv'))
+    else:
+        run_n_times(repeats)
