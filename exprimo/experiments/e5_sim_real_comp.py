@@ -14,7 +14,7 @@ from exprimo.utils.convert_nets_to_placements import convert_to_placement
 sns.set(style=PLOT_STYLE)
 
 
-model_type = 'alexnet'
+model_type = 'resnet'
 config_path = f'configs/experiments/e5_ga-malvik-{model_type}.json'
 repeats = 10
 with open(config_path) as f:
