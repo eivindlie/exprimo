@@ -3,7 +3,7 @@ import sys
 from exprimo.optimize import optimize_with_config
 
 
-config_path = 'configs/experiments/e4_ga-malvik-resnet50_sim-only.json'
+config_path = 'configs/experiments/e4_ga-malvik-inception-limited.json'
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
