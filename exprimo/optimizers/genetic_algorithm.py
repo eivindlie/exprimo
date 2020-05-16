@@ -43,7 +43,7 @@ def _evaluate(individual, net_string, groups, device_graph, pipeline_batches=1, 
     return 1 / evaluate_placement(apply_placement(net_string, individual.placement, groups), device_graph,
                                   pipeline_batches=pipeline_batches, batches=batches,
                                   comp_penalty=simulator_comp_penalty, comm_penalty=simulator_comm_penalty,
-                                  device_memory_utilization=1)
+                                  device_memory_utilization=device_memory_utilization)
 
 
 def _calculate_binary_difference_diversity(population):
