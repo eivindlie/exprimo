@@ -7,13 +7,15 @@ import multiprocessing
 class BaseOptimizer:
 
     def __init__(self, colocation_heuristic=None, verbose=False, batches=1, pipeline_batches=1, n_threads=-1,
-                 score_save_period=None, simulator_comp_penalty=1, simulator_comm_penalty=1):
+                 score_save_period=None, simulator_comp_penalty=1, simulator_comm_penalty=1,
+                 device_memory_utilization=1):
         self.colocation_heuristic = colocation_heuristic
         self.verbose = verbose
         self.batches = batches
         self.pipeline_batches = pipeline_batches
         self.simulator_comp_penalty = simulator_comp_penalty
         self.simulator_comm_penalty = simulator_comm_penalty
+        self.device_memory_utilization = device_memory_utilization
         if n_threads == -1:
             self.n_threads = multiprocessing.cpu_count()
         else:
@@ -34,7 +36,8 @@ class BaseOptimizer:
         return evaluate_placement(net, device_graph, batch_size=batch_size, batches=self.batches,
                                   pipeline_batches=self.pipeline_batches,
                                   comp_penalty=self.simulator_comp_penalty,
-                                  comm_penalty=self.simulator_comm_penalty)
+                                  comm_penalty=self.simulator_comm_penalty,
+                                  device_memory_utilization=self.device_memory_utilization)
 
     @abstractmethod
     def optimize(self, net_string, device_graph):

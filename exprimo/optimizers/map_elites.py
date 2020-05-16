@@ -25,14 +25,16 @@ sns.set(style=PLOT_STYLE)
 
 
 def _evaluate(individual, net_string, groups, device_graph, pipeline_batches=1, batches=1,
-              simulator_comp_penalty=1, simulator_comm_penalty=1):
+              simulator_comp_penalty=1, simulator_comm_penalty=1,
+              device_memory_utilization=1):
     description, individual = individual
 
     comp_graph_dict = apply_placement(net_string, individual, groups)
 
     score = 1 / evaluate_placement(comp_graph_dict, device_graph,
                                    pipeline_batches=pipeline_batches, batches=batches,
-                                   comp_penalty=simulator_comp_penalty, comm_penalty=simulator_comm_penalty)
+                                   comp_penalty=simulator_comp_penalty, comm_penalty=simulator_comm_penalty,
+                                   device_memory_utilization=device_memory_utilization)
 
     return score, description, individual
 
@@ -102,7 +104,8 @@ class MapElitesOptimizer(BaseOptimizer):
 
         def evaluate(individual):
             return _evaluate(individual, net_string, groups, device_graph, self.dimension_sizes, self.pipeline_batches,
-                             self.batches, self.simulator_comp_penalty, self.simulator_comm_penalty)
+                             self.batches, self.simulator_comp_penalty, self.simulator_comm_penalty,
+                             self.device_memory_utilization)
 
         def mutate(individual):
             new_individual = []
@@ -287,7 +290,8 @@ class MapElitesOptimizer(BaseOptimizer):
                 else:
                     fn_args = zip(((create_description(c), c) for c in candidates), repeat(net_string), repeat(groups),
                                   repeat(device_graph), repeat(self.pipeline_batches), repeat(self.batches),
-                                  repeat(self.simulator_comp_penalty), repeat(self.simulator_comm_penalty))
+                                  repeat(self.simulator_comp_penalty), repeat(self.simulator_comm_penalty),
+                                  repeat(self.device_memory_utilization))
 
                     eval_results = self.worker_pool.starmap(_evaluate, fn_args)
 

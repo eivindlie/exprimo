@@ -29,7 +29,7 @@ class Simulator:
     def simulate(self, batch_size=None, batches=1, check_memory_usage=True, pipeline_batches=1,
                  memory_penalization_factor=None,
                  print_event_trace=True, include_backward=True, return_event_trace=False, print_memory_usage=True,
-                 comp_penalization=1, comm_penalization=1):
+                 comp_penalization=1, comm_penalization=1, device_memory_utilization=1):
         op_queues = [deque() for device in self.device_graph.devices]
         transfer_queues = [deque() for comm_channel in self.device_graph.comm_channels]
         comm_free = [True for i in range(len(self.device_graph.comm_channels))]
@@ -236,8 +236,9 @@ class Simulator:
         if check_memory_usage:
             memory_overuse = 0
             for i, device in enumerate(self.device_graph.devices):
-                if peak_memory_usage[i] > device.device.memory * 10 ** 9:
-                    memory_overuse += peak_memory_usage[i] - device.device.memory * 10 ** 9
+                if peak_memory_usage[i] > (device.device.memory * 10 ** 9) * device_memory_utilization:
+                    memory_overuse += peak_memory_usage[i] - \
+                                      (device.device.memory * 10 ** 9) * device_memory_utilization
             if memory_penalization_factor:
                 score += memory_overuse * memory_penalization_factor
             elif memory_overuse > 0:

@@ -39,10 +39,11 @@ def create_parent_selection_function(type, s=2):
 
 
 def _evaluate(individual, net_string, groups, device_graph, pipeline_batches=1, batches=1, simulator_comp_penalty=1,
-              simulator_comm_penalty=1):
+              simulator_comm_penalty=1, device_memory_utilization=1):
     return 1 / evaluate_placement(apply_placement(net_string, individual.placement, groups), device_graph,
                                   pipeline_batches=pipeline_batches, batches=batches,
-                                  comp_penalty=simulator_comp_penalty, comm_penalty=simulator_comm_penalty)
+                                  comp_penalty=simulator_comp_penalty, comm_penalty=simulator_comm_penalty,
+                                  device_memory_utilization=1)
 
 
 def _calculate_binary_difference_diversity(population):
@@ -157,7 +158,8 @@ class GAOptimizer(BaseOptimizer):
             return _evaluate(individual, net_string, groups, device_graph,
                              pipeline_batches=self.pipeline_batches, batches=self.batches,
                              simulator_comm_penalty=self.simulator_comm_penalty,
-                             simulator_comp_penalty=self.simulator_comp_penalty)
+                             simulator_comp_penalty=self.simulator_comp_penalty,
+                             device_memory_utilization=self.device_memory_utilization)
 
         def rank(population, return_scores=False, benchmarking_function=None):
             if benchmarking_function:
@@ -181,7 +183,8 @@ class GAOptimizer(BaseOptimizer):
                 if self.worker_pool:
                     fn_arg = zip(population, repeat(net_string), repeat(groups), repeat(device_graph),
                                  repeat(self.pipeline_batches), repeat(self.batches),
-                                 repeat(self.simulator_comp_penalty), repeat(self.simulator_comm_penalty))
+                                 repeat(self.simulator_comp_penalty), repeat(self.simulator_comm_penalty),
+                                 repeat(self.device_memory_utilization))
                     fitness_scores = self.worker_pool.starmap(_evaluate, fn_arg)
                 else:
                     fitness_scores = list(map(evaluate, population))
