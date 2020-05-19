@@ -92,8 +92,11 @@ def scatter_plot_all_runs(lg_dir, use_benchmark_mean=True, plot_regression=True)
     plt.scatter(x, y)
 
     if plot_regression:
+        x_min = np.min(x)
+        x_max = np.max(x)
+        x1 = np.arange(x_min, x_max, (x_max - x_min) / 1000)
         m, b = np.polyfit(x, y, 1)
-        plt.plot(x, m * x + b, c='orange', ls='--')
+        plt.plot(x1, m * x1 + b, c='orange', ls='--')
 
         corr = np.corrcoef(x, y)
         print(f'Pearson coefficient: R = {corr[0][1]}')
