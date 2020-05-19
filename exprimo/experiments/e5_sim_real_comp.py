@@ -1,5 +1,7 @@
 import json
 import os
+
+import numpy as np
 import re
 
 import pandas as pd
@@ -64,7 +66,7 @@ def run_n_times(n):
                      os.path.join(get_log_dir(), 'batch_times.csv'))
 
 
-def scatter_plot_all_runs(lg_dir, use_benchmark_mean=True):
+def scatter_plot_all_runs(lg_dir, use_benchmark_mean=True, plot_regression=True):
     all_results = pd.DataFrame()
 
     for path in os.listdir(lg_dir):
@@ -86,7 +88,16 @@ def scatter_plot_all_runs(lg_dir, use_benchmark_mean=True):
 
         all_results = pd.concat([all_results, combined_scores])
 
-    plt.scatter(x=all_results['time_simulated'], y=all_results['time_benchmarked'])
+    x, y = all_results['time_simulated'], all_results['time_benchmarked']
+    plt.scatter(x, y)
+
+    if plot_regression:
+        m, b = np.polyfit(x, y, 1)
+        plt.plot(x, m * x + b, c='orange', ls='--')
+
+        corr = np.corrcoef(x, y)
+        print(f'Pearson coefficient: R = {corr[0][1]}')
+
     plt.xlabel('Simulated batch time (ms)')
     plt.ylabel('Benchmarked batch time (ms)')
 
