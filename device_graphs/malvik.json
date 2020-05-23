@@ -23,7 +23,7 @@
           "device": 1
         },
         {
-          "comm_channel": 1,
+          "comm_channel": 0,
           "device": 2
         }
       ]
@@ -55,11 +55,11 @@
       "type": "gpu",
       "neighbours": [
         {
-          "comm_channel": 1,
+          "comm_channel": 0,
           "device": 0
         },
         {
-          "comm_channel": 1,
+          "comm_channel": 0,
           "device": 1
         }
       ]
