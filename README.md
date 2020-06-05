@@ -1,5 +1,7 @@
 # Exprimo
 
+[![DOI](https://zenodo.org/badge/218742710.svg)](https://zenodo.org/badge/latestdoi/218742710)
+
 A performance modelling system for deep neural networks. Exprimo builds on [Paleo](https://github.com/TalwalkarLab/paleo) (Qi et al., 2017),
 combining it with the technique described in the paper about [Placeto](https://arxiv.org/abs/1906.08879) (Addanki et al., 2019)
 to accomodate for more complex model parallelism configurations. Exprimo runs entirely without relying on access to training hardware,
